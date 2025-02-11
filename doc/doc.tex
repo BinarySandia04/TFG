@@ -2,15 +2,15 @@
 \usepackage{amsfonts, amsmath, amssymb,latexsym,amsthm, mathrsfs, enumerate}
 \usepackage[utf8]{inputenc}
 \usepackage[catalan]{babel}
+\usepackage{csquotes}
 \usepackage{epsfig}
 \parskip=5pt
 \parindent=15pt
 \usepackage[margin=1.2in]{geometry}
 \usepackage{graphicx}
 \usepackage{listings}
-\usepackage{biblatex}
 \usepackage{tikz}
-\addbibresource{refs.bib}
+\selectlanguage{catalan}
 
 \setcounter{page}{0}
 
@@ -162,23 +162,71 @@ Una part for\c{c}a extensa de la tasca realitzada consisteix en una verificaci\'
 
 \begin{defi}
  Un \mathbb{tensor} de ordre $n$ es una matriu (o array) multidimensional $T \in \mathbb{R}^{I_1 \times \dots \times I_n}$ amb $I_1, \dots, I_n \in \mathbb{N}$.
+Representarem l'element indexat per $\{i_1, \dots, i_n\}$ com $T_{i_1, \dots, i_n}$
 \end{defi}
 
-Representarem l'element indexat per $\{i_1, \dots, i_n\}$ com $T_{i_1, \dots, i_n}$
+Al llarg d'aquest treball representarem els tensors i les xarxes tensorials a partir de representacions diagramiques. Aquestes
+representacions ens seràn més útils per estalviar notació a l'hora de tractar contraccions tensorials, tal com està descrit
+a les Figures \ref{fig:tensor_not} 
 
+\begin{figure}[h]
+\begin{center}
+    $$A = \begin{bmatrix}
+        a_1 \\
+        a_2 \\
+        \vdots \\
+        a_n
+    \end{bmatrix} \qquad
+    B = \begin{bmatrix}
+        b_{11} & \dots & b_{1m} \\
+        \vdots & & \vdots \\
+        b_{n1} & \dots & b_{nm}
+    \end{bmatrix}
+    \qquad
+    C=\begin{bmatrix}
+        c_{111} & \dots & c_{1m1} \\
+        \vdots & & \vdots \\
+        c_{n11} & \dots & c_{nm1} 
+    \end{bmatrix}
+    \dots
+\begin{bmatrix}
+        c_{11k} & \dots & c_{1mk}\\
+        \vdots & & \vdots \\
+        c_{n1k} & \dots & c_{nmk} 
+    \end{bmatrix}
+    \
+    $$
 
-Al llarg d'aquest treball representarem 
+\tikz{
+    \node at (-1,-0.5) {$A_i \Leftrightarrow$};
+    \node[draw, shape=circle] (v0) at (0,0) {$A$};
+    \node(i) at (0,-1) {$i$};
+    \draw (v0) -- (i);
+}\qquad \tikz{
+    \node at (-1,-0.5) {$B_{ij} \Leftrightarrow$};
+    \node[draw, shape=circle] (v0) at (0,0) {$B$};
+    \node(i) at (-0.5,-1) {$i$};
+    \node(j) at (0.5,-1) {$j$};
+    \draw (v0) -- (i);
+    \draw (v0) -- (j);
+}\qquad \tikz{
+    \node at (-1,-0.5) {$C_{ijk} \Leftrightarrow$};
+    \node[draw, shape=circle] (v0) at (0,0) {$C$};
+    \node(i) at (-0.5,-1) {$i$};
+    \node(j) at (0,-1) {$j$};
+    \node(k) at (0.5,-1) {$k$};
+    \draw (v0) -- (i);
+    \draw (v0) -- (j);
+    \draw (v0) -- (k);
+}
+\caption{
+    Representació diagramàtiques de tensors $A,B,C$ d'ordres $1,2$ i $3$ respectivament
+}
+\end{center}
+\label{fig:tensor_not}
+\end{figure}
 
-\iffalse
-\begin{tikzpicture}
-    \node[draw, shape=circle] (v0) at (0,0) {$v_0$};
-    \node[draw, shape=circle] (v1) at (1,0) {$v_1$};
-    \node[rectangle,minimum width=6em,draw] (v3) at (0.5,-1) {$v_3$};
-    \draw [thick] (v0) -- (v1)
-    (v0) -- (v0 |-  v3.north) % <-- changed coordinates
-    (v1) -- (v1 |- v3.north); % <-- changed coordinates
-\end{tikzpicture}
-\fi
+TODO: Parlar aqui sobre contraccions i dibuixar el diagrama
 
 
 \newpage
