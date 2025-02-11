@@ -1,0 +1,10 @@
+doc/doc.aux
+doc/doc.bcf
+doc/doc.fls
+doc/doc.log
+doc/doc.run.xml
+doc/doc.synctex.gz
+doc/doc.toc
+doc/.latexrun.db
+doc/.latexrun.db.lock
+doc/doc.pdf
