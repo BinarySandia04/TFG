@@ -160,14 +160,19 @@ Una part for\c{c}a extensa de la tasca realitzada consisteix en una verificaci\'
 
 \section{Xarxes Tensorials}
 
+
+
 \begin{defi}
- Un \mathbb{tensor} de ordre $n$ es una matriu (o array) multidimensional $T \in \mathbb{R}^{I_1 \times \dots \times I_n}$ amb $I_1, \dots, I_n \in \mathbb{N}$.
-Representarem l'element indexat per $\{i_1, \dots, i_n\}$ com $T_{i_1, \dots, i_n}$
+ Un \textbf{tensor} de ordre $d$ es una matriu multidimensional $T \in \mathbb{R}^{N_1 \times \dots \times N_d}$ 
+Representarem l'element indexat per $\{i_1, \dots, i_n\}$ de $T$ com $T_{i_1 \dots i_n}$
 \end{defi}
 
+\noindent Sigui $W$ una matriu sobre $\mathbb{R}$ de dimensions $M \times N$, amb $M = \prod_{i=1}^d M_i$, $N = \prod_{i=1}^p N_i$. Podem
+remodelar aquesta matriu com a un tensor $T \in \mathbb{R}^{M_1 \times \dots \times M_d \times N_1 \times \dots \times N_p}$ amb la funció bijectiva
+
+
 Al llarg d'aquest treball representarem els tensors i les xarxes tensorials a partir de representacions diagramiques. Aquestes
-representacions ens seràn més útils per estalviar notació a l'hora de tractar contraccions tensorials, tal com està descrit
-a les Figures \ref{fig:tensor_not} 
+representacions ens seràn més útils per estalviar notació a l'hora de tractar contraccions tensorials
 
 \begin{figure}[h]
 \begin{center}
@@ -220,13 +225,45 @@ a les Figures \ref{fig:tensor_not}
     \draw (v0) -- (k);
 }
 \caption{
-    Representació diagramàtiques de tensors $A,B,C$ d'ordres $1,2$ i $3$ respectivament
+    Representació diagramàtiques de tensors $A,B,C$ d'ordres $1,2$ i $3$ respectivament. Els nodes representen tensors i cada aresta desconectada
+    representa un index.
 }
 \end{center}
-\label{fig:tensor_not}
+\label{fig:tnot}
 \end{figure}
 
-TODO: Parlar aqui sobre contraccions i dibuixar el diagrama
+\begin{defi}
+    Donats dos tensors $T \in \mathbb{R}^{n_1 \times \dots \times n_d}$ i $P \in \mathbb{R}^{m_1 \times \dots \times m_p}$ d'ordres $d$ i $p$
+    respectivament tals que $n_a = m_b$, definim la \textbf{contracció} de $T$ i $P$ respecte els indexos $a$ i $b$ com al tensor $Q$ de dimensió
+    $\prod_{i \neq a}^{d} n_i \times \prod_{j \neq b}^{p} m_j$ i ordre $d + p - 2$ indexat de la forma
+    $$ (Q_{(i_k)_{k \neq a},(j_k)_{k \neq b}}) = \sum_{i_a=j_b=1}^{n_a} T_{i_1\cdots i_a \cdots i_d} P_{j_1 \cdots j_b \cdots j_p}$$
+\end{defi}
+
+\begin{figure}[h]
+    \begin{center}
+        \begin{tikzpicture}
+            \node(T)[draw, shape=circle] at (0, 0) {T};
+            \node(P)[draw, shape=circle] at (2, 0) {P};
+            \draw (T) -- node[midway, above]{n} (P);
+            \draw (T) -- node[right]{$I_2$} (0, -1);
+            \draw (P) -- node[right]{$I_3$} (2, -1);
+            \draw (T) -- node[above]{$I_1$} (-1, 0);
+            \draw (3,0) -- node[above]{$I_4$} (P);
+        \end{tikzpicture}
+        \caption{
+            Representació diagramàtica d'una xarxa tensorial. Cada aresta connectada entre dos tensors representa una contracció o un
+            sumatori respecte d'un índex. Per conveni, els indexos s'ordenen en sentit horari començant des de baix. En aquest cas, el tensor resultant de la contracció s'indexaria de la forma 
+            $(Q_{i_1i_2i_3i_4}) = \sum_{j=1}^{n} T_{i_2i_1j} P_{i_3ji_4}$.
+        }
+    \end{center}
+    \label{fig:tcont}
+\end{figure}
+
+La nostra motivació consistirà en descomposar i representar tensors de dimensionalitat (o d'ordre) alt per seqüencies de contraccions de tensors de més baixa dimensionalitat
+
+TODO: Que es un espai latent? Latent dimensions?
+Explicar normes tensorials
+
 
 
 \newpage
@@ -272,6 +309,9 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 %\bibitem{vgn} Vaughan, R. C.: \textit{The Hardy-Littlewood method}, Cambridge Tracts in Mathematics, No. 125, 2a edici\'o, Cambridge University Press, 1997.
 %\bibitem{vino} Vinogradov, I. M.: Sur le th\'eor\`eme de Waring, \textit{C. R. Acad. Sci. URSS}, 393-400, 1928.
 %\bibitem{vin} Vinogradov, I. M.: Representation of an odd number as a sum of three primes, \textit{Dokl. Akad. Nauk. SSSR}, 15:291-294, 1937.
+
+% Cites que s'han de posar si o si
+% TensorRingNetsAdaptedDeepMultiTaskLearning (intro mappings de matriu a tensor i tal)
 \end{thebibliography}
 
 \end{document}
