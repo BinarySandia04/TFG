@@ -9,3 +9,5 @@ doc/.latexrun.db
 doc/.latexrun.db.lock
 doc/doc.pdf
 papers/
+__pycache__/
+MNIST_data/

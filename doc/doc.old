@@ -1,15 +1,16 @@
-\documentclass[11pt,a4paper,openright,oneside]{book}
+\documentclass[11pt,a4paper,openright,oneside]{article}
 \usepackage{amsfonts, amsmath, amssymb,latexsym,amsthm, mathrsfs, enumerate}
 \usepackage[utf8]{inputenc}
 \usepackage[catalan]{babel}
+\usepackage{csquotes}
 \usepackage{epsfig}
-
 \parskip=5pt
 \parindent=15pt
 \usepackage[margin=1.2in]{geometry}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{tikz}
+\selectlanguage{catalan}
 
 \setcounter{page}{0}
 
@@ -36,6 +37,7 @@
 
 \def\qed{\hfill $\square$}
 
+% \renewcommand{\refname}{Bibliografia}
 % --------------------------------------------------
 \usepackage{fancyhdr}
 
@@ -55,12 +57,12 @@
 \begin{center}
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[width=6cm]{matematiquesinformatica-pos-rgb.png}
+\includegraphics[width=6cm]{refname.jpg}
 \end{center}
 \end{figure}
 
 \vspace*{1cm}
-\textbf{\LARGE GRAU DE MATEM\`{A}TIQUES } \\
+\textbf{\LARGE GRAU DE MATEMÀTIQUES } \\
 \vspace*{.5cm}
 \textbf{\LARGE Treball final de grau} \\
 
@@ -80,8 +82,8 @@
 
 \renewcommand{\arraystretch}{1.5}
 \begin{tabular}{ll}
-\textbf{\Large Director:} & \textbf{\Large Dr. Nahuel Statuto} \\
-\textbf{\Large Realitzat a:} & \textbf{\Large  Departament....   } \\
+\textbf{\Large Director:} & \textbf{\Large Dr. Nahuel Statuto } \\
+\textbf{\Large Realitzat a:} & \textbf{\Large  Departament de Matemàtiques   } \\
  & \textbf{\Large (nom del departament)} \\
 \\
 \textbf{\Large Barcelona,} & \textbf{\Large \today }
@@ -90,74 +92,54 @@
 \end{flushright}
 
 \end{center}
-
-
-
-
-
-
-
-
-
-
 \end{titlepage}
 
 
 \newpage
-\pagenumbering{roman} 
+\pagenumbering{roman}
 
+% ======== REUM
 \section*{Abstract}
 
 Goldbach's weak conjecture asserts that every odd integer greater than 5 is the sum of three primes. We study that problem and the proof of it presented by H. A. Helfgott and D. Platt. We focus on the circle method. Finally, we describe a computation that confirms Goldbach's weak conjecture up to $10^{28}$.
 
 \section*{Resum}
 La conjectura feble de Goldbach afirma que tot nombre enter imparell major que 5 \'es la suma de tres nombres primers. En aquest treball estudiem aquest problema i la seva prova presentada per HA Helfgott i D. Platt. Ens centrem en el m\`etode del cercle. Finalment, describim un c\`alcul que confirma la conjectura feble de Goldbach fins a $10^{28}$.
-
-
-
-% TODO: Omplir això
-% 15A69 - Multilinear Algebra, Tensor Calculus
 {\let\thefootnote\relax\footnote{2020 Mathematics Subject Classification. 11G05, 11G10, 14G10}}
 
 
-
-\newpage 
-
-
-\section*{Agra\"{\i}ments}
-
-Vull agrair a ... 
 \newpage
 
+% ========= AGRAIMENTS
+\section*{Agra\"{\i}ments}
+
+Vull agrair a ... algu algu
+\newpage
+
+% ========= CONTENTS
 \tableofcontents
 
 \newpage
 
-\pagenumbering{arabic} 
+\pagenumbering{arabic}
 \setcounter{page}{1}
-\section{Introducci\'o}
+
+% =========== INTRODUCCIÓ
+\section*{Introducci\'o}
+\iffalse
 \begin{prop}
-  
 \end{prop}
 \begin{teo}
-  
 \end{teo}
-
 \begin{prob}
-  
 \end{prob}
-
 \begin{ex}
-  
 \end{ex}
-
 \begin{defi}
-  
 \end{defi}
-
 \begin{lema}
-  
 \end{lema}
+\fi
 
 \subsection*{El projecte}
 
@@ -170,102 +152,24 @@ Posarem de manifest les idees b\`asiques i les t\`ecniques utilitzades en l'estu
 Una part for\c{c}a extensa de la tasca realitzada consisteix en una verificaci\'o parcial de la conjectura feble de Goldbach fins a $10^{28}$, que requereix del c\`alcul d'uns dos mil cinc-cents milions de nombres primers certificats. Veurem com portar a la pr\`actica tals c\`alculs i guardar les dades generades utilitzant els recursos inform\`atics de qu\`e disposem.
 
 
-
-
-
-
-
 \subsection*{Estructura de la Mem\`oria}
 
 \newpage
 
-\chapter{Preliminars}
+% ================ PRELIMINARS
 
-\section{Tensors}
+\section{Xarxes Tensorials}
 
-\noindent Donats $n,m \in \mathbb{N}$ amb $n < m$ denotarem $n \div m = \{n, n + 1, \dots, m\}$
-
-\noindent
-Siguin $N_1, \dots, N_d \in \mathbb{N}$ i $i_1 \in 1 \div N_1, i_2 \in 1 \div N_2, \dots, i_d \in 1 \div N_d$.
-Definim:
-$$\varphi_{N_1, \dots, N_d}(i_1, i_2, \dots, i_d) = \sum_{j=1}^k i_j \prod_{l=1}^{j-1} N_l $$
-
-\begin{prop}
-    $\varphi_{N_1,\dots,N_d}$ és una bijecció entre els conjunts $\prod_{i=1}^{d}(1 \div N_i)$ i $1 \div \prod_{i=1}^d N_i$
-\end{prop}
-\noindent Anomenarem a $i_1, \dots, i_d$ indexos. Per notació, escrivirem $N_k$ al valor màxim que pot
-correspondre a l'índex $i_k$. Quan ja pressuposem això, escriurem $\overline{i_1 i_2 \dots i_d}$ per referir-nos a
-$\varphi_{N_1, \dots, N_d}(i_1, i_2, \dots, i_d)$
-
-\begin{defi}
-    Un \textbf{tensor} $T$ de ordre $d$ es una aplicació multilineal $T \in \mathcal{M}_{N_1, \dots, N_d}(\mathbb{R})$ 
-Representarem l'element indexat per $(i_1, \dots, i_n)$ de $T$ com $T_{i_1 \dots i_n}$
-\end{defi}
 
 
 \begin{defi}
-    La $m$-fibra d'un tensor $T \in \mathcal{M}_{N_1, \dots, N_d}(\mathbb{R})$ d'ordre $d$ són vectors de mida $N_m$ 
-  obtinguts al variar l'index $i_m$ i deixant fixos la resta d'indexos. Es a dir, 
+ Un \textbf{tensor} de ordre $d$ es una matriu multidimensional $T \in \mathbb{R}^{N_1 \times \dots \times N_d}$ 
+Representarem l'element indexat per $\{i_1, \dots, i_n\}$ de $T$ com $T_{i_1 \dots i_n}$
 \end{defi}
 
-\begin{defi}
-    Sigui $T\in \mathcal{M}_{N_1,\dots, N_d}(\mathbb{R})$. Donat $1 \leqslant k \leqslant d$ definim el $k$-desplegament
-    de $T$ com la matriu $T_{\langle k \rangle}$ de mida $\prod_{i=1}^{k} N_i \times \prod_{i=k+1}^{d} N_i$ tal que els seus elements es troben definits
-    per
-    $$T_{\langle k \rangle}(\overline{i_1 i_2 \dots i_k}, \overline{i_{k+1} \dots i_d}) = T(i_1, i_2, \dots, i_d)$$
-\end{defi}
+\noindent Sigui $W$ una matriu sobre $\mathbb{R}$ de dimensions $M \times N$, amb $M = \prod_{i=1}^d M_i$, $N = \prod_{i=1}^p N_i$. Podem
+remodelar aquesta matriu com a un tensor $T \in \mathbb{R}^{M_1 \times \dots \times M_d \times N_1 \times \dots \times N_p}$ amb la funció bijectiva
 
-\begin{defi} (aplanament mode-$k$)
-    Donat un tensor $T \in \mathcal{M}_{N_1,\dots,N_d}(\mathbb{R})$ definim la matriu $T_{(m)} \in \mathcal{M}_{N_m, (N_1 \cdots  N_{m-1} N_{m+1} \cdots N_d)}(\mathbb{R})$ com la matriu
-    que té com a columnes les $m$-fibres de $T$, és a dir:
-    $$T_{(m)}(i_m, \overline{i_1 \dots i_{m-1} i_m \dots i_d}) = T(i_1, i_2, \dots, i_d)$$
-    La matriu $T_{(m)}$ rep el nom de \textbf{aplanament mode-$k$}
-\end{defi}
-
-\begin{defi} (aplanament permutat mode-$k$)
-    Donat un tensor $T$ definim la matriu $T_{[m]} \in \mathcal{M}_{N_m, (N_1 \cdots  N_{m-1} N_{m+1} \cdots N_d)}(\mathbb{R})$ com la següent matriu
-    que té com a columnes les $m$-fibres de $T$ amb el següent ordre:
-    $$T_{[m]}(i_m, \overline{i_m \dots i_{d} i_1 \dots i_{m-1}}) = T(i_1, i_2, \dots, i_d)$$
-    La matriu $T_{[m]}$ rep el nom de \textbf{aplanament permutat mode-$k$}
-\end{defi}
-
-\subsection{Contraccions}
-TODO: Explicar formalment que és una contracció i després els tipus de productes entre tensors
-
-\begin{defi}
-    Donats dos tensors $A, B$, definim la \textbf{traça tensorial} $Trt(A, B)$ com la contracció de $A$ amb $B$ sobre
-    tots els indexos coincidents
-\end{defi}
-
-\subsection{Normes tensorials}
-
-\subsubsection{Norma de Frobenius per a tensors}
-
-\begin{defi}
-Donat un tensor $T$ definim la seva norma de Frobenius com
-$$\|T\|_F = \sqrt{\sum_{i_1, i_2, \dots, i_d} \left| T(i_1, i_2, \dots, i_d) \right|^2}$$
-\end{defi}
-
-La norma de Frobenius per a tensors també es pot escriure de la forma
-$$\|T\|_F = \sqrt{Trt(T^\dagger, T)}$$
-
-\iffalse % Definició de tensor unitari
-\begin{defi}
-  Una matriu $U$ de mida $n \times m$ es una \textbf{isometria} si $$UU^\dagger = U^\dagger U = I$$
-  On $U^\dagger$ representa la matriu transposada conjugada de $U$. En cas que $n = m$ direm que $U$ és una matriu \textbf{unitaria}
-\end{defi}
-
-
-\begin{defi}
-Diem que un tensor $T$ és \textbf{unitari} respecte una bipartició particular de índexos si es pot remodelar a una matriu $W$ unitaria,
-és a dir, un tensor és unitari si i només si existeixen $A = \{a_1, \dots, a_p\}, B = \{b_1, \dots, p_q\}$ amb
-$\{a_1 \dots, a_p, b_1, \dots, p_q\} = 1 \div d$ tals que la matriu $U$ de mida $\prod \times \prod$
-\end{defi}
-\fi
-
-\section{Xarxes tensorials}
-
-TODO: Potser fer una mica de divulgació i motivació sobre les xarxes tensorials i posar bastant yapping sobre aquestes
 
 Al llarg d'aquest treball representarem els tensors i les xarxes tensorials a partir de representacions diagramiques. Aquestes
 representacions ens seràn més útils per estalviar notació a l'hora de tractar contraccions tensorials
@@ -332,7 +236,7 @@ representacions ens seràn més útils per estalviar notació a l'hora de tracta
     Donats dos tensors $T \in \mathbb{R}^{n_1 \times \dots \times n_d}$ i $P \in \mathbb{R}^{m_1 \times \dots \times m_p}$ d'ordres $d$ i $p$
     respectivament tals que $n_a = m_b$, definim la \textbf{contracció} de $T$ i $P$ respecte els indexos $a$ i $b$ com al tensor $Q$ de dimensió
     $\prod_{i \neq a}^{d} n_i \times \prod_{j \neq b}^{p} m_j$ i ordre $d + p - 2$ indexat de la forma
-    $$ Q((i_k)_{k \neq a},(j_k)_{k \neq b}) = \sum_{i_a=j_b=1}^{n_a} T_{i_1\cdots i_a \cdots i_d} P_{j_1 \cdots j_b \cdots j_p}$$
+    $$ (Q_{(i_k)_{k \neq a},(j_k)_{k \neq b}}) = \sum_{i_a=j_b=1}^{n_a} T_{i_1\cdots i_a \cdots i_d} P_{j_1 \cdots j_b \cdots j_p}$$
 \end{defi}
 
 \begin{figure}[h]
@@ -350,13 +254,12 @@ representacions ens seràn més útils per estalviar notació a l'hora de tracta
             Representació diagramàtica d'una xarxa tensorial. Cada aresta connectada entre dos tensors representa una contracció o un
             sumatori respecte d'un índex. Per conveni, els indexos s'ordenen en sentit horari començant des de baix. En aquest cas, el tensor resultant de la contracció s'indexaria de la forma 
             $(Q_{i_1i_2i_3i_4}) = \sum_{j=1}^{n} T_{i_2i_1j} P_{i_3ji_4}$.
-}
+        }
     \end{center}
     \label{fig:tcont}
 \end{figure}
 
 La nostra motivació consistirà en descomposar i representar tensors de dimensionalitat (o d'ordre) alt per seqüencies de contraccions de tensors de més baixa dimensionalitat
-
 
 TODO: Que es un espai latent? Latent dimensions?
 \begin{itemize}
@@ -366,13 +269,7 @@ TODO: Que es un espai latent? Latent dimensions?
 \end{itemize}
 
 
-
-
-\subsection{Subapartat 2.1}
-
 \newpage
-
-\section{Xarxes de tensors en anell}
 
 \section{Conclusions}
 
@@ -386,16 +283,10 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 
 \newpage
 
-
-% TODO: Fer això bé
-
 \begin{thebibliography}{25}
-
 \bibitem{wide} Wenqi Wang; Yifan Sun; Brian Eriksson; Wenlin Wang; Vaneet Aggarwal: Wide Compression: Tensor Ring Nets, \texttt{arXiv:1802.09052v1}, 2018 
 \bibitem{trd} Qibin Zhao, Guoxu Zhou, Shengli Xie, Liqing Zhang, Andrzej Cichocki: Tensor Ring Decomposition \texttt{arXiv:1606.05535v1 [cs.NA]}, 17 Jun 2016
 \bibitem{guide} Glen Evenbly: A Practical Guide to the Numerical Implementation of Tensor Networks I: Contractions, Decompositions and Gauge Freedom \texttt{arXiv:2202.02138v1 [quant-ph]}, 4 Feb 2022
-%
-
 %\bibitem{pari} Batut, C.; Belabas, K.; Bernardi, D.; Cohen, H.; Olivier, M.: User's guide to \textit{PARI-GP},  \newline \texttt{pari.math.u-bordeaux.fr/pub/pari/manuals/2.3.3/users.pdf}, 2000.
 %\bibitem{cw} Chen, J. R.; Wang, T. Z.: On the Goldbach problem, \textit{Acta Math. Sinica}, 32(5):702-718, 1989.
 %\bibitem{desh} Deshouillers, J. M.: Sur la constante de $\check{\text{S}}\text{nirel}^{\prime} \text{man}$, \textit{S\'eminaire Delange-Pisot-Poitou, 17e ann\'ee: (1975/76), Th\'eorie des nombres: Fac. 2, Exp. No.} G16, p\`ag. 6, Secr\`etariat Math., Paris, 1977.
@@ -425,8 +316,6 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 % Cites que s'han de posar si o si
 % TensorRingNetsAdaptedDeepMultiTaskLearning (intro mappings de matriu a tensor i tal)
 % llibre aleix deep learning
-% https://utoronto.scholaris.ca/server/api/core/bitstreams/12203066-bba0-4c38-9ab9-8cf0eb45aba4/content
-
 \end{thebibliography}
-\end{document} 
 
+\end{document}
