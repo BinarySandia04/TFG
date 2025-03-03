@@ -1,8 +1,11 @@
 \documentclass[11pt,a4paper,openright,oneside]{book}
 \usepackage{amsfonts, amsmath, amssymb,latexsym,amsthm, mathrsfs, enumerate}
 \usepackage[utf8]{inputenc}
-\usepackage[catalan]{babel}
+\usepackage[english]{babel}
 \usepackage{epsfig}
+\usepackage{csquotes}
+\usepackage{biblatex}
+\addbibresource{refs.bib}
 
 \parskip=5pt
 \parindent=15pt
@@ -14,27 +17,38 @@
 \setcounter{page}{0}
 
 
+
 \numberwithin{equation}{section}
-\newtheorem{teo}{Teorema}[section]
-\newtheorem*{teo*}{Teorema}
-\newtheorem*{prop*}{Proposici\'o}
-\newtheorem*{corol*}{Coro{\l}ari}
-\newtheorem{prop}[teo]{Proposici\'o}
-\newtheorem{corol}[teo]{Coro{\l}ari}
-\newtheorem{lema}[teo]{Lema}
-\newtheorem{defi}[teo]{Definici\'o}
-\newtheorem{nota}{Notaci\'o}
+\newtheorem{defn0}{Definition}[chapter]
+\newtheorem{prop0}[defn0]{Proposition}
+\newtheorem{thm0}[defn0]{Theorem}
+\newtheorem{lemma0}[defn0]{Lemma}
+\newtheorem{corollary0}[defn0]{Corollary}
+\newtheorem{example0}[defn0]{Example}
+\newtheorem{remark0}[defn0]{Remark}
+\newtheorem{conjecture0}[defn0]{Conjecture}
+
+\newenvironment{definition}{ \begin{defn0}}{\end{defn0}}
+\newenvironment{proposition}{\bigskip \begin{prop0}}{\end{prop0}}
+\newenvironment{theorem}{\bigskip \begin{thm0}}{\end{thm0}}
+\newenvironment{lemma}{\bigskip \begin{lemma0}}{\end{lemma0}}
+\newenvironment{corollary}{\bigskip \begin{corollary0}}{\end{corollary0}}
+\newenvironment{example}{ \begin{example0}\rm}{\end{example0}}
+\newenvironment{remark}{ \begin{remark0}\rm}{\end{remark0}}
+\newenvironment{conjecture}{\begin{conjecture0}}{\end{conjecture0}}
+
+\newcommand{\defref}[1]{Definition~\ref{#1}}
+\newcommand{\propref}[1]{Proposition~\ref{#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{#1}}
+\newcommand{\corref}[1]{Corollary~\ref{#1}}
+\newcommand{\exref}[1]{Example~\ref{#1}}
+\newcommand{\secref}[1]{Section~\ref{#1}}
+\newcommand{\remref}[1]{Remark~\ref{#1}}
+\newcommand{\conjref}[1]{Conjecture~\ref{#1}}
 
 
-\theoremstyle{definition}
-\newtheorem{prob}[teo]{Problema}
-\newtheorem*{sol}{Soluci\'o}
-\newtheorem{ex}[teo]{Exemple}
-\newtheorem{exs}[teo]{Exemples}
-\newtheorem{obs}[teo]{Observaci\'o}
-\newtheorem{obss}[teo]{Observacions}
-
-\def\qed{\hfill $\square$}
+\DeclareMathOperator{\vectorize}{vec}
 
 % --------------------------------------------------
 \usepackage{fancyhdr}
@@ -67,7 +81,7 @@
 \vspace*{1.5cm}
 \rule{16cm}{0.1mm}\\
 \begin{Huge}
-\textbf{COMPRESSIÓ DE TENSORS UTILITZANT XARXES D'ANELLS TENSORIALS} \\
+\textbf{COMPRESSING NEURAL NETWORKS USING TENSOR RING DECOMPOSITION} \\
 \end{Huge}
 \rule{16cm}{0.1mm}\\
 
@@ -81,8 +95,8 @@
 \renewcommand{\arraystretch}{1.5}
 \begin{tabular}{ll}
 \textbf{\Large Director:} & \textbf{\Large Dr. Nahuel Statuto} \\
-\textbf{\Large Realitzat a:} & \textbf{\Large  Departament....   } \\
- & \textbf{\Large (nom del departament)} \\
+\textbf{\Large Realitzat a:} & \textbf{\Large  Departament de Matemàtiques   } \\
+ & \textbf{\Large i Informàtica} \\
 \\
 \textbf{\Large Barcelona,} & \textbf{\Large \today }
 \end{tabular}
@@ -90,13 +104,6 @@
 \end{flushright}
 
 \end{center}
-
-
-
-
-
-
-
 
 
 
@@ -135,142 +142,30 @@ Vull agrair a ...
 
 \pagenumbering{arabic} 
 \setcounter{page}{1}
-\section{Introducci\'o}
-\begin{prop}
-  
-\end{prop}
-\begin{teo}
-  
-\end{teo}
+\chapter{Introduction}
 
-\begin{prob}
-  
-\end{prob}
-
-\begin{ex}
-  
-\end{ex}
-
-\begin{defi}
-  
-\end{defi}
-
-\begin{lema}
-  
-\end{lema}
-
-\subsection*{El projecte}
-
-La conjectura forta de Goldbach assegura que tot nombre enter parell m\' es gran que 2 pot ser escrit com a suma de dos nombres primers. \'es f\`acil veure que aquesta conjectura implica l'anomenada conjectura feble de Goldbach: tot nombre enter senar m\'es gran que 5 pot ser escrit com a suma d'exactament tres nombres primers.
-
-En aquest treball comentarem l'origen d'aquests problemes, exposarem una cro\-no\-lo\-gia parcial del seu tractament, amb alguns dels resultats m\'es coneguts, i n'enunciarem algunes conseq\"u\`encies.
-
-Posarem de manifest les idees b\`asiques i les t\`ecniques utilitzades en l'estudi de la conjectura feble de Goldbach, centrant-nos en les de la demostraci\'o presentada recentment per H. A. Helfgott en co{\l}aboraci\'o amb D. Platt, prestant especial atenci\'o al m\`etode del cercle de Hardy-Littlewood.
-
-Una part for\c{c}a extensa de la tasca realitzada consisteix en una verificaci\'o parcial de la conjectura feble de Goldbach fins a $10^{28}$, que requereix del c\`alcul d'uns dos mil cinc-cents milions de nombres primers certificats. Veurem com portar a la pr\`actica tals c\`alculs i guardar les dades generades utilitzant els recursos inform\`atics de qu\`e disposem.
-
-
-
-
-
-
-
-\subsection*{Estructura de la Mem\`oria}
 
 \newpage
 
-\chapter{Preliminars}
+\chapter{Tensor networks}
 
 \section{Tensors}
 
-\noindent Donats $n,m \in \mathbb{N}$ amb $n < m$ denotarem $n \div m = \{n, n + 1, \dots, m\}$
+\nocite{yokotaVeryBasicsTensors2024}
+We treat a tensor of $n$-order as a $n$-dimensional array $\mathcal{A} \in \mathbb{R}^{N_1\times N_2 \times \cdots \times N_n}$
+Tensors are therefore generalizations of vectors and matrices, if we see them as arrays of numbers. For example, a first order
+tensor is a vector, a second order tensor is a matrix, a third order tensor can be seen as a cube of numbers represented as an
+array of matrices (Fig \ref{fig:tint}), a fourth order is as an array of arrays of matrices, and so on.
 
-\noindent
-Siguin $N_1, \dots, N_d \in \mathbb{N}$ i $i_1 \in 1 \div N_1, i_2 \in 1 \div N_2, \dots, i_d \in 1 \div N_d$.
-Definim:
-$$\varphi_{N_1, \dots, N_d}(i_1, i_2, \dots, i_d) = \sum_{j=1}^k i_j \prod_{l=1}^{j-1} N_l $$
-
-\begin{prop}
-    $\varphi_{N_1,\dots,N_d}$ és una bijecció entre els conjunts $\prod_{i=1}^{d}(1 \div N_i)$ i $1 \div \prod_{i=1}^d N_i$
-\end{prop}
-\noindent Anomenarem a $i_1, \dots, i_d$ indexos. Per notació, escrivirem $N_k$ al valor màxim que pot
-correspondre a l'índex $i_k$. Quan ja pressuposem això, escriurem $\overline{i_1 i_2 \dots i_d}$ per referir-nos a
-$\varphi_{N_1, \dots, N_d}(i_1, i_2, \dots, i_d)$
-
-\begin{defi}
-    Un \textbf{tensor} $T$ de ordre $d$ es una aplicació multilineal $T \in \mathcal{M}_{N_1, \dots, N_d}(\mathbb{R})$ 
-Representarem l'element indexat per $(i_1, \dots, i_n)$ de $T$ com $T_{i_1 \dots i_n}$
-\end{defi}
+We denote $\mathcal{A}_{i_1 i_2 \dots i_N} = \mathcal{A}(i_1, i_2, \dots, i_N)$ as the $(i_1, i_2, \dots, i_N)$nth entry of the
+tensor. The arrangement of directions (or axes) of the tensors are called \textbf{modes}. The number of arranged
+entries are called the size or length of the mode. We denote the $n$-mode as arranging from the $n$th index. For example,
+the vertical direction of a matrix $\mathcal{M} \in \mathbb{R}^{N_1 \times N_2}$ is the first mode. Notice that we arrange the 
+using the $i_1$ index. The horizontal direction corresponds to the second mode, and it is arranged using $i_2$. An $N$-order
+tensor has $N$ modes
 
 
-\begin{defi}
-    La $m$-fibra d'un tensor $T \in \mathcal{M}_{N_1, \dots, N_d}(\mathbb{R})$ d'ordre $d$ són vectors de mida $N_m$ 
-  obtinguts al variar l'index $i_m$ i deixant fixos la resta d'indexos. Es a dir, 
-\end{defi}
-
-\begin{defi}
-    Sigui $T\in \mathcal{M}_{N_1,\dots, N_d}(\mathbb{R})$. Donat $1 \leqslant k \leqslant d$ definim el $k$-desplegament
-    de $T$ com la matriu $T_{\langle k \rangle}$ de mida $\prod_{i=1}^{k} N_i \times \prod_{i=k+1}^{d} N_i$ tal que els seus elements es troben definits
-    per
-    $$T_{\langle k \rangle}(\overline{i_1 i_2 \dots i_k}, \overline{i_{k+1} \dots i_d}) = T(i_1, i_2, \dots, i_d)$$
-\end{defi}
-
-\begin{defi} (aplanament mode-$k$)
-    Donat un tensor $T \in \mathcal{M}_{N_1,\dots,N_d}(\mathbb{R})$ definim la matriu $T_{(m)} \in \mathcal{M}_{N_m, (N_1 \cdots  N_{m-1} N_{m+1} \cdots N_d)}(\mathbb{R})$ com la matriu
-    que té com a columnes les $m$-fibres de $T$, és a dir:
-    $$T_{(m)}(i_m, \overline{i_1 \dots i_{m-1} i_m \dots i_d}) = T(i_1, i_2, \dots, i_d)$$
-    La matriu $T_{(m)}$ rep el nom de \textbf{aplanament mode-$k$}
-\end{defi}
-
-\begin{defi} (aplanament permutat mode-$k$)
-    Donat un tensor $T$ definim la matriu $T_{[m]} \in \mathcal{M}_{N_m, (N_1 \cdots  N_{m-1} N_{m+1} \cdots N_d)}(\mathbb{R})$ com la següent matriu
-    que té com a columnes les $m$-fibres de $T$ amb el següent ordre:
-    $$T_{[m]}(i_m, \overline{i_m \dots i_{d} i_1 \dots i_{m-1}}) = T(i_1, i_2, \dots, i_d)$$
-    La matriu $T_{[m]}$ rep el nom de \textbf{aplanament permutat mode-$k$}
-\end{defi}
-
-\subsection{Contraccions}
-TODO: Explicar formalment que és una contracció i després els tipus de productes entre tensors
-
-\begin{defi}
-    Donats dos tensors $A, B$, definim la \textbf{traça tensorial} $Trt(A, B)$ com la contracció de $A$ amb $B$ sobre
-    tots els indexos coincidents
-\end{defi}
-
-\subsection{Normes tensorials}
-
-\subsubsection{Norma de Frobenius per a tensors}
-
-\begin{defi}
-Donat un tensor $T$ definim la seva norma de Frobenius com
-$$\|T\|_F = \sqrt{\sum_{i_1, i_2, \dots, i_d} \left| T(i_1, i_2, \dots, i_d) \right|^2}$$
-\end{defi}
-
-La norma de Frobenius per a tensors també es pot escriure de la forma
-$$\|T\|_F = \sqrt{Trt(T^\dagger, T)}$$
-
-\iffalse % Definició de tensor unitari
-\begin{defi}
-  Una matriu $U$ de mida $n \times m$ es una \textbf{isometria} si $$UU^\dagger = U^\dagger U = I$$
-  On $U^\dagger$ representa la matriu transposada conjugada de $U$. En cas que $n = m$ direm que $U$ és una matriu \textbf{unitaria}
-\end{defi}
-
-
-\begin{defi}
-Diem que un tensor $T$ és \textbf{unitari} respecte una bipartició particular de índexos si es pot remodelar a una matriu $W$ unitaria,
-és a dir, un tensor és unitari si i només si existeixen $A = \{a_1, \dots, a_p\}, B = \{b_1, \dots, p_q\}$ amb
-$\{a_1 \dots, a_p, b_1, \dots, p_q\} = 1 \div d$ tals que la matriu $U$ de mida $\prod \times \prod$
-\end{defi}
-\fi
-
-\section{Xarxes tensorials}
-
-TODO: Potser fer una mica de divulgació i motivació sobre les xarxes tensorials i posar bastant yapping sobre aquestes
-
-Al llarg d'aquest treball representarem els tensors i les xarxes tensorials a partir de representacions diagramiques. Aquestes
-representacions ens seràn més útils per estalviar notació a l'hora de tractar contraccions tensorials
-
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
     $$A = \begin{bmatrix}
         a_1 \\
@@ -298,6 +193,17 @@ representacions ens seràn més útils per estalviar notació a l'hora de tracta
     \
     $$
 
+\caption{
+    Explicit representation of tensors of different orders. $A$, $B$ and $C$ are tensors of order $1$,$2$ and $3$ respectively
+}
+\end{center}
+\label{fig:tint}
+
+\end{figure}
+
+
+\begin{figure}
+\centering
 \tikz{
     \node at (-1,-0.5) {$A_i \Leftrightarrow$};
     \node[draw, shape=circle] (v0) at (0,0) {$A$};
@@ -321,22 +227,19 @@ representacions ens seràn més útils per estalviar notació a l'hora de tracta
     \draw (v0) -- (k);
 }
 \caption{
-    Representació diagramàtiques de tensors $A,B,C$ d'ordres $1,2$ i $3$ respectivament. Els nodes representen tensors i cada aresta desconectada
-    representa un index.
+    Representation of the same tensors of Figure \ref{fig:tint} in tensor network notation.
 }
-\end{center}
 \label{fig:tnot}
 \end{figure}
 
-\begin{defi}
-    Donats dos tensors $T \in \mathbb{R}^{n_1 \times \dots \times n_d}$ i $P \in \mathbb{R}^{m_1 \times \dots \times m_p}$ d'ordres $d$ i $p$
-    respectivament tals que $n_a = m_b$, definim la \textbf{contracció} de $T$ i $P$ respecte els indexos $a$ i $b$ com al tensor $Q$ de dimensió
-    $\prod_{i \neq a}^{d} n_i \times \prod_{j \neq b}^{p} m_j$ i ordre $d + p - 2$ indexat de la forma
-    $$ Q((i_k)_{k \neq a},(j_k)_{k \neq b}) = \sum_{i_a=j_b=1}^{n_a} T_{i_1\cdots i_a \cdots i_d} P_{j_1 \cdots j_b \cdots j_p}$$
-\end{defi}
+The way we represent tensors in Figure \ref{fig:tint} is useful for
+relating tensors as data arrays but it is very difficult to visualize for high order tensors. Also, it is time consuming
+to write. The graphical notation or tensor network diagram notation (Fig \ref{fig:tnot}) uses nodes and edges to represent tensors. Each node is
+a tensor and each edge represents a mode
 
-\begin{figure}[h]
-    \begin{center}
+\iffalse
+\begin{figure}
+    \centering
         \begin{tikzpicture}
             \node(T)[draw, shape=circle] at (0, 0) {T};
             \node(P)[draw, shape=circle] at (2, 0) {P};
@@ -350,19 +253,77 @@ representacions ens seràn més útils per estalviar notació a l'hora de tracta
             Representació diagramàtica d'una xarxa tensorial. Cada aresta connectada entre dos tensors representa una contracció o un
             sumatori respecte d'un índex. Per conveni, els indexos s'ordenen en sentit horari començant des de baix. En aquest cas, el tensor resultant de la contracció s'indexaria de la forma 
             $(Q_{i_1i_2i_3i_4}) = \sum_{j=1}^{n} T_{i_2i_1j} P_{i_3ji_4}$.
-}
-    \end{center}
+        }
     \label{fig:tcont}
 \end{figure}
+\fi
 
-La nostra motivació consistirà en descomposar i representar tensors de dimensionalitat (o d'ordre) alt per seqüencies de contraccions de tensors de més baixa dimensionalitat
+\section{Tensor operations}
 
+\subsection*{Tensor slices}
+Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
+as $$A(:, j) = \mathbf{a}_j \in \mathbb{R}^I \qquad A(i, :) = \mathbf{\tilde{a}}_j \in \mathbb{R}^J$$
+In other words, the slice of a matrix is obtained by fixing a certain index and then looping through the other
+free indexes. For example, for the vertical slice $A(:, j)$, is obtained by fixing $j$ and then writing on a vector
+the column $j$ from top to bottom. The same goes for $A(i, :)$, where we obtain the slice by fixing the second
+index $i$ and then writing the vector by the free second index from left to right.
+
+We can generalize matrix slices by considering a tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, and then
+considering the $p < n$ free indexes $i_{k_1}, i_{k_2}, \dots, i_{k_p}$. By iterating from the first to the last free index
+we obtain a $p$th-order tensor $\mathcal{T} \in \mathbb{R}^{N_{k_1} \times \cdots \times N_{k_p}}$
+
+\begin{example}
+    Consider a $4$th-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times N_2 \times N_3 \times N_4}$. If we choose $k_1 = 1$ and
+    $k_2 = 4$ the tensor slice is defined by the tensor of $2$th-order $\mathcal{T} = \mathcal{A}(:, i_2, i_3, :) \in \mathbb{R}^{N_1 \times N_4}$ with its entries defined by:
+    $$\mathcal{T}(i_1, i_4) = \mathcal{A}(i_1, i_2, i_3, i_4)$$
+\end{example}
+
+\begin{example}
+    Consider a $n$th-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. Let $k \leqslant n$ We call the \textbf{$k$-mode} of a tensor
+    the tensor slice $\mathcal{T} = \mathcal{A}(i_1, i_2, \dots, i_{k-1}, :, i_{k+1}, \dots, i_n) \in \mathbb{R}^{N_k}$
+\end{example}
+
+\subsection*{Vectorization}
+
+Vectorization is the operation of transforming an $n$-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \dots \times N_n}$
+into a vector $a$ of length $\prod_{i=1}^{n} N_i$. The entries of the vector $a$ are defined by $$a(\overline{i_1 i_2 \dots i_n}) = 
+\mathcal{A}(i_1, i_2, \dots, i_n)$$
+Where $\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$
+
+\subsection*{Matricization}
+
+\subsection*{Foldings}
+
+\subsection*{Outer product}
+The outer product of two vectors $a \in \mathbb{R}^I$ and $b \in \mathbb{R}^J$ is denoted by $a \circ b$ and it results
+as a matrix $M = a \circ b \in \mathbb{R}^{I \times J}$ with its entries defined as $M_{ij} = a_i b_j$. We can extend the outer
+product of two vectors to an arbitrary number of vectors and get as a result a $n$-order tensor
+
+\begin{definition}[Outer product]
+    We define the \textbf{outer product} of $n$ vectors 
+    $a_1 \in \mathbb{R}^{N_1}, a_2 \in \mathbb{R}^{N_2}, \dots, a_n \in \mathbb{R}^{N_n}$
+    as the $n$th-order tensor $\mathcal{T} \in \mathbb{R}^{N_1 \times N_2 \times \dots \times N_n}$ with its entries being
+    $$\mathcal{T}(i_1, \dots, i_n) = a_1(i_1) a_2(i_2) \cdots a_n(i_n)$$
+\end{definition}
+\subsection*{Inner product}
+The inner product of two tensors $\mathcal{X}, \mathcal{Y} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ is defined by
+$$\langle \mathcal{X},\mathcal{Y} \rangle = \sum_{i_1, \dots, i_N}^{N_1, \dots, N_n} \mathcal{X}_{i_1, \dots, i_n} \mathcal{Y}_{i_1, \dots, i_n} = 
+\vectorize(\mathcal{X})^T \vectorize(\mathcal{Y}) = \langle \vectorize(\mathcal{X}), \vectorize(\mathcal{Y}) \rangle$$
+
+\subsection*{Frobenius norm}
+\begin{definition}[Frobenius norm]
+The \textbf{Frobenius norm} of a tensor $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ is given by
+$$\|\mathcal{T}\|_F = \sqrt{\langle \mathcal{T}, \mathcal{T} \rangle} = \sqrt{\sum_{i_1, \dots, i_n}^{N_1, \dots, N_n}
+\mathcal{T}_{i_1 \dots i_n}^2}$$
+\end{definition}
+
+
+\newpage
 
 TODO: Que es un espai latent? Latent dimensions?
 \begin{itemize}
     \item Explicar normes tensorials
  \item Explicar tot el tema de descomposició SVD de tensors i algoritmes
- \item Explicar la tensor ring factorization
 \end{itemize}
 
 
@@ -370,11 +331,61 @@ TODO: Que es un espai latent? Latent dimensions?
 
 \subsection{Subapartat 2.1}
 
-\newpage
+Idea de guió del TFG:
 
-\section{Xarxes de tensors en anell}
+\begin{itemize}
+    \item Preliminaries
+    \begin{itemize}
+        \item Tensors
+        \item Xarxes Tensorials
+        \item Xarxes Neuronals
+        \item Xarxes convulucionals
+    \end{itemize}
+    \item Tensor Ring Nets
+    \begin{itemize}
+        \item Propietats de Tensor Ring Nets
+        \item Com trobar la descomposició en anells de xarxes tensorials
+        \begin{itemize}
+            \item TR-SVD (Singular Value Decomposition)
+            \item TR-ALS (Alternating Least Squares)
+            \item Scalable Bayesian Tensor Ring Factorization
+            \item TR-STF (Scaled Tri-Factorization) 
+        \end{itemize}
+    \end{itemize}
+    \item Comprimir Xarxes Tensorials amb Tensor Ring Nets
+        \begin{itemize}
+            \item Petita Intro (Related work) \cite{obukhovTBasisCompactRepresentation2021}
+            \item Com fer-ho per xarxes neuronals (Fully connected neurons)
+            \item Per a xarxes convulocionals
+        \end{itemize}
+    \item Experiments pràctics
+    \begin{itemize}
+        \item Comparar datasets i coses amb diferents algoritmes de compressió
+    \end{itemize}
+    \item Conclusions
+\end{itemize}
 
-\section{Conclusions}
+\chapter{Tensor ring networks}
+In this chapter we will study the Tensor Ring (TR) decomposition. We will see some properties, and some advantages
+and disadvantages between some tensor decompositions.
+
+Tensor rings are chains of tensors with both ends joined, forming a ring. Tensor rings
+have gained interest in tensor decomposition because they are a generalization of Tensor Train (TT) networks with
+the difference that both ends of the tensor decomposition have more freedom and can store some information [CN]
+
+A matrix $A \in \mathbb{R}^{m\times n}$ of rank $r$ can be decomposed as $A = WH$ where $W \in \mathbb{R}^{m \times r}$ and
+$H \in \mathbb{R}^{r \times n}$. For a lower rank $k < r$, $A$ can be decomposed as the product of two matrices 
+$W \in \mathbb{R}^{m \times k}$ and $H \in \mathbb{R}^{k \times n}$ at the expense of some error after optimizing the function
+$$\min_{W, H} \frac{1}{2} \|A - WH\|^2_F$$
+
+A common technique of achieving this factorization is the Singular Value Decomposition
+(SVD). For orthogonal matrices $U \in \mathbb{R}^{n \times r}$, $V \in \mathbb{R}^{r \times m}$ and a
+diagonal matrix $\Sigma \in \mathbb{R}^{r \times r}$ of singular values we can write
+$$A = U\Sigma V^T$$
+If $k < r$, then this factorization is called truncated SVD
+\chapter{Neural network compression}
+
+\chapter{Conclusions}
 
 Fent servir un s\'{\i}mil geom\`etrico-cartogr\`afic, aquesta mem\`oria constitueix un mapa a escala planet\`aria de la demostraci\'o de la conjectura feble de Goldbach presentada per Helfgott i un mapa a escala continental de la verificaci\'o num\`erica d'aquesta. Estudis posteriors i m\'es profunds haurien de permetre elaborar mapes de menor escala.
 
@@ -384,49 +395,14 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 
 \normalfont
 
+
 \newpage
 
+\addcontentsline{toc}{chapter}{Bibliography}
+\printbibliography
 
-% TODO: Fer això bé
-
-\begin{thebibliography}{25}
-
-\bibitem{wide} Wenqi Wang; Yifan Sun; Brian Eriksson; Wenlin Wang; Vaneet Aggarwal: Wide Compression: Tensor Ring Nets, \texttt{arXiv:1802.09052v1}, 2018 
-\bibitem{trd} Qibin Zhao, Guoxu Zhou, Shengli Xie, Liqing Zhang, Andrzej Cichocki: Tensor Ring Decomposition \texttt{arXiv:1606.05535v1 [cs.NA]}, 17 Jun 2016
-\bibitem{guide} Glen Evenbly: A Practical Guide to the Numerical Implementation of Tensor Networks I: Contractions, Decompositions and Gauge Freedom \texttt{arXiv:2202.02138v1 [quant-ph]}, 4 Feb 2022
-%
-
-%\bibitem{pari} Batut, C.; Belabas, K.; Bernardi, D.; Cohen, H.; Olivier, M.: User's guide to \textit{PARI-GP},  \newline \texttt{pari.math.u-bordeaux.fr/pub/pari/manuals/2.3.3/users.pdf}, 2000.
-%\bibitem{cw} Chen, J. R.; Wang, T. Z.: On the Goldbach problem, \textit{Acta Math. Sinica}, 32(5):702-718, 1989.
-%\bibitem{desh} Deshouillers, J. M.: Sur la constante de $\check{\text{S}}\text{nirel}^{\prime} \text{man}$, \textit{S\'eminaire Delange-Pisot-Poitou, 17e ann\'ee: (1975/76), Th\'eorie des nombres: Fac. 2, Exp. No.} G16, p\`ag. 6, Secr\`etariat Math., Paris, 1977.
-%\bibitem{derz} Deshouillers, J. M.; Effinger, G.; te Riele, H.; Zinoviev, D.: A complete Vinogradov 3-primes theorem under the Riemann hypothesis, \textit{Electron. Res. Announc. Amer. Math. Soc.}, 3:99-104, 1997.
-%\bibitem{dick} Dickson, L. E.: \textit{History of the theory of numbers. Vol. I: Divisibility and primality}, Chelsea Publishing Co., New York, 1966.
-%\bibitem{hl} Hardy, G. H.; Littlewood, J. E.: Some problems of \textquoteleft Partitio numerorum\textquoteright; III: On the expression of a number as a sum of primes, \textit{Acta Math.}, 44(1):1-70, 1923.
-%\bibitem{hara} Hardy, G. H.; Ramanujan, S.: Asymptotic formulae in combinatory analysis, \textit{Proc. Lond. Math. Soc.}, 17:75-115, 1918.
-%\bibitem{haw} Hardy, G. H.; Wright, E. M.: \textit{An introduction to the theory of numbers}, 5a edici\'o, Oxford University Press, 1979.
-%\bibitem{minarc} Helfgott, H. A.: Minor arcs for Goldbach's problem, \newline \texttt{arXiv:1205.5252v4 [math.NT]}, desembre de 2013.
-%\bibitem{majarc} Helfgott, H. A.: Major arcs for Goldbach's problem, \newline \texttt{arXiv:1305.2897v4 [math.NT]}, abril de 2014.
-%\bibitem{istrue} Helfgott, H. A.: The ternary Goldbach conjecture is true, \newline \texttt{arXiv:1312.7748v2 [math.NT]}, gener de 2014.
-%\bibitem{HP} Helfgott, H. A.; Platt, D.: Numerical verification of the ternary Goldbach conjecture up to $8.875 \cdot 10^{30}$, \texttt{arXiv:1305.3062v2 [math.NT]}, abril de 2014.
-%\bibitem{KPS} Klimov, N. I.; $\text{Pil}^{\prime} \text{tja}\breve{\imath}$, G. Z.; $\check{\text{S}}\text{eptickaja}$, T. A.: An estimate of the absolute constant in the Goldbach-$\check{\text{S}}\text{nirel}^{\prime} \text{man}$ problem, \textit{Studies in number theory, No. 4}, p\`ag. 35-51, Izdat. Saratov. Univ., Saratov, 1972.
-%\bibitem{lw} Liu, M. C.; Wang, T.: On the Vinogradov bound in the three primes Goldbach conjecture, \textit{Acta Arith.}, 105(2):133-175, 2002.
-%\bibitem{OSHP} Oliveira e Silva, T.; Herzog, S.; Pardi, S.: Empirical verification of the even Goldbach conjecture and computation of prime gaps up to $4\cdot10^{18}$, \textit{Math. Comp.}, 83:2033-2060, 2014.
-%\bibitem{ram} Ramar\'e, O.: On $\check{\text{S}}\text{nirel}^{\prime} \text{man's}$ constant, \textit{Ann. Scuola Norm. Sup. Pisa Cl. Sci.}, 22(4):645-706, 1995.
-%\bibitem{riva} Riesel, H.; Vaughan, R. C.: On sums of primes, \textit{Ark. Mat.}, 21(1):46-74, 1983.
-%\bibitem{RS} Rosser, J. B.; Schoenfeld, L.: Approximate formulas for some functions of prime numbers, \textit{Illinois J. Math.}, 6:64-94, 1962.
-%\bibitem{sch} Schnirelmann, L.: \"Uber additive Eigenschaften von Zahlen, \textit{Math. Ann.}, 107(1):649-690, 1933.
-%\bibitem{tao} Tao, T.: Every odd number greater than $1$ is the sum of at most five primes, \textit{Math. Comp.}, 83:997-1038, 2014.
-%\bibitem{ari} Travesa, A.: \textit{Aritm\`etica}, Co{\l}ecci\'o UB, No. 25, Barcelona, 1998.
-%\bibitem{vau} Vaughan, R. C.: On the estimation of Schnirelman's constant, \textit{J. Reine Angew. Math.}, 290:93-108, 1977.
-%\bibitem{vgn} Vaughan, R. C.: \textit{The Hardy-Littlewood method}, Cambridge Tracts in Mathematics, No. 125, 2a edici\'o, Cambridge University Press, 1997.
-%\bibitem{vino} Vinogradov, I. M.: Sur le th\'eor\`eme de Waring, \textit{C. R. Acad. Sci. URSS}, 393-400, 1928.
-%\bibitem{vin} Vinogradov, I. M.: Representation of an odd number as a sum of three primes, \textit{Dokl. Akad. Nauk. SSSR}, 15:291-294, 1937.
-
-% Cites que s'han de posar si o si
-% TensorRingNetsAdaptedDeepMultiTaskLearning (intro mappings de matriu a tensor i tal)
-% llibre aleix deep learning
-% https://utoronto.scholaris.ca/server/api/core/bitstreams/12203066-bba0-4c38-9ab9-8cf0eb45aba4/content
-
-\end{thebibliography}
+\appendix
+\chapter{Noseque}
+\section{Nosequantos}
 \end{document} 
 

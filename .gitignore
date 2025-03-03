@@ -8,6 +8,9 @@ doc/doc.toc
 doc/.latexrun.db
 doc/.latexrun.db.lock
 doc/doc.pdf
+doc/doc.bbl
+doc/doc.blg
+doc/doc.fdb_latexmk
 papers/
 __pycache__/
 MNIST_data/
