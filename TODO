@@ -1,0 +1,28 @@
+Que es un espai latent? Latent dimensions?
+- Explicar normes tensorials
+- Explicar tot el tema de descomposició SVD de tensors i algoritmes
+
+
+Idea de guió del TFG:
+
+- Preliminaries
+        \item Tensors
+        \item Xarxes Tensorials
+        \item Xarxes Neuronals
+        \item Xarxes convulucionals
+    \item Tensor Ring Nets
+        \item Propietats de Tensor Ring Nets
+        \item Com trobar la descomposició en anells de xarxes tensorials
+            \item TR-SVD (Singular Value Decomposition)
+            \item TR-ALS (Alternating Least Squares)
+            \item Scalable Bayesian Tensor Ring Factorization
+            \item TR-STF (Scaled Tri-Factorization) 
+    \item Comprimir Xarxes Tensorials amb Tensor Ring Nets
+            \item Petita Intro (Related work) \cite{obukhovTBasisCompactRepresentation2021}
+            \item Com fer-ho per xarxes neuronals (Fully connected neurons)
+            \item Per a xarxes convulocionals
+    \item Experiments pràctics
+        \item Comparar datasets i coses amb diferents algoritmes de compressió
+    \item Conclusions
+
+

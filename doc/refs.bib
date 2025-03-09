@@ -100,6 +100,23 @@
   file = {/home/arans/Zotero/storage/T8TASW9M/Liao et al. - 2019 - Differentiable Programming Tensor Networks.pdf;/home/arans/Zotero/storage/8T8U272U/1903.html}
 }
 
+@article{liHybridFullyConnected2023,
+  title = {Hybrid {{Fully Connected Tensorized Compression Network}} for {{Hyperspectral Image Classification}}},
+  author = {Li, Heng-Chao and Lin, Zhi-Xin and Ma, Tian-Yu and Zhao, Xi-Le and Plaza, Antonio and Emery, William J.},
+  date = {2023},
+  journaltitle = {IEEE Transactions on Geoscience and Remote Sensing},
+  volume = {61},
+  pages = {1--16},
+  issn = {1558-0644},
+  doi = {10.1109/TGRS.2023.3241193},
+  url = {https://ieeexplore.ieee.org/document/10032776},
+  urldate = {2025-03-04},
+  abstract = {Deep learning models, such as convolutional neural networks (CNNs), have made significant progress in hyperspectral image (HSI) classification. However, these models require a large number of parameters, which occupy a lot of storage space and suffer from overfitting, thus resulting in performance loss. To solve the above problems, in this article, we propose a new compression network [namely, a Hybrid Fully Connected Tensorized Compression Network (HybridFCTCN)] by considering the high dimensionality of HSI data. First, using the low-rank fully connected tensor network decomposition (FCTND), three novel units, i.e., FCTN-FC, FCTNConv2D, and FCTNConv3D, are designed to compress the weight tensor of standard fully connected (FC) layer and kernel tensor of convolutional layer, reducing their parameters. In the novel units, the intrinsic correlation of the decomposed factors is adequately exploited by the FC structures, which enhances their feature extraction and classification abilities. Then, benefiting from the hybrid network backbone composed of the FCTNConv3D and FCTNConv2D units, HybridFCTCN can extract more discriminative features with fewer parameters, while it has great generalization capability and robustness, enabling better HSI classification. Finally, the rank of above-designed units is defined, and its determination is discussed to facilitate the application of the proposed model. Extensive experiments on three widely used HSI datasets reveal that the proposed model achieves state-of-the-art classification performance for different training sample sizes with a very small number of parameters.},
+  eventtitle = {{{IEEE Transactions}} on {{Geoscience}} and {{Remote Sensing}}},
+  keywords = {Convolution,Convolutional neural networks (CNNs),Correlation,Feature extraction,fully connected tensor network decomposition (FCTND),hyperspectral image (HSI) classification,Hyperspectral imaging,Kernel,network compression,Standards,Tensors},
+  file = {/home/arans/Zotero/storage/AASX2SE7/Li et al. - 2023 - Hybrid Fully Connected Tensorized Compression Network for Hyperspectral Image Classification.pdf;/home/arans/Zotero/storage/SLGWWKUE/10032776.html}
+}
+
 @inproceedings{malikSamplingBasedMethodTensor2021,
   title = {A {{Sampling-Based Method}} for {{Tensor Ring Decomposition}}},
   booktitle = {Proceedings of the 38th {{International Conference}} on {{Machine Learning}}},
@@ -166,6 +183,23 @@
   file = {/home/arans/Zotero/storage/X7KW2L2H/Neill - 2020 - An Overview of Neural Network Compression.pdf;/home/arans/Zotero/storage/SVISX6KR/2006.html}
 }
 
+@online{novikovTensorizingNeuralNetworks2015,
+  title = {Tensorizing {{Neural Networks}}},
+  author = {Novikov, Alexander and Podoprikhin, Dmitry and Osokin, Anton and Vetrov, Dmitry},
+  date = {2015-12-20},
+  eprint = {1509.06569},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.1509.06569},
+  url = {http://arxiv.org/abs/1509.06569},
+  urldate = {2025-03-05},
+  abstract = {Deep neural networks currently demonstrate state-of-the-art performance in several domains. At the same time, models of this class are very demanding in terms of computational resources. In particular, a large amount of memory is required by commonly used fully-connected layers, making it hard to use the models on low-end devices and stopping the further increase of the model size. In this paper we convert the dense weight matrices of the fully-connected layers to the Tensor Train format such that the number of parameters is reduced by a huge factor and at the same time the expressive power of the layer is preserved. In particular, for the Very Deep VGG networks we report the compression factor of the dense weight matrix of a fully-connected layer up to 200000 times leading to the compression factor of the whole network up to 7 times.},
+  pubstate = {prepublished},
+  version = {2},
+  keywords = {Computer Science - Machine Learning,Computer Science - Neural and Evolutionary Computing},
+  file = {/home/arans/Zotero/storage/ULH6GF4L/Novikov et al. - 2015 - Tensorizing Neural Networks.pdf;/home/arans/Zotero/storage/7LH3A3QN/1509.html}
+}
+
 @online{obukhovTBasisCompactRepresentation2021,
   title = {T-{{Basis}}: A {{Compact Representation}} for {{Neural Networks}}},
   shorttitle = {T-{{Basis}}},
@@ -181,6 +215,27 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {/home/arans/Zotero/storage/E5SFIX9L/Obukhov et al. - 2021 - T-Basis a Compact Representation for Neural Networks.pdf;/home/arans/Zotero/storage/G5MT2NQX/2007.html}
+}
+
+@article{panTedNetPytorchToolkit2022,
+  title = {{{TedNet}}: {{A Pytorch Toolkit}} for {{Tensor Decomposition Networks}}},
+  shorttitle = {{{TedNet}}},
+  author = {Pan, Yu and Wang, Maolin and Xu, Zenglin},
+  date = {2022-01},
+  journaltitle = {Neurocomputing},
+  shortjournal = {Neurocomputing},
+  volume = {469},
+  eprint = {2104.05018},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  pages = {234--238},
+  issn = {09252312},
+  doi = {10.1016/j.neucom.2021.10.064},
+  url = {http://arxiv.org/abs/2104.05018},
+  urldate = {2025-03-07},
+  abstract = {Tensor Decomposition Networks (TDNs) prevail for their inherent compact architectures. To give more researchers a flexible way to exploit TDNs, we present a Pytorch toolkit named TedNet. TedNet implements 5 kinds of tensor decomposition(i.e., CANDECOMP/PARAFAC (CP), Block-Term Tucker (BTT), Tucker-2, Tensor Train (TT) and Tensor Ring (TR) on traditional deep neural layers, the convolutional layer and the fully-connected layer. By utilizing the basic layers, it is simple to construct a variety of TDNs. TedNet is available at https://github.com/tnbar/tednet.},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/VZIBHP3J/Pan et al. - 2022 - TedNet A Pytorch Toolkit for Tensor Decomposition Networks.pdf;/home/arans/Zotero/storage/SQ86QPH8/2104.html}
 }
 
 @online{taoScalableBayesianTensor2024,
@@ -319,4 +374,39 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Numerical Analysis,Mathematics - Numerical Analysis},
   file = {/home/arans/Zotero/storage/CQWTDZRS/Yu y Li - 2022 - Practical Sketching-Based Randomized Tensor Ring Decomposition.pdf;/home/arans/Zotero/storage/MI2VW9VF/2209.html}
+}
+
+@online{zhaoTensorRingDecomposition2016,
+  title = {Tensor {{Ring Decomposition}}},
+  author = {Zhao, Qibin and Zhou, Guoxu and Xie, Shengli and Zhang, Liqing and Cichocki, Andrzej},
+  date = {2016-06-17},
+  eprint = {1606.05535},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.1606.05535},
+  url = {http://arxiv.org/abs/1606.05535},
+  urldate = {2025-03-04},
+  abstract = {Tensor networks have in recent years emerged as the powerful tools for solving the large-scale optimization problems. One of the most popular tensor network is tensor train (TT) decomposition that acts as the building blocks for the complicated tensor networks. However, the TT decomposition highly depends on permutations of tensor dimensions, due to its strictly sequential multilinear products over latent cores, which leads to difficulties in finding the optimal TT representation. In this paper, we introduce a fundamental tensor decomposition model to represent a large dimensional tensor by a circular multilinear products over a sequence of low dimensional cores, which can be graphically interpreted as a cyclic interconnection of 3rd-order tensors, and thus termed as tensor ring (TR) decomposition. The key advantage of TR model is the circular dimensional permutation invariance which is gained by employing the trace operation and treating the latent cores equivalently. TR model can be viewed as a linear combination of TT decompositions, thus obtaining the powerful and generalized representation abilities. For optimization of latent cores, we present four different algorithms based on the sequential SVDs, ALS scheme, and block-wise ALS techniques. Furthermore, the mathematical properties of TR model are investigated, which shows that the basic multilinear algebra can be performed efficiently by using TR representaions and the classical tensor decompositions can be conveniently transformed into the TR representation. Finally, the experiments on both synthetic signals and real-world datasets were conducted to evaluate the performance of different algorithms.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Data Structures and Algorithms,Computer Science - Numerical Analysis},
+  file = {/home/arans/Zotero/storage/YCNI4PLW/Zhao et al. - 2016 - Tensor Ring Decomposition.pdf;/home/arans/Zotero/storage/BD6X7K7B/1606.html}
+}
+
+@article{zhengFullyConnectedTensorNetwork2021,
+  title = {Fully-{{Connected Tensor Network Decomposition}} and {{Its Application}} to {{Higher-Order Tensor Completion}}},
+  author = {Zheng, Yu-Bang and Huang, Ting-Zhu and Zhao, Xi-Le and Zhao, Qibin and Jiang, Tai-Xiang},
+  date = {2021-05-18},
+  journaltitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume = {35},
+  number = {12},
+  pages = {11071--11078},
+  issn = {2374-3468},
+  doi = {10.1609/aaai.v35i12.17321},
+  url = {https://ojs.aaai.org/index.php/AAAI/article/view/17321},
+  urldate = {2025-03-04},
+  abstract = {The popular tensor train (TT) and tensor ring (TR) decompositions have achieved promising results in science and engineering. However, TT and TR decompositions only establish an operation between adjacent two factors and are highly sensitive to the permutation of tensor modes, leading to an inadequate and inflexible representation. In this paper, we propose a generalized tensor decomposition, which decomposes an Nth-order tensor into a set of Nth-order factors and establishes an operation between any two factors. Since it can be graphically interpreted as a fully-connected network, we named it fully-connected tensor network (FCTN) decomposition. The superiorities of the FCTN decomposition lie in the outstanding capability for characterizing adequately the intrinsic correlations between any two modes of tensors and the essential invariance for transposition. Furthermore, we employ the FCTN decomposition to one representative task, i.e., tensor completion, and develop an efficient solving algorithm based on proximal alternating minimization. Theoretically, we prove the convergence of the developed algorithm, i.e., the sequence obtained by it globally converges to a critical point. Experimental results substantiate that the proposed method compares favorably to the state-of-the-art methods based on other tensor decompositions.},
+  issue = {12},
+  langid = {english},
+  keywords = {Applications},
+  file = {/home/arans/Zotero/storage/DBK847TT/Zheng et al. - 2021 - Fully-Connected Tensor Network Decomposition and Its Application to Higher-Order Tensor Completion.pdf}
 }

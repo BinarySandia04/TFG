@@ -1,5 +1,6 @@
 \documentclass[11pt,a4paper,openright,oneside]{book}
 \usepackage{amsfonts, amsmath, amssymb,latexsym,amsthm, mathrsfs, enumerate}
+\usepackage{mathabx}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{epsfig}
@@ -13,6 +14,7 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{parskip}
 
 \setcounter{page}{0}
 
@@ -147,7 +149,7 @@ Vull agrair a ...
 
 \newpage
 
-\chapter{Tensor networks}
+\chapter{Preliminaries}
 
 \section{Tensors}
 
@@ -258,7 +260,19 @@ a tensor and each edge represents a mode
 \end{figure}
 \fi
 
-\section{Tensor operations}
+\section{Reshaping operations}
+
+In this section we will present some basic reshaping operations of tensors.
+
+\begin{definition}[Linearization]
+    Given $N_1, \dots, N_n \in \mathbb{N}$ and $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
+    we define the Linearization of the indices $i_1, \dots, i_n$ as:
+    $$\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$$
+\end{definition}
+
+\noindent
+The linearization operation is used for mapping a set of coordinates into a single index. It will become useful
+for reshaping tensors
 
 \subsection*{Tensor slices}
 Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
@@ -288,11 +302,35 @@ we obtain a $p$th-order tensor $\mathcal{T} \in \mathbb{R}^{N_{k_1} \times \cdot
 Vectorization is the operation of transforming an $n$-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \dots \times N_n}$
 into a vector $a$ of length $\prod_{i=1}^{n} N_i$. The entries of the vector $a$ are defined by $$a(\overline{i_1 i_2 \dots i_n}) = 
 \mathcal{A}(i_1, i_2, \dots, i_n)$$
-Where $\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$
 
-\subsection*{Matricization}
 
-\subsection*{Foldings}
+\subsection*{Tensor unfolding}
+
+\begin{definition}
+Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, $n \geqslant 2$, $1 \leqslant d \leqslant n$ and $p$ a permutation of the vector $(1,2,\dots, n)$. We define the
+\textbf{generalized unfolding} of the tensor $\mathcal{T}$ as the $2$nd-order tensor 
+$\mathcal{T}_{[p_{1:d};p_{d+1:n}]} \in \mathbb{R}^{\prod_{i=1}^d N_{p_i} \times \prod_{i=d+1}^n N_{p_i}}$:
+
+$$ \mathcal{T}_{[p_{1:d};p_{d+1:n}]} (\overline{i_{p_1}, \dots, i_{p_d}}, \overline{i_{p_{d+1}}, \dots, i_{p_n}}) = \mathcal{T}(i_1, \dots, i_n)$$
+\end{definition}
+
+\section{Basic tensor operations}
+
+\subsection*{Entrywise operations}
+An entrywise operation is an operation of two tensors $\mathcal{A}, \mathcal{B}$ of the same orders and lengths
+that results on a tensor of the same order and lengths that is obtained of applying an operation element by element.
+More formally:
+\begin{definition}
+    Given an operation $\cdot$ and two tensors $\mathcal{A}, \mathcal{B} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ of the same order and lengths,
+    we define the \textbf{entrywise operation} $\mathcal{A} \boxdot \mathcal{B} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ as the tensor with entries
+    $$ [\mathcal{A} \boxdot \mathcal{B}]_{i_1, \dots, i_n} = \mathcal{A}_{i_1, \dots, i_n} \cdot \mathcal{B}_{i_1, \dots, i_n} $$
+\end{definition}
+
+Some usual entrywise operations are:
+\begin{itemize}
+    \item The entrywise product $\mathcal{A} \boxdot \mathcal{B}$ and the entrywise division $\mathcal{A} \boxslash \mathcal{B}$
+    \item The usual tensor sum operation $\mathcal{A} \boxplus \mathcal{B}$ and subtraction $\mathcal{A} \boxminus \mathcal{B}$, also written as $\mathcal{A} + \mathcal{B}$ and $\mathcal{A} - \mathcal{B}$
+\end{itemize}
 
 \subsection*{Outer product}
 The outer product of two vectors $a \in \mathbb{R}^I$ and $b \in \mathbb{R}^J$ is denoted by $a \circ b$ and it results
@@ -317,73 +355,67 @@ $$\|\mathcal{T}\|_F = \sqrt{\langle \mathcal{T}, \mathcal{T} \rangle} = \sqrt{\s
 \mathcal{T}_{i_1 \dots i_n}^2}$$
 \end{definition}
 
+\subsection*{Tensor transposition}
+\begin{definition}
+    \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$
+    be an $n$th-order tensor and $p$ a permutation of the vector $(1, 2, \dots, n)$. We define the \textbf{vector $p$ based tensor
+    transposition of $\mathcal{T}$} as the tensor $\overrightarrow{\mathcal{T}_p} \in \mathbb{R}^{N_{p_1} \times \cdots \times N_{p_n}}$ with its entries defined as follows:
+    $$\overrightarrow{\mathcal{T}_p}(i_1, i_2, \cdots, i_n) = (i_{p_1}, i_{p_2}, \cdots, i_{p_n})$$
+\end{definition}
 
-\newpage
+\subsection*{Tensor contractions}
+\begin{definition}
+    \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Suppose that $p$ and $q$ are reorderings of the vectors
+    $(1,2,\dots,n)$ and $(1,2,\dots,m)$ respectively, and let ${\mathcal{X} \in \mathbb{R}^{N_1 \times \cdots \times N_n}}$ 
+    and $\mathcal{Y} \in \mathbb{R}^{M_1 \times \cdots \times M_m}$ two tensors with $N_{p_i} = M_{q_i}$ for all $i = 1,2,\dots,d$
+    with $d \leqslant \min{(n, m)}$. We define the tensor contraction along the $p_{1:d}$-modes of $\mathcal{X}$ and the $q_{1:d}$-modes
+    of $\mathcal{Y}$ as the tensor $\mathcal{Z}$ of order $n + m - 2d$
+$$\mathcal{Z} = \mathcal{X} \times_{p_{1:d}}^{q_{1:d}} \mathcal{Y} \in \mathbb{R}^{N_{p_{d+1}} \times \cdots \times N_{p_{n}} \times N_{q_{d+1}} \times \cdots \times N_{q_m}}$$
+whose elements are defined by:
+$$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$ \sum_{i_{p_1} = 1}^{N_1} \sum_{i_{p_2} = 1}^{N_2} \cdots \sum_{i_{p_d} = 1}^{N_d}
+\overrightarrow{\mathcal{X}_p}(i_{p_1}, \cdots, i_{p_d}, i_{p_{d+1}}, \cdots, i_{p_n}) \overrightarrow{\mathcal{Y}_q}(i_{p_1}, \cdots, i_{p_d}, j_{q_{d+1}}, \cdots, j_{q_m})$$
+\end{definition}
 
-TODO: Que es un espai latent? Latent dimensions?
-\begin{itemize}
-    \item Explicar normes tensorials
- \item Explicar tot el tema de descomposició SVD de tensors i algoritmes
-\end{itemize}
 
+\chapter{Tensor decompositions}
 
+\section{Tensor Train Network Decomposition}
+\section{Tensor Ring Network Decomposition}
+\section{Fully Connected Tensor Network Decomposition}
 
-
-\subsection{Subapartat 2.1}
-
-Idea de guió del TFG:
-
-\begin{itemize}
-    \item Preliminaries
-    \begin{itemize}
-        \item Tensors
-        \item Xarxes Tensorials
-        \item Xarxes Neuronals
-        \item Xarxes convulucionals
-    \end{itemize}
-    \item Tensor Ring Nets
-    \begin{itemize}
-        \item Propietats de Tensor Ring Nets
-        \item Com trobar la descomposició en anells de xarxes tensorials
-        \begin{itemize}
-            \item TR-SVD (Singular Value Decomposition)
-            \item TR-ALS (Alternating Least Squares)
-            \item Scalable Bayesian Tensor Ring Factorization
-            \item TR-STF (Scaled Tri-Factorization) 
-        \end{itemize}
-    \end{itemize}
-    \item Comprimir Xarxes Tensorials amb Tensor Ring Nets
-        \begin{itemize}
-            \item Petita Intro (Related work) \cite{obukhovTBasisCompactRepresentation2021}
-            \item Com fer-ho per xarxes neuronals (Fully connected neurons)
-            \item Per a xarxes convulocionals
-        \end{itemize}
-    \item Experiments pràctics
-    \begin{itemize}
-        \item Comparar datasets i coses amb diferents algoritmes de compressió
-    \end{itemize}
-    \item Conclusions
-\end{itemize}
-
-\chapter{Tensor ring networks}
 In this chapter we will study the Tensor Ring (TR) decomposition. We will see some properties, and some advantages
 and disadvantages between some tensor decompositions.
 
 Tensor rings are chains of tensors with both ends joined, forming a ring. Tensor rings
-have gained interest in tensor decomposition because they are a generalization of Tensor Train (TT) networks with
-the difference that both ends of the tensor decomposition have more freedom and can store some information [CN]
+have gained interest in tensor decomposition since they are a generalization of Tensor Train (TT) networks with
+the difference that both ends of the tensor decomposition have more freedom and can store some information \cite{wangWideCompressionTensor2018}
 
-A matrix $A \in \mathbb{R}^{m\times n}$ of rank $r$ can be decomposed as $A = WH$ where $W \in \mathbb{R}^{m \times r}$ and
-$H \in \mathbb{R}^{r \times n}$. For a lower rank $k < r$, $A$ can be decomposed as the product of two matrices 
-$W \in \mathbb{R}^{m \times k}$ and $H \in \mathbb{R}^{k \times n}$ at the expense of some error after optimizing the function
-$$\min_{W, H} \frac{1}{2} \|A - WH\|^2_F$$
+On the course of this chapter, we denote $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ an $n$th-order tensor
 
-A common technique of achieving this factorization is the Singular Value Decomposition
-(SVD). For orthogonal matrices $U \in \mathbb{R}^{n \times r}$, $V \in \mathbb{R}^{r \times m}$ and a
-diagonal matrix $\Sigma \in \mathbb{R}^{r \times r}$ of singular values we can write
-$$A = U\Sigma V^T$$
-If $k < r$, then this factorization is called truncated SVD
+\begin{definition}[Tensor ring decomposition]
+    Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. A set of $n$ $3$th-order tensors $\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)}$
+    with $\mathcal{U}^{(i)} \in \mathbb{R}^{R_i \times N_i \times R_{i+1}}$, $R_1, \dots, R_n \leqslant n$ such that
+    $$\mathcal{T}_{i_1, i_2, \dots, i_n} = \sum_{r_1, \dots, r_n}^{R_1, \dots, R_n} \mathcal{U}_{r_n, i_1, r_1}^{(1)} \mathcal{U}_{r_1, i_2, r_2}^{(2)} \cdots \mathcal{U}_{r_{n-1}, i_n, r_n}^{(n)}$$
+    Are a \textbf{tensor ring decomposition} of $\mathcal{T}$. We call the tensors $\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)}$ the \textbf{cores} of 
+    decomposition. We write a tensor ring decomposition of $\mathcal{T}$ as $\mathcal{T} = \mathfrak{R}(\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)})$
+
+\end{definition}
+Under the tensor ring decomposition, one can notice that we can express $\mathcal{T}$ with $\sum_{i=1}^n R_i^2 N_i$ parameters,
+which is significally less than $\prod_{i=1}^n N_i$
+
+\subsection{Properties}
+
+Tensor ring networks have good properties \cite{zhaoTensorRingDecomposition2016}
+
+\begin{theorem} [Circular dimensional permutation invariance] Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ be
+    a $n$th-order tensor with its corresponding tensor ring decomposition $\mathcal{T} = \mathcal{R}(\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)})$
+
+    
+\end{theorem}
+
 \chapter{Neural network compression}
+
+We use the TedNet library \cite{panTedNetPytorchToolkit2022}
 
 \chapter{Conclusions}
 
