@@ -1,6 +1,5 @@
 \documentclass[11pt,a4paper,openright,oneside]{book}
 \usepackage{amsfonts, amsmath, amssymb,latexsym,amsthm, mathrsfs, enumerate}
-\usepackage{mathabx}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{epsfig}
@@ -14,6 +13,7 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{tikz-cd}
 \usepackage{parskip}
 
 \setcounter{page}{0}
@@ -51,6 +51,8 @@
 
 
 \DeclareMathOperator{\vectorize}{vec}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\unfolding}{unfold}
 
 % --------------------------------------------------
 \usepackage{fancyhdr}
@@ -83,7 +85,7 @@
 \vspace*{1.5cm}
 \rule{16cm}{0.1mm}\\
 \begin{Huge}
-\textbf{COMPRESSING NEURAL NETWORKS USING TENSOR RING DECOMPOSITION} \\
+\textbf{LOW-RANK APPROXIMATION USING TENSOR NETWORKS} \\
 \end{Huge}
 \rule{16cm}{0.1mm}\\
 
@@ -118,10 +120,11 @@
 \section*{Abstract}
 
 Goldbach's weak conjecture asserts that every odd integer greater than 5 is the sum of three primes. We study that problem and the proof of it presented by H. A. Helfgott and D. Platt. We focus on the circle method. Finally, we describe a computation that confirms Goldbach's weak conjecture up to $10^{28}$.
+With the misco's theorem, we can achieve great results from approximating all digits of $\pi^2$
 
 \section*{Resum}
 La conjectura feble de Goldbach afirma que tot nombre enter imparell major que 5 \'es la suma de tres nombres primers. En aquest treball estudiem aquest problema i la seva prova presentada per HA Helfgott i D. Platt. Ens centrem en el m\`etode del cercle. Finalment, describim un c\`alcul que confirma la conjectura feble de Goldbach fins a $10^{28}$.
-
+Amb el teorema d'en Misco, podem aproximar i dir clarament quines són les normes del servidor de Discord
 
 
 % TODO: Omplir això
@@ -146,6 +149,22 @@ Vull agrair a ...
 \setcounter{page}{1}
 \chapter{Introduction}
 
+A well known problem in science and engineering is to retrieve a function given some data. It may be
+for example the solution of a partially differentiable equation given some boundary conditions or initial data or
+even a target function to be learned from some training set data. \cite{yeTensorNetworkRanks2019}
+
+Explicar que normalment es que les funcions que resulten d'aixo segurament viuen en un espai molt gran, segurament
+amb una dimensió molt alta i que una cosa
+que s'hi sol fer es assumir per exemple que la nostra funció és pot reescriure com una de low-rank, és a dir, que es pot escriure com la suma
+d'unes altres funcions.
+
+A partir d'això entren en joc un concepte originat de part de la física, les tensor networks. Les tensor networks no són més
+que representacions de tensors, normalment d'ordre alt, que es poden recuperar a partir de contraure diferents tensors d'ordres més
+petits. Resulta que les tensor networks, si representem les dades de la nostra funció com un tensor d'ordre alt, no acaben sent més que
+aproximacions low-rank del nostre problema.
+
+L'objectiu final d'aquest treball es intentar donar una solució óptima a aquest problema utilitzant xarxes tensorials i després mostrar
+alguna aplicació en diferents camps de la física i del machine learning.
 
 \newpage
 
@@ -153,21 +172,146 @@ Vull agrair a ...
 
 \section{Tensors}
 
-\nocite{yokotaVeryBasicsTensors2024}
-We treat a tensor of $n$-order as a $n$-dimensional array $\mathcal{A} \in \mathbb{R}^{N_1\times N_2 \times \cdots \times N_n}$
-Tensors are therefore generalizations of vectors and matrices, if we see them as arrays of numbers. For example, a first order
-tensor is a vector, a second order tensor is a matrix, a third order tensor can be seen as a cube of numbers represented as an
-array of matrices (Fig \ref{fig:tint}), a fourth order is as an array of arrays of matrices, and so on.
+Informally, a tensor can be viewed as higher-order extensions of a scalar (i.e, a zero order tensor) or vector (i.e, a first order tensor) 
+or a matrix (i.e, second order tensor) (Fig \ref{fig:tint}) \cite{yokotaVeryBasicsTensors2024}.
 
-We denote $\mathcal{A}_{i_1 i_2 \dots i_N} = \mathcal{A}(i_1, i_2, \dots, i_N)$ as the $(i_1, i_2, \dots, i_N)$nth entry of the
-tensor. The arrangement of directions (or axes) of the tensors are called \textbf{modes}. The number of arranged
-entries are called the size or length of the mode. We denote the $n$-mode as arranging from the $n$th index. For example,
+\begin{itemize}
+    \item We will denote $\mathbb{N}_0$ as the set of all natural numbers including $0$
+    \item We will denote $\mathbb{V}_1, \dots, \mathbb{V}_n$ as finite vector spaces over a field $\mathbb{K}$ ($\mathbb{C}$ if unspecified) of dimension $\dim{\mathbb{V}_i} = N_i \; \forall i = 1, \dots, n$.
+    \item We denote $\mathcal{B}_1, \dots, \mathcal{B}_n$ the bases of $\mathbb{V}_1, \dots, \mathbb{V}_n$ respectively. We also denote
+        ${\mathcal{B}_i = \{e_1^{(i)}, \dots, e_{N_i}^{(i)}\}}$ a basis of the vector space $\mathbb{V}_i$
+\end{itemize}
+
+At the moment we will consider the definition of a covariant tensor:
+
+\begin{definition}[Tensor]
+    A \textbf{tensor} is a multilineal map ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$
+\end{definition}
+
+\begin{definition}[Tensor product] Let $L$ be the vector space generated by the base ${V_1 \times \dots \times V_n}$, i.e the
+    set of linear combinations of the elements $(v_1, \dots, v_n), v_i \in \mathbb{V}_i$. Let $\mathcal{R}$ be the linear subspace of
+    $L$ generated by the relation $R$ defined by:
+    $$(v_1, \dots, \alpha v_i, \dots, v_n) \sim \alpha(v_1, \dots, v_n) \; \forall i = 1, \dots, n, \forall \alpha \in \mathbb{K}$$
+    $$(v_1, \dots, v_i + u_i, \dots, v_n) \sim (v_1, \dots, v_i \dots, v_n) + (v_1, \dots, u_i, \dots, v_n) \; \forall i = 1, \dots, n$$
+    The tensor product $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$ is defined as the quotient $L / \mathcal{R}$ and its called 
+    \textbf{tensor product space}. The image of
+    $(v_1, \dots, v_n)$ by the quotient is denoted by $v_1 \otimes \dots \otimes v_n$
+\end{definition}
+
+The following theorem gives us a correspondance between each tensor ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$
+and each element of $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$:
+
+\begin{theorem}[Universal property of the tensor product]
+    \normalfont{\cite{romanTensorProducts2008}}
+    The tensor product of two vector spaces $\mathbb{V} \otimes \mathbb{W}$
+    for every bilinear map $h: \mathbb{V} \times \mathbb{W} \rightarrow X$ there exists an unique bilinear map $\tilde{h}: \mathbb{V} \otimes
+    \mathbb{W} \rightarrow X$ such that the following diagram commutes:
+
+    \centering
+% https://q.uiver.app/#q=WzAsMyxbMCwwLCJWXFx0aW1lcyBXIl0sWzEsMCwiViBcXG90aW1lcyBXIl0sWzEsMSwiWCJdLFswLDEsIlxcdmFycGhpIl0sWzAsMiwiaCIsMl0sWzEsMiwiXFx0aWxkZSBoIl1d
+\begin{tikzcd}
+	{\mathbb{V}\times \mathbb{W}} & {\mathbb{V} \otimes \mathbb{W}} \\
+	& X
+	\arrow["\varphi", from=1-1, to=1-2]
+	\arrow["h"', from=1-1, to=2-2]
+	\arrow["{\tilde h}", from=1-2, to=2-2]
+\end{tikzcd}
+
+\end{theorem}
+
+We can construct a basis for $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$. We define
+$$\mathcal{B}_{\otimes} = \{e_{i_1}^{(1)} \otimes \cdots \otimes e_{i_n}^{(n)} : 1 \leqslant i_j \leqslant N_j, 1 \leqslant j \leqslant n\}$$
+Constructed this way, $\mathcal{B}_\otimes$ is a basis of $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$. 
+
+(POSAR COSES DEL KROENKER PRODUCT, PRESENTARLO)
+
+\begin{remark} The dimension
+of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$ is ${\dim{\mathbb{V}_1} \cdot \cdots \dim{\mathbb{V}_n}}$ and its elements can be expressed as
+
+$$T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^{(1)} \otimes \cdots \otimes e_{s_n}^{(n)} $$
+\end{remark}
+
+Therefore, a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be identified as a "$n$-dimensional array" $\mathcal{T}$, i.e,
+a discrete function
+$$\begin{align}
+    \mathcal{T}: \prod_{i=1}^n \{1, \dots, N_i\} & \longrightarrow \mathbb{K} \\
+    T(i_1, \dots, i_n) & \longmapsto T_{i_1, \dots, i_n}
+\end{align}$$
+
+From now on, we will do some abuse of notation and we will write $\mathcal{T}$ as
+an element of ${\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}}$ \cite{yokotaVeryBasicsTensors2024}
+of $T$ as $\mathcal{T}$. Now we will define some definitions from the underlying definition of the tensor viewed as an $n$-dimensional array:
+
+\begin{definition}[Order of a tensor] We define the \textbf{order} of the tensor as $n$.
+\end{definition}
+
+Now we will define some definitions that will help us establish a formalized method of mapping $n$-dimensional arrays with
+vectors and matrices:
+
+\begin{definition}[Linearization]
+    Fixed $N_1, \dots, N_n \in \mathbb{N}$, given $i_1, \dots, i_n \in \mathbb{N}$ such that $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
+    we define the Linearization of the indices $i_1, \dots, i_n$ as:
+    $$\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$$
+\end{definition}
+
+\begin{definition}[Vectorization]
+    Given a tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$, we define the \textbf{vectorization} of $\mathcal{T}$
+    as the first order tensor $\mathcal{V} \in \mathbb{K}^{N_1 N_2 \cdots N_n}$ defined by:
+    $$\mathcal{V}(\overline{i_1 i_2 \dots i_n}) = \mathcal{T}(i_1, i_2, \dots, i_n)$$
+    We will write $\mathcal{V} = \vectorize{\mathcal{T}}$
+\end{definition}
+
+
+\begin{definition}[Tensor unfolding]
+Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, $n \geqslant 2$, $1 \leqslant d \leqslant n$ and $p$ a permutation of the vector $(1,2,\dots, n)$. We define the
+\textbf{generalized unfolding} of the tensor $\mathcal{T}$ as the $2$nd-order tensor 
+$\mathcal{U} \in \mathbb{R}^{\prod_{i=1}^d N_{p_i} \times \prod_{i=d+1}^n N_{p_i}}$:
+$$ \mathcal{U} (\overline{i_{p_1}, \dots, i_{p_d}}, \overline{i_{p_{d+1}}, \dots, i_{p_n}}) = \mathcal{T}(i_1, \dots, i_n)$$
+
+We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1}, \dots, p_n))}$
+\end{definition}
+
+
+
+\begin{definition}[Tensor slices]
+%Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
+%as $$A(:, j) = \mathbf{a}_j \in \mathbb{R}^I \qquad A(i, :) = \mathbf{\tilde{a}}_j \in \mathbb{R}^J$$
+
+    Let $\mathcal{T} \in \mathbb{K}^{N_1\times \cdots \times N_n}$. Consider $S \subset \{1, \dots, n\}$ a subset of modes (dimensions)
+    of $\mathcal{T}$. Let $\mathbf{i}_S = (i_k)_{k \in S}$. We define the \textbf{slice of $\mathcal{T}$} as the tensor $\mathcal{T}_{\mathbf{i}_S}$
+    of order $n - \#S$
+    $$\begin{align}
+        \mathcal{T}_{\mathbf{i}_S} : \prod_{k \not\in S} \{1, \dots, N_k\} & \longrightarrow \mathbb{K} \\
+        \mathcal{T}_{\mathbf{i}_S}(i_{j_1}, \dots, i_{j_m}) = \mathcal{T}(i_1, \dots, i_n)
+    \end{align}$$
+    Where $\{j_1, \dots, j_m\} = \{1, \dots, n\} \setminus S$. 
+
+    Sometimes we will also implicitly specify $\mathbf{i}_S$ by writing $\mathcal{T}(a_1, \dots, a_n)$ and replacing $a_j$ with $i_j$ if $j \in S$ and "$:$" otherwise
+
+\end{definition}
+
+\begin{example}
+    Consider $\mathcal{M} \in \mathbb{K}^{N_1 \times N_2}$ a second order tensor. We can see this tensor as a
+    bidimensional array (matrix). The slice $\mathcal{M}(i, :)$ results in the $i$-th row of $\mathcal{M}$.
+    The slice $\mathcal{M}(:, j)$ results in the $j$-th column of $\mathcal{M}$
+\end{example}
+
+\begin{example}
+    Consider a $4$th-order tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times N_2 \times N_3 \times N_4}$. 
+    Fixed $i_2, i_3$, the tensor slice of $2$th-order $\mathcal{T} = \mathcal{A}(:, i_2, i_3, :) \in \mathbb{K}^{N_1 \times N_4}$ 
+    with its entries defined by ${\mathcal{T}(i_1, i_4) = \mathcal{A}(i_1, i_2, i_3, i_4)}$
+\end{example}
+
+
+\section{Tensor Networks}
+
+We denote $\mathcal{T}_{i_1 i_2 \dots i_N} = \mathcal{T}(i_1, i_2, \dots, i_N)$ as the $(i_1, i_2, \dots, i_N)$nth entry of the
+tensor. The number of arranged entries are called the size or length of the mode. We denote the $n$-mode as arranging from the $n$th index. For example,
 the vertical direction of a matrix $\mathcal{M} \in \mathbb{R}^{N_1 \times N_2}$ is the first mode. Notice that we arrange the 
 using the $i_1$ index. The horizontal direction corresponds to the second mode, and it is arranged using $i_2$. An $N$-order
 tensor has $N$ modes
 
-
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
     $$A = \begin{bmatrix}
         a_1 \\
@@ -207,20 +351,20 @@ tensor has $N$ modes
 \begin{figure}
 \centering
 \tikz{
-    \node at (-1,-0.5) {$A_i \Leftrightarrow$};
-    \node[draw, shape=circle] (v0) at (0,0) {$A$};
+    \node at (-1.25,-0.5) {$A_i \Leftrightarrow$};
+    \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$A$};
     \node(i) at (0,-1) {$i$};
     \draw (v0) -- (i);
 }\qquad \tikz{
-    \node at (-1,-0.5) {$B_{ij} \Leftrightarrow$};
-    \node[draw, shape=circle] (v0) at (0,0) {$B$};
+    \node at (-1.25,-0.5) {$B_{ij} \Leftrightarrow$};
+    \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$B$};
     \node(i) at (-0.5,-1) {$i$};
     \node(j) at (0.5,-1) {$j$};
     \draw (v0) -- (i);
     \draw (v0) -- (j);
 }\qquad \tikz{
-    \node at (-1,-0.5) {$C_{ijk} \Leftrightarrow$};
-    \node[draw, shape=circle] (v0) at (0,0) {$C$};
+    \node at (-1.25,-0.5) {$C_{ijk} \Leftrightarrow$};
+    \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$C$};
     \node(i) at (-0.5,-1) {$i$};
     \node(j) at (0,-1) {$j$};
     \node(k) at (0.5,-1) {$k$};
@@ -239,103 +383,11 @@ relating tensors as data arrays but it is very difficult to visualize for high o
 to write. The graphical notation or tensor network diagram notation (Fig \ref{fig:tnot}) uses nodes and edges to represent tensors. Each node is
 a tensor and each edge represents a mode
 
-\iffalse
-\begin{figure}
-    \centering
-        \begin{tikzpicture}
-            \node(T)[draw, shape=circle] at (0, 0) {T};
-            \node(P)[draw, shape=circle] at (2, 0) {P};
-            \draw (T) -- node[midway, above]{n} (P);
-            \draw (T) -- node[right]{$I_2$} (0, -1);
-            \draw (P) -- node[right]{$I_3$} (2, -1);
-            \draw (T) -- node[above]{$I_1$} (-1, 0);
-            \draw (3,0) -- node[above]{$I_4$} (P);
-        \end{tikzpicture}
-        \caption{
-            Representació diagramàtica d'una xarxa tensorial. Cada aresta connectada entre dos tensors representa una contracció o un
-            sumatori respecte d'un índex. Per conveni, els indexos s'ordenen en sentit horari començant des de baix. En aquest cas, el tensor resultant de la contracció s'indexaria de la forma 
-            $(Q_{i_1i_2i_3i_4}) = \sum_{j=1}^{n} T_{i_2i_1j} P_{i_3ji_4}$.
-        }
-    \label{fig:tcont}
-\end{figure}
-\fi
-
-\section{Reshaping operations}
+\subsection{Reshaping operations}
 
 In this section we will present some basic reshaping operations of tensors.
 
-\begin{definition}[Linearization]
-    Given $N_1, \dots, N_n \in \mathbb{N}$ and $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
-    we define the Linearization of the indices $i_1, \dots, i_n$ as:
-    $$\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$$
-\end{definition}
-
-\noindent
-The linearization operation is used for mapping a set of coordinates into a single index. It will become useful
-for reshaping tensors
-
-\subsection*{Tensor slices}
-Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
-as $$A(:, j) = \mathbf{a}_j \in \mathbb{R}^I \qquad A(i, :) = \mathbf{\tilde{a}}_j \in \mathbb{R}^J$$
-In other words, the slice of a matrix is obtained by fixing a certain index and then looping through the other
-free indexes. For example, for the vertical slice $A(:, j)$, is obtained by fixing $j$ and then writing on a vector
-the column $j$ from top to bottom. The same goes for $A(i, :)$, where we obtain the slice by fixing the second
-index $i$ and then writing the vector by the free second index from left to right.
-
-We can generalize matrix slices by considering a tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, and then
-considering the $p < n$ free indexes $i_{k_1}, i_{k_2}, \dots, i_{k_p}$. By iterating from the first to the last free index
-we obtain a $p$th-order tensor $\mathcal{T} \in \mathbb{R}^{N_{k_1} \times \cdots \times N_{k_p}}$
-
-\begin{example}
-    Consider a $4$th-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times N_2 \times N_3 \times N_4}$. If we choose $k_1 = 1$ and
-    $k_2 = 4$ the tensor slice is defined by the tensor of $2$th-order $\mathcal{T} = \mathcal{A}(:, i_2, i_3, :) \in \mathbb{R}^{N_1 \times N_4}$ with its entries defined by:
-    $$\mathcal{T}(i_1, i_4) = \mathcal{A}(i_1, i_2, i_3, i_4)$$
-\end{example}
-
-\begin{example}
-    Consider a $n$th-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. Let $k \leqslant n$ We call the \textbf{$k$-mode} of a tensor
-    the tensor slice $\mathcal{T} = \mathcal{A}(i_1, i_2, \dots, i_{k-1}, :, i_{k+1}, \dots, i_n) \in \mathbb{R}^{N_k}$
-\end{example}
-
-\subsection*{Vectorization}
-
-Vectorization is the operation of transforming an $n$-order tensor $\mathcal{A} \in \mathbb{R}^{N_1 \times \dots \times N_n}$
-into a vector $a$ of length $\prod_{i=1}^{n} N_i$. The entries of the vector $a$ are defined by $$a(\overline{i_1 i_2 \dots i_n}) = 
-\mathcal{A}(i_1, i_2, \dots, i_n)$$
-
-
-\subsection*{Tensor unfolding}
-
-\begin{definition}
-Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, $n \geqslant 2$, $1 \leqslant d \leqslant n$ and $p$ a permutation of the vector $(1,2,\dots, n)$. We define the
-\textbf{generalized unfolding} of the tensor $\mathcal{T}$ as the $2$nd-order tensor 
-$\mathcal{T}_{[p_{1:d};p_{d+1:n}]} \in \mathbb{R}^{\prod_{i=1}^d N_{p_i} \times \prod_{i=d+1}^n N_{p_i}}$:
-
-$$ \mathcal{T}_{[p_{1:d};p_{d+1:n}]} (\overline{i_{p_1}, \dots, i_{p_d}}, \overline{i_{p_{d+1}}, \dots, i_{p_n}}) = \mathcal{T}(i_1, \dots, i_n)$$
-\end{definition}
-
-\section{Basic tensor operations}
-
-\subsection*{Entrywise operations}
-An entrywise operation is an operation of two tensors $\mathcal{A}, \mathcal{B}$ of the same orders and lengths
-that results on a tensor of the same order and lengths that is obtained of applying an operation element by element.
-More formally:
-\begin{definition}
-    Given an operation $\cdot$ and two tensors $\mathcal{A}, \mathcal{B} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ of the same order and lengths,
-    we define the \textbf{entrywise operation} $\mathcal{A} \boxdot \mathcal{B} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ as the tensor with entries
-    $$ [\mathcal{A} \boxdot \mathcal{B}]_{i_1, \dots, i_n} = \mathcal{A}_{i_1, \dots, i_n} \cdot \mathcal{B}_{i_1, \dots, i_n} $$
-\end{definition}
-
-Some usual entrywise operations are:
-\begin{itemize}
-    \item The entrywise product $\mathcal{A} \boxdot \mathcal{B}$ and the entrywise division $\mathcal{A} \boxslash \mathcal{B}$
-    \item The usual tensor sum operation $\mathcal{A} \boxplus \mathcal{B}$ and subtraction $\mathcal{A} \boxminus \mathcal{B}$, also written as $\mathcal{A} + \mathcal{B}$ and $\mathcal{A} - \mathcal{B}$
-\end{itemize}
-
-\subsection*{Outer product}
-The outer product of two vectors $a \in \mathbb{R}^I$ and $b \in \mathbb{R}^J$ is denoted by $a \circ b$ and it results
-as a matrix $M = a \circ b \in \mathbb{R}^{I \times J}$ with its entries defined as $M_{ij} = a_i b_j$. We can extend the outer
-product of two vectors to an arbitrary number of vectors and get as a result a $n$-order tensor
+\subsection{Basic tensor operations}
 
 \begin{definition}[Outer product]
     We define the \textbf{outer product} of $n$ vectors 
@@ -343,28 +395,52 @@ product of two vectors to an arbitrary number of vectors and get as a result a $
     as the $n$th-order tensor $\mathcal{T} \in \mathbb{R}^{N_1 \times N_2 \times \dots \times N_n}$ with its entries being
     $$\mathcal{T}(i_1, \dots, i_n) = a_1(i_1) a_2(i_2) \cdots a_n(i_n)$$
 \end{definition}
-\subsection*{Inner product}
+
+\begin{example}
+The outer product of two vectors $a \in \mathbb{R}^I$ and $b \in \mathbb{R}^J$ is denoted by $a \circ b$ and it results
+as a matrix $M = a \circ b \in \mathbb{R}^{I \times J}$ with its entries defined as $M_{ij} = a_i b_j$.
+\end{example}
+
+
+\begin{definition}[Inner product]
 The inner product of two tensors $\mathcal{X}, \mathcal{Y} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ is defined by
 $$\langle \mathcal{X},\mathcal{Y} \rangle = \sum_{i_1, \dots, i_N}^{N_1, \dots, N_n} \mathcal{X}_{i_1, \dots, i_n} \mathcal{Y}_{i_1, \dots, i_n} = 
 \vectorize(\mathcal{X})^T \vectorize(\mathcal{Y}) = \langle \vectorize(\mathcal{X}), \vectorize(\mathcal{Y}) \rangle$$
+\end{definition}
 
-\subsection*{Frobenius norm}
+
+\begin{definition}[Kronecker product]
+    \normalfont{\cite{panagakisTensorMethodsComputer2021}} Given two matrices $A \in \mathbb{R}^{N_1 \times N_2}$ and $B \in \mathbb{R}^{M_1 \times M_2}$,
+    their kronecker product is defined as the matrix $A \otimes B \in \mathbb{R}^{N_1 \cdot M_1 \times N_2 \cdot M_2}$ with
+    $$A \otimes B = \begin{bmatrix}
+        a_{11}B & \cdots & a_{1N_2}B \\ 
+        \vdots & \ddots & \vdots \\
+        a_{N_1 1}B & \cdots & a_{N_1 N_2}B \\
+    \end{bmatrix}$$
+\end{definition}
+
+\begin{definition}[Khatri-Rao product]
+    \normalfont{\cite{panagakisTensorMethodsComputer2021}} Given two matrices $A \in \mathbb{R}^{N \times R}$ and $B \in \mathbb{R}^{M \times R}$ their
+Khatri-Rao, also known as column-wise Kronecker product is defined as $A \odot B \in \mathbb{R}^{N \cdot M \times R}$
+    $$ A \odot B = \begin{bmatrix} A_{:,1} \otimes B_{:,1} & A_{:,2} \otimes B_{:,2} & \cdots & A_{:,R} \otimes B_{:,R}  \end{bmatrix}$$
+        
+
+\end{definition}
+
 \begin{definition}[Frobenius norm]
 The \textbf{Frobenius norm} of a tensor $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ is given by
 $$\|\mathcal{T}\|_F = \sqrt{\langle \mathcal{T}, \mathcal{T} \rangle} = \sqrt{\sum_{i_1, \dots, i_n}^{N_1, \dots, N_n}
 \mathcal{T}_{i_1 \dots i_n}^2}$$
 \end{definition}
 
-\subsection*{Tensor transposition}
-\begin{definition}
+\begin{definition}[Tensor transposition]
     \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$
     be an $n$th-order tensor and $p$ a permutation of the vector $(1, 2, \dots, n)$. We define the \textbf{vector $p$ based tensor
     transposition of $\mathcal{T}$} as the tensor $\overrightarrow{\mathcal{T}_p} \in \mathbb{R}^{N_{p_1} \times \cdots \times N_{p_n}}$ with its entries defined as follows:
     $$\overrightarrow{\mathcal{T}_p}(i_1, i_2, \cdots, i_n) = (i_{p_1}, i_{p_2}, \cdots, i_{p_n})$$
 \end{definition}
 
-\subsection*{Tensor contractions}
-\begin{definition}
+\begin{definition}[Tensor contraction]
     \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Suppose that $p$ and $q$ are reorderings of the vectors
     $(1,2,\dots,n)$ and $(1,2,\dots,m)$ respectively, and let ${\mathcal{X} \in \mathbb{R}^{N_1 \times \cdots \times N_n}}$ 
     and $\mathcal{Y} \in \mathbb{R}^{M_1 \times \cdots \times M_m}$ two tensors with $N_{p_i} = M_{q_i}$ for all $i = 1,2,\dots,d$
@@ -376,15 +452,156 @@ $$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$
 \overrightarrow{\mathcal{X}_p}(i_{p_1}, \cdots, i_{p_d}, i_{p_{d+1}}, \cdots, i_{p_n}) \overrightarrow{\mathcal{Y}_q}(i_{p_1}, \cdots, i_{p_d}, j_{q_{d+1}}, \cdots, j_{q_m})$$
 \end{definition}
 
+We represent the tensor contraction with the graphical notation by joining two nodes with some edges (Fig. \ref{fig:tcont}), and
+each end of the edge corresponds to one of the $p_{1:d}$ modes contracted with its corresponding $q_{1:d}$ modes.
+We will only write one label to the edge if there is no confusin about which mode is contracted with each tensor.
 
-\chapter{Tensor decompositions}
+\begin{figure}[h]
+    \centering
+        \begin{tikzpicture}
+            \node(T)[draw, shape=square, minimum size=0.75cm] at (0, 0) {T};
+            \node(P)[draw, shape=square, minimum size=0.75cm] at (2, 0) {P};
+            \draw (T) -- node[midway, above]{$I_3$} (P);
+            \draw (T) -- node[right]{$I_2$} (0, -1);
+            \draw (P) -- node[right]{$I_4$} (2, -1);
+            \draw (T) -- node[above]{$I_1$} (-1, 0);
+            \draw (3,0) -- node[above]{$I_5$} (P);
+        \end{tikzpicture}
+        \caption{
+            Graphical notation of a tensor network contraction.
+            $(Q_{i_1i_2i_3i_4}) = \sum_{j=1}^{n} T_{i_2i_1j} P_{i_3ji_4}$.
+        }
+    \label{fig:tcont}
+\end{figure}
 
-\section{Tensor Train Network Decomposition}
-\section{Tensor Ring Network Decomposition}
-\section{Fully Connected Tensor Network Decomposition}
 
-In this chapter we will study the Tensor Ring (TR) decomposition. We will see some properties, and some advantages
-and disadvantages between some tensor decompositions.
+\chapter{Tensor Decompositions}
+
+The commonly use terminology "tensor decomposition" (TD) is equivalent to "tensor network" to some extent. After
+several years of progress accross different research fields, there is no significant distinction between tensor decomposition
+and tensor networks. TD was employed primarly in signal processing fields \cite{wangTensorNetworksMeet2023}. Traditional TD models can be viewed
+as basic kinds of tensor networks. In this thesis we will study some of the properties of different tensor decomposition methods,
+and their effectivity.
+
+
+\begin{figure}[h]
+    \centering
+
+    \begin{minipage}[htb]{0.49\linewidth}
+        \centering
+        \begin{tikzpicture}[scale=0.8]
+            \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$T$};
+            \node(i1) at (-1,0) {$I_1$};
+            \node(iN) at(0, -1) {$I_n$};
+            \node(d) at(-0.7, -0.7) {$\ddots$};
+            \draw (v0) -- (i1);
+            \draw (v0) -- (iN);
+            \node(s) at (1, 0) {$\simeq$};
+            \node[draw, shape=square, minimum size=0.75cm] (g1) at (2, 0) {$\mathcal{G}^{(1)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (g2) at (4, 0) {$\mathcal{G}^{(2)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (gn) at (7, 0) {$\mathcal{G}^{(n)}$};
+            \node(I1) at(2, -1.5) {$I_1$}
+            \node(I2) at(4, -1.5) {$I_2$}
+            \node(IN) at(7, -1.5) {$I_N$}
+            \node(D) at(5.5, 0) {$\dots$}
+                \draw (I1) -- (g1);
+                \draw (I2) -- (g2);
+                \draw (IN) -- (gn);
+                \draw (g1) -- (g2);
+                \draw (g2) -- (D);
+                \draw (D) -- (gn);
+        \end{tikzpicture}
+     \subcaption{Tensor Train (TT) decomposition} 
+    \end{minipage}
+    \begin{minipage}[htb]{0.49\linewidth}
+        \centering
+        \begin{tikzpicture}[scale=0.8]
+            \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$T$};
+            \node(i1) at (-1,0) {$I_1$};
+            \node(iN) at(0, -1) {$I_n$};
+            \node(d) at(-0.7, -0.7) {$\ddots$};
+            \draw (v0) -- (i1);
+            \draw (v0) -- (iN);
+            \node(s) at (1.5, 0) {$\simeq$};
+            \node[draw, shape=square, minimum size=0.75cm] (g) at (5.5, 1) {$\mathcal{G}$};
+            \node[draw, shape=square, minimum size=0.75cm] (a1) at (4, 0.75) {$A^{(1)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (a2) at (4.5, -0.5) {$A^{(2)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (an) at (6, -1) {$A^{(n)}$};
+            \draw (g) -- (a1);
+            \draw (g) -- (a2);
+            \draw (g) -- (an);
+            \node(I1) at(2.5, 0.55) {$I_1$}
+            \node(I2) at(3, -1.5) {$I_2$}
+            \node(IN) at(6, -2.25) {$I_N$}
+            \node(D) at(4.5, -2) {$\dots$}
+            \draw (a1) -- (I1)
+            \draw (a2) -- (I2)
+            \draw (an) -- (IN)
+        \end{tikzpicture}
+       \subcaption{Tensor Ring (TR) decomposition}
+       \label{fig:Graph1}
+   \end{minipage}
+   \vspace{1cm}
+
+    \begin{minipage}[htb]{0.49\linewidth}
+        \centering
+        \begin{tikzpicture}[scale=0.85]
+            \node[draw, shape=square, minimum size=0.75cm] (v0) at (0,0) {$T$};
+            \node(i1) at (-1,0) {$I_1$};
+            \node(iN) at(0, -1) {$I_n$};
+            \node(d) at(-0.7, -0.7) {$\ddots$};
+            \draw (v0) -- (i1);
+            \draw (v0) -- (iN);
+            \node(s) at (1, 0) {$\simeq$};
+            \node[draw, shape=square, minimum size=0.75cm] (g1) at (2, 0) {$\mathcal{G}^{(1)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (g2) at (4, 0) {$\mathcal{G}^{(2)}$};
+            \node[draw, shape=square, minimum size=0.75cm] (gn) at (7, 0) {$\mathcal{G}^{(n)}$};
+            \node(I1) at(2, -1.5) {$I_1$}
+            \node(I2) at(4, -1.5) {$I_2$}
+            \node(IN) at(7, -1.5) {$I_N$}
+            \node(D) at(5.5, 0) {$\dots$}
+                \draw (I1) -- (g1);
+                \draw (I2) -- (g2);
+                \draw (IN) -- (gn);
+                \draw (g1) -- (g2);
+                \draw (g2) -- (D);
+                \draw (D) -- (gn);
+        \end{tikzpicture}
+     \subcaption{Fully Connected (FC) tensor decomposition} 
+    \end{minipage}
+
+
+
+
+    \caption{TN diagrams for some commonly used tensor decompositions \cite{wangTensorNetworksMeet2023}}
+    \label{fig:tndiag}
+
+\end{figure}
+
+\section{Tensor Train Decomposition}
+
+\begin{definition}[Tensor Train decomposition]
+    \normalfont{\cite{oseledetsTensorTrainDecomposition2011}} Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. A tensor
+    train decomposition of $\mathcal{T}$ are a set of $3$th-order tensors $\mathcal{G}^{(1)},\mathcal{G}^{(2)},\dots,\mathcal{G}^{(n)}$ with
+    $\mathcal{G}^{(i)} \in \mathbb{R}^{R_{i-1} \times N_i \times R_i}$ and $R_0 = R_n = 1$ such that every element of $\mathcal{T}$ is written in the
+    form
+    $$\mathcal{T}(i_1,i_2,\dots,i_n) = \sum_{r_0, \dots, r_n}^{R_0, \dots, R_n} \mathcal{G}(r_0, i_1, r_1) \mathcal{G} (r_1, i_2, r_2) \cdots \mathcal{G}(r_{n-1}, i_n, r_n)$$
+
+\end{definition}
+
+We denote $R_0, R_1, \dots, R_n$ as the ranks of the tensor train decomposition, or $TT$-ranks.
+
+One natural question that, given a tensor $\mathcal{T}$, can we guarantee that such decomposition exists? The following theorem
+gives a constructive way to compute the tensor train decomposition of $\mathcal{T}$:
+
+
+\begin{theorem}
+    \normalfont{\cite{oseledetsTensorTrainDecomposition2011}}
+    Given the unfoldings $A_k = \mathcal{T}_{[1:k, k:n]}$, if we choose $\rank{A_k} = r_k$ then there exists a $TT$-decomposition
+    with its ranks not higher than $r_k$
+\end{theorem}
+
+\section{Tensor Ring Decomposition}
 
 Tensor rings are chains of tensors with both ends joined, forming a ring. Tensor rings
 have gained interest in tensor decomposition since they are a generalization of Tensor Train (TT) networks with
@@ -395,25 +612,45 @@ On the course of this chapter, we denote $\mathcal{T} \in \mathbb{R}^{N_1 \times
 \begin{definition}[Tensor ring decomposition]
     Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. A set of $n$ $3$th-order tensors $\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)}$
     with $\mathcal{U}^{(i)} \in \mathbb{R}^{R_i \times N_i \times R_{i+1}}$, $R_1, \dots, R_n \leqslant n$ such that
-    $$\mathcal{T}_{i_1, i_2, \dots, i_n} = \sum_{r_1, \dots, r_n}^{R_1, \dots, R_n} \mathcal{U}_{r_n, i_1, r_1}^{(1)} \mathcal{U}_{r_1, i_2, r_2}^{(2)} \cdots \mathcal{U}_{r_{n-1}, i_n, r_n}^{(n)}$$
+    $$\mathcal{T}(i_1, i_2, \dots, i_n) = \sum_{r_1, \dots, r_n}^{R_1, \dots, R_n} \mathcal{U}_{r_n, i_1, r_1}^{(1)} \mathcal{U}_{r_1, i_2, r_2}^{(2)} \cdots \mathcal{U}_{r_{n-1}, i_n, r_n}^{(n)}$$
     Are a \textbf{tensor ring decomposition} of $\mathcal{T}$. We call the tensors $\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)}$ the \textbf{cores} of 
     decomposition. We write a tensor ring decomposition of $\mathcal{T}$ as $\mathcal{T} = \mathfrak{R}(\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)})$
-
 \end{definition}
+
 Under the tensor ring decomposition, one can notice that we can express $\mathcal{T}$ with $\sum_{i=1}^n R_i^2 N_i$ parameters,
 which is significally less than $\prod_{i=1}^n N_i$
-
-\subsection{Properties}
 
 Tensor ring networks have good properties \cite{zhaoTensorRingDecomposition2016}
 
 \begin{theorem} [Circular dimensional permutation invariance] Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ be
     a $n$th-order tensor with its corresponding tensor ring decomposition $\mathcal{T} = \mathcal{R}(\mathcal{U}^{(1)}, \mathcal{U}^{(2)}, \dots, \mathcal{U}^{(n)})$
-
-    
 \end{theorem}
 
-\chapter{Neural network compression}
+
+
+\section{Fully Connected Tensor Network Decomposition}
+
+
+
+
+TODO:
+\begin{itemize}
+\item Fer intro exhaustiva de tensor networks
+\item Veure DRMG (?)
+\item Crec que es pot fer DRMG per tensor rings, es pot connectar pero la optimització per la compressió s'ha de canviar bastant. Es possible
+\item Investigar després si hi ha alguna forma de fer-ho per fully-connected i tal
+\item Mirar resultats i aplicacions de DRMG? Potser fer que això sigui una aplicació
+\item Fer que aixó sigui un exemple molt petit (2 pag max)
+\item Mirar millor de fer exemples amb mates (Hi ha alguna cosa que necessiti comprimir matrius gegants?)
+\end{itemize}
+
+
+Una petita historia:
+
+\begin{itemize}
+    \item Presentem els tres metodes de connectar coses
+    \item 
+\end{itemize}
 
 We use the TedNet library \cite{panTedNetPytorchToolkit2022}
 
@@ -434,7 +671,7 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 \printbibliography
 
 \appendix
-\chapter{Noseque}
-\section{Nosequantos}
+\chapter{Chapter}
+\section{Section}
 \end{document} 
 

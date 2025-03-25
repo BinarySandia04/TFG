@@ -79,6 +79,39 @@
   file = {/home/arans/Zotero/storage/QLD2LQLH/He y Atia - 2023 - Scalable and Robust Tensor Ring Decomposition for Large-scale Data.pdf;/home/arans/Zotero/storage/Z4NM82JZ/2305.html}
 }
 
+@online{landsbergGeometryTensorNetwork2012,
+  title = {On the Geometry of Tensor Network States},
+  author = {Landsberg, J. M. and Qi, Yang and Ye, Ke},
+  date = {2012-01-09},
+  eprint = {1105.4449},
+  eprinttype = {arXiv},
+  eprintclass = {math},
+  doi = {10.48550/arXiv.1105.4449},
+  url = {http://arxiv.org/abs/1105.4449},
+  urldate = {2025-03-25},
+  abstract = {We answer a question of L. Grasedyck that arose in quantum information theory, showing that the limit of tensors in a space of tensor network states need not be a tensor network state. We also give geometric descriptions of spaces of tensor networks states corresponding to trees and loops. Grasedyck's question has a surprising connection to the area of Geometric Complexity Theory, in that the result is equivalent to the statement that the boundary of the Mulmuley-Sohoni type variety associated to matrix multiplication is strictly larger than the projections and re-labelings of matrix multiplication. Tensor Network States are also related to graphical models in algebraic statistics.},
+  pubstate = {prepublished},
+  keywords = {Mathematics - Algebraic Geometry},
+  file = {/home/arans/Zotero/storage/HW8P9XX4/Landsberg et al. - 2012 - On the geometry of tensor network states.pdf;/home/arans/Zotero/storage/NDPKSBSL/1105.html}
+}
+
+@online{liAlternatingLocalEnumeration2023,
+  title = {Alternating {{Local Enumeration}} ({{TnALE}}): {{Solving Tensor Network Structure Search}} with {{Fewer Evaluations}}},
+  shorttitle = {Alternating {{Local Enumeration}} ({{TnALE}})},
+  author = {Li, Chao and Zeng, Junhua and Li, Chunmei and Caiafa, Cesar and Zhao, Qibin},
+  date = {2023-05-29},
+  eprint = {2304.12875},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2304.12875},
+  url = {http://arxiv.org/abs/2304.12875},
+  urldate = {2025-03-24},
+  abstract = {Tensor network (TN) is a powerful framework in machine learning, but selecting a good TN model, known as TN structure search (TN-SS), is a challenging and computationally intensive task. The recent approach TNLS\textasciitilde\textbackslash cite\{li2022permutation\} showed promising results for this task, however, its computational efficiency is still unaffordable, requiring too many evaluations of the objective function. We propose TnALE, a new algorithm that updates each structure-related variable alternately by local enumeration, \textbackslash emph\{greatly\} reducing the number of evaluations compared to TNLS. We theoretically investigate the descent steps for TNLS and TnALE, proving that both algorithms can achieve linear convergence up to a constant if a sufficient reduction of the objective is \textbackslash emph\{reached\} in each neighborhood. We also compare the evaluation efficiency of TNLS and TnALE, revealing that \$\textbackslash Omega(2\textasciicircum N)\$ evaluations are typically required in TNLS for \textbackslash emph\{reaching\} the objective reduction in the neighborhood, while ideally \$O(N\textasciicircum 2R)\$ evaluations are sufficient in TnALE, where \$N\$ denotes the tensor order and \$R\$ reflects the \textbackslash emph\{``low-rankness''\} of the neighborhood. Experimental results verify that TnALE can find practically good TN-ranks and permutations with vastly fewer evaluations than the state-of-the-art algorithms.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/VY77TAB6/Li et al. - 2023 - Alternating Local Enumeration (TnALE) Solving Tensor Network Structure Search with Fewer Evaluation.pdf;/home/arans/Zotero/storage/FHR5VXAJ/2304.html}
+}
+
 @article{liaoDifferentiableProgrammingTensor2019,
   title = {Differentiable {{Programming Tensor Networks}}},
   author = {Liao, Hai-Jun and Liu, Jin-Guo and Wang, Lei and Xiang, Tao},
@@ -100,6 +133,33 @@
   file = {/home/arans/Zotero/storage/T8TASW9M/Liao et al. - 2019 - Differentiable Programming Tensor Networks.pdf;/home/arans/Zotero/storage/8T8U272U/1903.html}
 }
 
+@inproceedings{liEvolutionaryTopologySearch2020,
+  title = {Evolutionary {{Topology Search}} for {{Tensor Network Decomposition}}},
+  booktitle = {Proceedings of the 37th {{International Conference}} on {{Machine Learning}}},
+  author = {Li, Chao and Sun, Zhun},
+  date = {2020-11-21},
+  pages = {5947--5957},
+  publisher = {PMLR},
+  issn = {2640-3498},
+  url = {https://proceedings.mlr.press/v119/li20l.html},
+  urldate = {2025-03-24},
+  abstract = {Tensor network (TN) decomposition is a promising framework to represent extremely high-dimensional problems with few parameters. However, it is challenging to search the (near-)optimal topological structures for TN decomposition, since the number of candidate solutions exponentially grows with increasing the order of a tensor. In this paper, we claim that the issue can be practically tackled by evolutionary algorithms in an affordable manner. We encode the complex topological structures into binary strings, and develop a simple genetic meta-algorithm to search the optimal topology on Hamming space. The experimental results by both synthetic and real-world data demonstrate that our method can effectively discover the ground-truth topology or even better structures with a small number of generations, and significantly boost the representational power of TN decomposition compared with well-known tensor-train (TT) or tensor-ring (TR) models.},
+  eventtitle = {International {{Conference}} on {{Machine Learning}}},
+  langid = {english},
+  file = {/home/arans/Zotero/storage/TS4RXZBT/Li y Sun - 2020 - Evolutionary Topology Search for Tensor Network Decomposition.pdf}
+}
+
+@inproceedings{liEvolutionaryTopologySearch2020a,
+  title = {Evolutionary {{Topology Search}} for {{Tensor Network Decomposition}}: An {{Extended Abstract}}},
+  shorttitle = {Evolutionary {{Topology Search}} for {{Tensor Network Decomposition}}},
+  author = {Li, Chao and Sun, Zhun and Zeng, Junhua and Zhao, Qibin},
+  date = {2020},
+  url = {https://www.semanticscholar.org/paper/Evolutionary-Topology-Search-for-Tensor-Network-an-Li-Sun/8878e7d70b76b99d939fd68079b5e894cba370b6},
+  urldate = {2025-03-24},
+  abstract = {Tensor network (TN) decomposition is a promising framework to represent extremely high-dimensional problems with few parameters. However, it remains challenging to search the (near-)optimal topological structures for TN decomposition, since the number of candidate solutions exponentially grows with increasing the order of a tensor. In this work, we claim that the issue can be practically tackled by genetic algorithms (GAs) in an affordable manner, and the key is to encode the complex topological structures into fixed-length binary strings, a.k.a. , chromosomes in the context of GA. The experimental results on natural images demonstrate that, in the decomposition task, GA is able to discover more efficient topologys than the well-known TN models within a small number of generations.},
+  file = {/home/arans/Zotero/storage/UDVKKIQ7/Li et al. - 2020 - Evolutionary Topology Search for Tensor Network Decomposition an Extended Abstract.pdf}
+}
+
 @article{liHybridFullyConnected2023,
   title = {Hybrid {{Fully Connected Tensorized Compression Network}} for {{Hyperspectral Image Classification}}},
   author = {Li, Heng-Chao and Lin, Zhi-Xin and Ma, Tian-Yu and Zhao, Xi-Le and Plaza, Antonio and Emery, William J.},
@@ -115,6 +175,22 @@
   eventtitle = {{{IEEE Transactions}} on {{Geoscience}} and {{Remote Sensing}}},
   keywords = {Convolution,Convolutional neural networks (CNNs),Correlation,Feature extraction,fully connected tensor network decomposition (FCTND),hyperspectral image (HSI) classification,Hyperspectral imaging,Kernel,network compression,Standards,Tensors},
   file = {/home/arans/Zotero/storage/AASX2SE7/Li et al. - 2023 - Hybrid Fully Connected Tensorized Compression Network for Hyperspectral Image Classification.pdf;/home/arans/Zotero/storage/SLGWWKUE/10032776.html}
+}
+
+@online{liPermutationSearchTensor2022,
+  title = {Permutation {{Search}} of {{Tensor Network Structures}} via {{Local Sampling}}},
+  author = {Li, Chao and Zeng, Junhua and Tao, Zerui and Zhao, Qibin},
+  date = {2022-06-14},
+  eprint = {2206.06597},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2206.06597},
+  url = {http://arxiv.org/abs/2206.06597},
+  urldate = {2025-03-24},
+  abstract = {Recent works put much effort into tensor network structure search (TN-SS), aiming to select suitable tensor network (TN) structures, involving the TN-ranks, formats, and so on, for the decomposition or learning tasks. In this paper, we consider a practical variant of TN-SS, dubbed TN permutation search (TN-PS), in which we search for good mappings from tensor modes onto TN vertices (core tensors) for compact TN representations. We conduct a theoretical investigation of TN-PS and propose a practically-efficient algorithm to resolve the problem. Theoretically, we prove the counting and metric properties of search spaces of TN-PS, analyzing for the first time the impact of TN structures on these unique properties. Numerically, we propose a novel meta-heuristic algorithm, in which the searching is done by randomly sampling in a neighborhood established in our theory, and then recurrently updating the neighborhood until convergence. Numerical results demonstrate that the new algorithm can reduce the required model size of TNs in extensive benchmarks, implying the improvement in the expressive power of TNs. Furthermore, the computational cost for the new algorithm is significantly less than that in\textasciitilde\textbackslash cite\{li2020evolutionary\}.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/DN5NA8XZ/Li et al. - 2022 - Permutation Search of Tensor Network Structures via Local Sampling.pdf;/home/arans/Zotero/storage/9STGY9YD/2206.html}
 }
 
 @inproceedings{malikSamplingBasedMethodTensor2021,
@@ -217,6 +293,44 @@
   file = {/home/arans/Zotero/storage/E5SFIX9L/Obukhov et al. - 2021 - T-Basis a Compact Representation for Neural Networks.pdf;/home/arans/Zotero/storage/G5MT2NQX/2007.html}
 }
 
+@article{oseledetsTensorTrainDecomposition2011,
+  title = {Tensor-{{Train Decomposition}}},
+  author = {Oseledets, I. V.},
+  date = {2011-01},
+  journaltitle = {SIAM Journal on Scientific Computing},
+  shortjournal = {SIAM J. Sci. Comput.},
+  volume = {33},
+  number = {5},
+  pages = {2295--2317},
+  publisher = {{Society for Industrial and Applied Mathematics}},
+  issn = {1064-8275},
+  doi = {10.1137/090752286},
+  url = {https://epubs.siam.org/doi/10.1137/090752286},
+  urldate = {2025-03-24},
+  abstract = {Tensors arise naturally in high-dimensional problems in chemistry, financial mathematics, and many other areas. The numerical treatment of such problems is difficult due to the curse of dimensionality: the number of unknowns and the computational complexity grow exponentially with the dimension of the problem. To break the curse of dimensionality, low-parametric representations, or formats, have to be used. In this paper we make use of the TT-format (tensor-train format) which is one of the most effective stable representations of high-dimensional tensors. Basic linear algebra operations in the TT-format are now well developed. Our goal is to provide a “black-box” type of solver for linear systems where both the matrix and the right-hand side are in the TT-format. An efficient DMRG (density matrix renormalization group) method is proposed, and several tricks are employed to make it work. The numerical experiments confirm the effectiveness of our approach.}
+}
+
+@article{panagakisTensorMethodsComputer2021,
+  title = {Tensor {{Methods}} in {{Computer Vision}} and {{Deep Learning}}},
+  author = {Panagakis, Yannis and Kossaifi, Jean and Chrysos, Grigorios G. and Oldfield, James and Nicolaou, Mihalis A. and Anandkumar, Anima and Zafeiriou, Stefanos},
+  date = {2021-05},
+  journaltitle = {Proceedings of the IEEE},
+  shortjournal = {Proc. IEEE},
+  volume = {109},
+  number = {5},
+  eprint = {2107.03436},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  pages = {863--890},
+  issn = {0018-9219, 1558-2256},
+  doi = {10.1109/JPROC.2021.3074329},
+  url = {http://arxiv.org/abs/2107.03436},
+  urldate = {2025-03-09},
+  abstract = {Tensors, or multidimensional arrays, are data structures that can naturally represent visual data of multiple dimensions. Inherently able to efficiently capture structured, latent semantic spaces and high-order interactions, tensors have a long history of applications in a wide span of computer vision problems. With the advent of the deep learning paradigm shift in computer vision, tensors have become even more fundamental. Indeed, essential ingredients in modern deep learning architectures, such as convolutions and attention mechanisms, can readily be considered as tensor mappings. In effect, tensor methods are increasingly finding significant applications in deep learning, including the design of memory and compute efficient network architectures, improving robustness to random noise and adversarial attacks, and aiding the theoretical understanding of deep networks. This article provides an in-depth and practical review of tensors and tensor methods in the context of representation learning and deep learning, with a particular focus on visual data analysis and computer vision applications. Concretely, besides fundamental work in tensor-based visual data analysis methods, we focus on recent developments that have brought on a gradual increase of tensor methods, especially in deep learning architectures, and their implications in computer vision applications. To further enable the newcomer to grasp such concepts quickly, we provide companion Python notebooks, covering key aspects of the paper and implementing them, step-by-step with TensorLy.},
+  keywords = {Computer Science - Computer Vision and Pattern Recognition},
+  file = {/home/arans/Zotero/storage/F54KSHQT/Panagakis et al. - 2021 - Tensor Methods in Computer Vision and Deep Learning.pdf;/home/arans/Zotero/storage/N2KKT4RH/2107.html}
+}
+
 @article{panTedNetPytorchToolkit2022,
   title = {{{TedNet}}: {{A Pytorch Toolkit}} for {{Tensor Decomposition Networks}}},
   shorttitle = {{{TedNet}}},
@@ -238,6 +352,38 @@
   file = {/home/arans/Zotero/storage/VZIBHP3J/Pan et al. - 2022 - TedNet A Pytorch Toolkit for Tensor Decomposition Networks.pdf;/home/arans/Zotero/storage/SQ86QPH8/2104.html}
 }
 
+@incollection{romanTensorProducts2008,
+  title = {Tensor {{Products}}},
+  booktitle = {Advanced {{Linear Algebra}}},
+  author = {Roman, Steven},
+  editor = {Roman, Steven},
+  date = {2008},
+  pages = {355--409},
+  publisher = {Springer},
+  location = {New York, NY},
+  doi = {10.1007/978-0-387-72831-5_14},
+  url = {https://doi.org/10.1007/978-0-387-72831-5_14},
+  urldate = {2025-03-25},
+  isbn = {978-0-387-72831-5},
+  langid = {english},
+  file = {/home/arans/Zotero/storage/XYZBU59B/Roman - 2008 - Tensor Products.pdf}
+}
+
+@online{sharipovQuickIntroductionTensor2004,
+  title = {Quick Introduction to Tensor Analysis},
+  author = {Sharipov, Ruslan},
+  date = {2004-03-16},
+  eprint = {math/0403252},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.math/0403252},
+  url = {http://arxiv.org/abs/math/0403252},
+  urldate = {2025-03-25},
+  abstract = {I wrote this book in a "do-it-yourself" style so that I give only a draft of tensor theory, which includes formulating definitions and theorems and giving basic ideas and formulas. All other work such as proving consistence of definitions, deriving formulas, proving theorems or completing details to proofs is left to the reader in the form of numerous exercises. I hope that this style makes learning the subject really quick and more effective for understanding and memorizing.},
+  pubstate = {prepublished},
+  keywords = {Mathematical Physics,Mathematics - History and Overview,Mathematics - Mathematical Physics},
+  file = {/home/arans/Zotero/storage/DCI93IDE/Sharipov - 2004 - Quick introduction to tensor analysis.pdf;/home/arans/Zotero/storage/SUCI5QKJ/0403252.html}
+}
+
 @online{taoScalableBayesianTensor2024,
   title = {Scalable {{Bayesian Tensor Ring Factorization}} for {{Multiway Data Analysis}}},
   author = {Tao, Zerui and Tanaka, Toshihisa and Zhao, Qibin},
@@ -252,6 +398,42 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {/home/arans/Zotero/storage/PUELZQNA/Tao et al. - 2024 - Scalable Bayesian Tensor Ring Factorization for Multiway Data Analysis.pdf;/home/arans/Zotero/storage/45CUHEIS/2412.html}
+}
+
+@article{wangSVDbasedAlgorithmsFullyconnected2024,
+  title = {{{SVD-based}} Algorithms for Fully-Connected Tensor Network Decomposition},
+  author = {Wang, Mengyu and Li, Hanyu},
+  date = {2024-06-03},
+  journaltitle = {Computational and Applied Mathematics},
+  shortjournal = {Comp. Appl. Math.},
+  volume = {43},
+  number = {5},
+  pages = {265},
+  issn = {1807-0302},
+  doi = {10.1007/s40314-024-02772-w},
+  url = {https://doi.org/10.1007/s40314-024-02772-w},
+  urldate = {2025-03-20},
+  abstract = {The popular fully-connected tensor network (FCTN) decomposition has achieved successful applications in many fields. A standard method to this decomposition is the alternating least squares. However, it often converges slowly and suffers from issues of numerical stability. In this work, we investigate the SVD-based algorithms for FCTN decomposition to tackle the aforementioned deficiencies. On the basis of a result about FCTN-ranks, a deterministic algorithm, namely FCTN-SVD, is first proposed, which can approximate the FCTN decomposition under a fixed accuracy. Then, we present the randomized version of the algorithm. Both synthetic and real data are used to test our algorithms. Numerical results show that they perform much better than the existing methods, and the randomized algorithm can indeed yield acceleration on FCTN-SVD. Moreover, we also apply our algorithms to tensor-on-vector regression and achieve quite decent performance.},
+  langid = {english},
+  keywords = {15A69,49M27,68W20,68W25,Alternating least squares,Fully-connected tensor network decomposition,Randomized algorithm,Sketching,SVD},
+  file = {/home/arans/Zotero/storage/BAKG65DK/Wang y Li - 2024 - SVD-based algorithms for fully-connected tensor network decomposition.pdf}
+}
+
+@online{wangTensorNetworksMeet2023,
+  title = {Tensor {{Networks Meet Neural Networks}}: {{A Survey}} and {{Future Perspectives}}},
+  shorttitle = {Tensor {{Networks Meet Neural Networks}}},
+  author = {Wang, Maolin and Pan, Yu and Xu, Zenglin and Yang, Xiangli and Li, Guangxi and Cichocki, Andrzej},
+  date = {2023-05-08},
+  eprint = {2302.09019},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2302.09019},
+  url = {http://arxiv.org/abs/2302.09019},
+  urldate = {2025-03-09},
+  abstract = {Tensor networks (TNs) and neural networks (NNs) are two fundamental data modeling approaches. TNs were introduced to solve the curse of dimensionality in large-scale tensors by converting an exponential number of dimensions to polynomial complexity. As a result, they have attracted significant attention in the fields of quantum physics and machine learning. Meanwhile, NNs have displayed exceptional performance in various applications, e.g., computer vision, natural language processing, and robotics research. Interestingly, although these two types of networks originate from different observations, they are inherently linked through the common multilinearity structure underlying both TNs and NNs, thereby motivating a significant number of intellectual developments regarding combinations of TNs and NNs. In this paper, we refer to these combinations as tensorial neural networks (TNNs), and present an introduction to TNNs in three primary aspects: network compression, information fusion, and quantum circuit simulation. Furthermore, this survey also explores methods for improving TNNs, examines flexible toolboxes for implementing TNNs, and documents TNN development while highlighting potential future directions. To the best of our knowledge, this is the first comprehensive survey that bridges the connections among NNs, TNs, and quantum circuits. We provide a curated list of TNNs at \textbackslash url\{https://github.com/tnbar/awesome-tensorial-neural-networks\}.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/EWMTFVHQ/Wang et al. - 2023 - Tensor Networks Meet Neural Networks A Survey and Future Perspectives.pdf;/home/arans/Zotero/storage/34RZIB8N/2302.html}
 }
 
 @online{wangWideCompressionTensor2018,
@@ -321,6 +503,38 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning},
   file = {/home/arans/Zotero/storage/HBX6TQIZ/Yang et al. - 2024 - CoMERA Computing- and Memory-Efficient Training via Rank-Adaptive Tensor Optimization.pdf;/home/arans/Zotero/storage/YB8LGHYV/2405.html}
+}
+
+@online{yangLatentMatricesTensor2022,
+  title = {Latent {{Matrices}} for {{Tensor Network Decomposition}} and to {{Tensor Completion}}},
+  author = {Yang, Peilin and Sun, Weijun and Zhao, Qibin and Zhou, Guoxu},
+  date = {2022-10-19},
+  eprint = {2210.03392},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2210.03392},
+  url = {http://arxiv.org/abs/2210.03392},
+  urldate = {2025-03-20},
+  abstract = {The prevalent fully-connected tensor network (FCTN) has achieved excellent success to compress data. However, the FCTN decomposition suffers from slow computational speed when facing higher-order and large-scale data. Naturally, there arises an interesting question: can a new model be proposed that decomposes the tensor into smaller ones and speeds up the computation of the algorithm? This work gives a positive answer by formulating a novel higher-order tensor decomposition model that utilizes latent matrices based on the tensor network structure, which can decompose a tensor into smaller-scale data than the FCTN decomposition, hence we named it Latent Matrices for Tensor Network Decomposition (LMTN). Furthermore, three optimization algorithms, LMTN-PAM, LMTN-SVD and LMTN-AR, have been developed and applied to the tensor-completion task. In addition, we provide proofs of theoretical convergence and complexity analysis for these algorithms. Experimental results show that our algorithm has the effectiveness in both deep learning dataset compression and higher-order tensor completion, and that our LMTN-SVD algorithm is 3-6 times faster than the FCTN-PAM algorithm and only a 1.8 points accuracy drop.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/ALVFQIX2/Yang et al. - 2022 - Latent Matrices for Tensor Network Decomposition and to Tensor Completion.pdf;/home/arans/Zotero/storage/L82QSRA9/2210.html}
+}
+
+@online{yeTensorNetworkRanks2019,
+  title = {Tensor Network Ranks},
+  author = {Ye, Ke and Lim, Lek-Heng},
+  date = {2019-02-09},
+  eprint = {1801.02662},
+  eprinttype = {arXiv},
+  eprintclass = {math},
+  doi = {10.48550/arXiv.1801.02662},
+  url = {http://arxiv.org/abs/1801.02662},
+  urldate = {2025-03-24},
+  abstract = {In problems involving approximation, completion, denoising, dimension reduction, estimation, interpolation, modeling, order reduction, regression, etc, we argue that the near-universal practice of assuming that a function, matrix, or tensor (which we will see are all the same object in this context) has \textbackslash emph\{low rank\} may be ill-justified. There are many natural instances where the object in question has high rank with respect to the classical notions of rank: matrix rank, tensor rank, multilinear rank --- the latter two being the most straightforward generalizations of the former. To remedy this, we show that one may vastly expand these classical notions of ranks: Given any undirected graph \$G\$, there is a notion of \$G\$-rank associated with \$G\$, which provides us with as many different kinds of ranks as there are undirected graphs. In particular, the popular tensor network states in physics (e.g., \textbackslash textsc\{mps\}, \textbackslash textsc\{ttns\}, \textbackslash textsc\{peps\}) may be regarded as functions of a specific \$G\$-rank for various choices of \$G\$. Among other things, we will see that a function, matrix, or tensor may have very high matrix, tensor, or multilinear rank and yet very low \$G\$-rank for some \$G\$. In fact the difference is in the orders of magnitudes and the gaps between \$G\$-ranks and these classical ranks are arbitrarily large for some important objects in computer science, mathematics, and physics. Furthermore, we show that there is a \$G\$ such that almost every tensor has \$G\$-rank exponentially lower than its rank or the dimension of its ambient space.},
+  pubstate = {prepublished},
+  keywords = {Mathematics - Numerical Analysis},
+  file = {/home/arans/Zotero/storage/9K8HJWC5/Ye y Lim - 2019 - Tensor network ranks.pdf;/home/arans/Zotero/storage/JWF2D3NC/1801.html}
 }
 
 @online{yokotaVeryBasicsTensors2024,
@@ -409,4 +623,20 @@
   langid = {english},
   keywords = {Applications},
   file = {/home/arans/Zotero/storage/DBK847TT/Zheng et al. - 2021 - Fully-Connected Tensor Network Decomposition and Its Application to Higher-Order Tensor Completion.pdf}
+}
+
+@online{zhouTensorStarTensor2024,
+  title = {Tensor {{Star Tensor Decomposition}} and {{Its Applications}} to {{Higher-order Compression}} and {{Completion}}},
+  author = {Zhou, Wuyang and Zheng, Yu-Bang and Zhao, Qibin and Mandic, Danilo},
+  date = {2024-09-06},
+  eprint = {2403.10481},
+  eprinttype = {arXiv},
+  eprintclass = {eess},
+  doi = {10.48550/arXiv.2403.10481},
+  url = {http://arxiv.org/abs/2403.10481},
+  urldate = {2025-03-24},
+  abstract = {A novel tensor decomposition framework, termed Tensor Star (TS) decomposition, is proposed which represents a new type of tensor network decomposition based on tensor contractions. This is achieved by connecting the core tensors in a ring shape, whereby the core tensors act as skip connections between the factor tensors and allow for direct correlation characterisation between any two arbitrary dimensions. Uniquely, this makes it possible to decompose an order-\$N\$ tensor into \$N\$ order-\$3\$ factor tensors \$\textbackslash\{\textbackslash mathcal\{G\}\_\{k\}\textbackslash\}\_\{k=1\}\textasciicircum\{N\}\$ and \$N\$ order-\$4\$ core tensors \$\textbackslash\{\textbackslash mathcal\{C\}\_\{k\}\textbackslash\}\_\{k=1\}\textasciicircum\{N\}\$, which are arranged in a star shape. Unlike the class of Tensor Train (TT) decompositions, these factor tensors are not directly connected to one another. The so obtained core tensors also enable consecutive factor tensors to have different latent ranks. In this way, the TS decomposition alleviates the "curse of dimensionality" and controls the "curse of ranks", exhibiting a storage complexity which scales linearly with the number of dimensions and as the fourth power of the ranks.},
+  pubstate = {prepublished},
+  keywords = {Electrical Engineering and Systems Science - Image and Video Processing,Electrical Engineering and Systems Science - Signal Processing},
+  file = {/home/arans/Zotero/storage/GMHGJRJC/Zhou et al. - 2024 - Tensor Star Tensor Decomposition and Its Applications to Higher-order Compression and Completion.pdf;/home/arans/Zotero/storage/CQLCFDBY/2403.html}
 }
