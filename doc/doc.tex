@@ -17,6 +17,16 @@
 \usepackage{tikz}
 \usepackage{tikz-cd}
 \usepackage{parskip}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{color}
+\hypersetup{
+    linktoc=all,
+    colorlinks=true,
+    linkcolor=blue,  %choose some color if you want links to stand out
+}
 
 \setcounter{page}{0}
 
@@ -50,6 +60,9 @@
 \newcommand{\secref}[1]{Section~\ref{#1}}
 \newcommand{\remref}[1]{Remark~\ref{#1}}
 \newcommand{\conjref}[1]{Conjecture~\ref{#1}}
+\newcommand{\figref}[1]{\cref{#1}}
+\newcommand{\refeq}[1]{\cref{#1}}
+
 
 
 \DeclareMathOperator{\vectorize}{vec}
@@ -58,6 +71,10 @@
 \DeclareMathOperator{\IN}{IN}
 \DeclareMathOperator{\OUT}{OUT}
 \DeclareMathOperator{\TNS}{TNS}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\size}{Size}
 
 % --------------------------------------------------
 \usepackage{fancyhdr}
@@ -124,13 +141,31 @@
 
 \section*{Abstract}
 
-Goldbach's weak conjecture asserts that every odd integer greater than 5 is the sum of three primes. We study that problem and the proof of it presented by H. A. Helfgott and D. Platt. We focus on the circle method. Finally, we describe a computation that confirms Goldbach's weak conjecture up to $10^{28}$.
-With the misco's theorem, we can achieve great results from approximating all digits of $\pi^2$
+Tensor network structure search has been interesting research topic since the raise on
+complexity of deep learning models and quantum mechanics. This is an Undegraduate Thesis whose main goal is to give an 
+automated search of an optimal tensor network structure for representing a given
+tensor with some fixed error.
+
+For these purpose we first give an introduction to tensors, tensor networks and then we present some examples
+of well studied tensor networks, including Tucker decomposition, Tensor Train decomposition, Tensor Ring decomposition
+and Fully Connected Tensor Network decomposition. 
+
+Then with some practical experiments we demonstrate that it is possible to find more optimized structures
+without significant losses on performance and accuracy, and finally we will present
+an algorithm for finding these optimized structures.
 
 \section*{Resum}
-La conjectura feble de Goldbach afirma que tot nombre enter imparell major que 5 \'es la suma de tres nombres primers. En aquest treball estudiem aquest problema i la seva prova presentada per HA Helfgott i D. Platt. Ens centrem en el m\`etode del cercle. Finalment, describim un c\`alcul que confirma la conjectura feble de Goldbach fins a $10^{28}$.
-Amb el teorema d'en Misco, podem aproximar i dir clarament quines són les normes del servidor de Discord
 
+La recerca de l'estructura òptima de xarxes de tensors ha estat un tema d'interès des de l'augment en la complexitat dels models d'aprenentatge profund i de la mecànica quàntica. 
+Aquest és un treball de final de grau que té com a objectiu principal oferir una cerca automatitzada 
+d’una estructura òptima de xarxa de tensors per representar un tensor donat amb un error fixat.
+
+Per aconseguir aquest propòsit, primer oferim una introducció als tensors, a les xarxes de tensors, i tot seguit presentem alguns exemples de xarxes de tensors ben estudiades, 
+incloent-hi la descomposició de Tucker, la descomposició en tren de tensors (Tensor Train), la descomposició en anell
+de tensors (Tensor Ring) i la descomposició de xarxa de tensors totalment connectada.
+
+A continuació, amb alguns experiments pràctics, demostrem que és possible trobar estructures més optimitzades sense pèrdues significatives 
+en el rendiment i la precissió de la representació, i finalment presentem un algoritme per trobar aquestes estructures optimitzades.
 
 % TODO: Omplir això
 % 15A69 - Multilinear Algebra, Tensor Calculus, Graph Theory, no se
@@ -146,13 +181,32 @@ Amb el teorema d'en Misco, podem aproximar i dir clarament quines són les norme
 Vull agrair a ... 
 \newpage
 
+{\hypersetup{linkcolor=black}
 \tableofcontents
+}
 
 \newpage
 
 \pagenumbering{arabic} 
 \setcounter{page}{1}
 \chapter{Introduction}
+
+Neural networks are a set of dependant non-linear functions which each individual function corresponds to 
+a neuron (or perceptron). In a fully connected neural network, each neuron applies a linear transformation
+to the input vector through a weight of matrices.
+
+The output of a neuron $j$ in some layer is given by the formula:
+
+$$ y_j(x) = f\left(\sum_{i=1}^N w_{ji} x_i + b_{j}\right) $$ 
+
+Where $w_{ji}$ is the weight assigned to the connection between the neuron $i$ of the previous layer with the neuron
+$j$ of the current layer, $f$ is an activation function and $b_j$ is some bias of the neuron $j$.
+
+We can represent the weights of a fully connected neural network as a matrix, that we call the \textbf{weight matrix}
+since the recent rise on complexity of neural networks, weight matrices can be very large and there is a lot of
+interest on compressing weight matrices without sacrificing accuracy or performance.
+
+
 
 A well known problem in science and engineering is to retrieve a function given some data. It may be
 for example the solution of a partially differentiable equation given some boundary conditions or initial data or
@@ -174,6 +228,16 @@ alguna aplicació en diferents camps de la física i del machine learning.
 En resum hauria d'explicar el problema sencer
 
 \section{Objectives}
+
+TODO: Estructura de la memòria
+
+Parlar sobre alguns problemes dels quals es requereix comprimir matrius bastant grans, com per exemple
+fully connected tensor networks, o estats físics. Així que l'objectiu d'aquest treball consistirà en:
+
+\begin{itemize}
+    \item Explicar com podem representar tensor amb alta dimensional com la contracció d'uns determinats tensors de dimensionalitat molt més baixa
+    \item Explorar de quina forma és més óptima fer aquestes contraccions, i en quin ordre per aconseguir una millor contracció amb menys temps de complexitat
+\end{itemize}
 
 \section{Thesis structure}
 
@@ -274,6 +338,8 @@ $$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$
 In this chapter we will introduce the basics of tensor algebra and we will present some results that will be useful in the
 following chapters
 
+\section{Basic tensor definitions}
+
 We will denote $\mathbb{V}_1, \dots, \mathbb{V}_n$ as finite vector spaces over a field $\mathbb{K}$ ($\mathbb{C}$ if unspecified) of dimension $\dim{\mathbb{V}_i} = N_i \; \forall i = 1, \dots, n$.
 We denote $\mathcal{B}_1, \dots, \mathcal{B}_n$ with ${\mathcal{B}_i = \{e_1^{(i)}, \dots, e_{N_i}^{(i)}\}, i = 1, \dots, n}$ the canonical basis of $\mathbb{V}_1, \dots, \mathbb{V}_n$
 
@@ -331,6 +397,7 @@ Constructed this way, $\mathcal{B}_\otimes$ is a (canonical) basis of ${\mathbb{
     \begin{equation} \label{eq:base-representation}
 T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^{(1)} \otimes \cdots \otimes e_{s_n}^{(n)}
 \end{equation}
+We will define the size of the tensor $T$ as $\size(T) = \dim \mathbb{V}_1 \cdot \dim \mathbb{V}_2 \cdots \dim \mathbb{V}_n$
 \end{remark}
 
 
@@ -346,7 +413,7 @@ T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^
 
 \end{definition}
 
-From remark \ref{rem:tenbase}, a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be identified as a "$n$-dimensional array" $\mathcal{T}$, i.e,
+From \remref{rem:tenbase}, a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be identified as a "$n$-dimensional array" $\mathcal{T}$, i.e,
 a discrete function
 $$\begin{align}
     \mathcal{T}: \prod_{i=1}^n \{1, \dots, N_i\} & \longrightarrow \mathbb{K} \\
@@ -388,7 +455,7 @@ We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1
 We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, \dots, n))}$
 \end{definition}
 
-
+TODO: Posar dibuix de tensor unfolding
 
 \begin{definition}[Tensor slices]
 %Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
@@ -405,7 +472,9 @@ We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, 
 
     Sometimes we will also implicitly specify $\mathbf{i}_S$ by writing $\mathcal{T}(a_1, \dots, a_n)$ and replacing $a_j$ with $i_j$ if $j \in S$ and "$:$" otherwise
 
+    We will denote $\mathcal{T}^{(m)} := \mathcal{T}(:, \dots, :, i_m, :, \dots, :)$ and $\mathcal{T}^{(\neq m)} := \mathcal{T}(i_1, \dots, i_{m-1}, :, i_{m+1}, \dots, i_n)$
 \end{definition}
+
 
 \begin{example}
     Consider $\mathcal{M} \in \mathbb{K}^{N_1 \times N_2}$ a second order tensor. We can see this tensor as a
@@ -443,7 +512,50 @@ We will now present an slightly better upper bound for the tensor rank:
 \end{proof}
 \end{proposition}
 
+\section{Penrose Notation}
 
+The Penrose an intuitive graphical language to represent tensor contractions that
+dates back from at least the early 1970s \cite{rogerPenroseApplications}
+
+Given an $n$th-order tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \dots \times N_n}$ the way we draw it using the
+Penrose notation is as a circle with as many edges as the order of the tensor, as seen in \figref{fig:tens}
+
+\begin{figure}[h]
+\centering
+\tikz {
+    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
+    \node(i) at (-1, 0) {$i_1$};
+    \node(i2) at (-0.7, 0.8) {$i_2$};
+    \node(id) at (0.7, 0.8) {$\dots$};
+    \node(in) at (1, 0) {$i_n$};
+    \draw (T) -- (i);
+    \draw (T) -- (i2);
+    \draw (T) -- (id);
+    \draw (T) -- (in);
+}
+\caption{
+    Representation of a tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation
+}
+\label{fig:tens}
+\end{figure}
+
+A lot of times we will not write explicitly the name of the indexes, since we only care about their order. The order
+of the indexes will be determined by their orientation respect to the circle: to get the order we will start from the left and then
+following a clockwise rotation. The order in which we encounter the edges will be the order of the indexes. For example,
+in \figref{fig:tens}, the order would be $i_1, i_2, \dots, i_n$
+
+
+\section{Tensor contraction}
+
+We would want to generalize the concept of vector dot product, or matrix product or the trace operation into tensors.
+The tensor contraction gives us a generalization of all of the above. The concept of the tensor contraction 
+basically arises from the canonical pairing of a vector space and its dual. Since tensors are elments
+of $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$ with for each
+$\mathbb{W}_j$ being the dual space of some space $\mathbb{V}_i$, one can contract these tensor by pairing these two
+spaces.
+
+Formally, the contraction of two tensors $\mathcal{X}, \mathcal{Y}$ is the image of a fixed contraction $\mathcal{C}_k^l$ map where $k$ is an index (or edge) of the first tensor $\mathcal{X}$ and $l$
+is another index of the second tensor $\mathcal{Y}$:
 
 \begin{definition}
     \normalfont{\cite{dodsonTensorsMultilinearForms1991}}
@@ -471,58 +583,15 @@ $\mathcal{C}_k^l$ is defined as the tensor contraction mapping of $\mathbb{V}_1 
     indices $(k,l)$ as $$X \times^l_k Y := \mathcal{C}_k^l(X \otimes Y)$$
 \end{definition}
 
-Fixing bases for $\mathbb{V}_1, \dots, \mathbb{V}_p, \mathbb{W}_1, \dots, \mathbb{W}_q$ and representing $X, Y$
-as discrete functions by its representations in those basis, we get a way for computing $\mathcal{C}_k^l(X \otimes Y)$:
+We will represent the contraction between two tensors $\mathcal{X} \in \mathbb{K}^{N_1 \times \cdots \times N_n}, \mathcal{Y} \in \mathbb{K}^{M_1 \times \cdots \times M_m}$
+as their representation in the Penrose notation with the edges that represent the indexes that are contracting by joining them, as seen in \figref{fig:tencon}.
 
-\begin{definition}[Base dependant tensor contraction]
-    \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Given $\mathcal{X}, \mathcal{Y}$ as the discrete function representations
-    of $X, Y$ from earlier, we can write $\mathcal{C}_k^l(X \otimes Y)$ element-wise as:
-    $$\begin{align}\mathcal{C}_k^l & (i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_p, j_1, \dots, j_{l-1}, j_{l+1}, \dots, j_q) \\  =& \sum_{s=1}^{N_k}
-        \mathcal{X}(i_1, \cdots, i_{k-1}, s, i_{k+1}, \cdots, i_p) \mathcal{Y}(j_1, \cdots, j_{l-1}, s, j_{l+1}, \cdots, j_q)
-\end{align}$$
-    \end{definition}
-
-Since the notation for making a single contraction is already very tedious to write, from now on
-we will use the Penrose notation.
-
-\section{Penrose notation}
-The Penrose an intuitive graphical language to represent tensor contractions that
-dates back from at least the early 1970s \cite{rogerPenroseApplications}
-
-Given an $n$th-order tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \dots \times N_n}$ the way we draw it using the
-Penrose notation is as a circle with as many edges as the order of the tensor, as seen in Fig. \ref{pen:tens}
-
-\begin{figure}[h]
-\centering
-\tikz {
-    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
-    \node(i) at (-1, 0) {$i_1$};
-    \node(i2) at (-0.7, 0.8) {$i_2$};
-    \node(id) at (0.7, 0.8) {$\dots$};
-    \node(in) at (1, 0) {$i_n$};
-    \draw (T) -- (i);
-    \draw (T) -- (i2);
-    \draw (T) -- (id);
-    \draw (T) -- (in);
-}
-\caption{
-    Representation of a tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation
-}
-\label{pen:tens}
-\end{figure}
-
-A lot of times we will not write explicitly the name of the indexes, since we only care about their order. The order
-of the indexes will be determined by their orientation respect to the circle: to get the order we will start from the left and then
-following a clockwise rotation. The order in which we encounter the edges will be the order of the indexes. For example,
-in Fig. $\ref{pen:tens}$, the order would be $i_1, i_2, \dots, i_n$
-
-We represent the contraction between two tensors $\mathcal{X} \in \mathbb{K}^{N_1 \times \cdots \times N_n}, \mathcal{Y} \in \mathbb{K}^{M_1 \times \cdots \times M_m}$
-as their representation in the Penrose notation with the edges that represent the indexes that are contracting by joining them. For example, the contraction
-shown in Fig. \ref{pen:tencon}, results in the tensor $\mathcal{Z} = \mathcal{X} \times_3^1 \mathcal{Y} \in \mathbb{K}^{N_1 \times N_2 \times M_2 \times M_3}$
 
 \begin{figure}
-\centering
-\tikz {
+    \begin{center}
+    \hfill
+\begin{minipage}{0.2\textwidth}
+    \begin{tikzpicture}
     \node(X)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{X}$};
     \node(Y)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$\mathcal{Y}$};
     \node(i1) at (-1, 0) {$i_1$};
@@ -536,9 +605,20 @@ shown in Fig. \ref{pen:tencon}, results in the tensor $\mathcal{Z} = \mathcal{X}
     \draw (X) -- (Y) 
         node[above, pos=0.8] {$j_1$}
         node[above, pos=0.2] {$i_3$};
-}
-\tikz {
-    \node(R) at (-1.75, 0) {$\equiv$}
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
+    \node(1) at(-1.5, -0.5);
+    \node(2) at(3, -0.5);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
+        node[above, pos=0.45] {$\mathcal{C}_{i_3}^{j_1}$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
     \node(Z)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{Z}$};
     \node(i1) at (-1, 0) {$i_1$};
     \node(i2) at (-0.4, 1) {$i_2$};
@@ -548,25 +628,293 @@ shown in Fig. \ref{pen:tencon}, results in the tensor $\mathcal{Z} = \mathcal{X}
     \draw (Z) -- (i2);
     \draw (Z) -- (j2);
     \draw (Z) -- (j3);
-}
+\end{tikzpicture}
+\end{minipage}
+\end{center}
+
 \caption{
     Representation in the Penrose notation of the contraction between two tensors $\mathcal{X} \in \mathbb{K}^{N_1 \times N_2 \times N_3}, \mathcal{Y} \in \mathbb{K}^{M_1 \times M_2 \times M_3}$
     by their indices $i_3$ and $j_1$ with $N_1, N_2, N_3, M_1, M_2, M_3 \in \mathbb{N}$ and $N_3 = M_1$
 }
-\label{pen:tencon}
+\label{fig:tencon}
 \end{figure}
 
+Fixing bases for $\mathbb{V}_1, \dots, \mathbb{V}_p, \mathbb{W}_1, \dots, \mathbb{W}_q$ and representing $X, Y$
+as discrete functions by its representations in those basis, we get a way for computing $\mathcal{C}_k^l(X \otimes Y)$:
+
+\begin{definition}[Base dependant tensor contraction]
+    \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Given $\mathcal{X}, \mathcal{Y}$ as the discrete function representations
+    of $X, Y$ from earlier, we can write $\mathcal{C}_k^l(X \otimes Y)$ element-wise as:
+    \begin{equation}
+    \begin{align}\mathcal{C}_k^l & (i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_p, j_1, \dots, j_{l-1}, j_{l+1}, \dots, j_q) \\  =& \sum_{s=1}^{N_k}
+        \mathcal{X}(i_1, \cdots, i_{k-1}, s, i_{k+1}, \cdots, i_p) \mathcal{Y}(j_1, \cdots, j_{l-1}, s, j_{l+1}, \cdots, j_q)
+\end{align}
+\label{eq:contraction}
+    \end{equation}
+    \end{definition}
+
+\begin{example}
+    The tensor contraction for two tensors of order $2$ $X \in \mathbb{K}^{N_1 \times N_2}, Y \in \mathbb{K}^{N_2 \times N_3}$ over one edge of each tensor yields the matrix multiplication.
+    Applying \refeq{eq:contraction} we get that
+    $$(\mathcal{X} \times_2^2 \mathcal{Y}) (i_1, j_2) = \sum_{s=1}^{N_2} X(i_1, s) Y(s, j_2)$$
+    And it is equivalent to the conventional matrix product. Visually, using the Penrsone notation we have:
+    \begin{center}
+    \hfill
+\begin{minipage}{0.2\textwidth}
+    \begin{tikzpicture}
+    \node(X)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{X}$};
+    \node(Y)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$\mathcal{Y}$};
+    \node(i1) at (-1, 0) {$i_1$};
+    \node(j2) at (3, 0) {$j_2$};
+    \draw (X) -- (i1);
+    \draw (Y) -- (j2);
+    \draw (X) -- (Y) 
+        node[above, pos=0.8] {$j_1$}
+        node[above, pos=0.2] {$i_2$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
+    \node(1) at(-1.5, 1);
+    \node(2) at(3, 1);
+    \node(i) at(3, 0.5);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
+        node[above, pos=0.45] {$\mathcal{C}_{i_2}^{j_1}$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
+    \node(Z)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{Z}$};
+    \node(i1) at (-1, 0) {$i_1$};
+    \node(j2) at (1, 0) {$j_2$};
+    \draw (Z) -- (i1);
+    \draw (Z) -- (j2);
+\end{tikzpicture}
+\end{minipage}
+
+    \end{center}
+\end{example}
+
+\begin{example}
+    Suppose that $X \in \mathbb{R}^{3 \times 3 \times 2}, Y \in \mathbb{R}^{2 \times 3 \times 3}$ with their representation
+    in some given basis
+    $$X = \left[ 
+    \begin{pmatrix}
+        1 & 0 & -1 \\
+        0 & 2 & -2 \\
+        -1 & 3 & 1
+    \end{pmatrix} \quad
+    \begin{pmatrix}
+        1 & 1 & 0 \\
+        2 & 0 & 2 \\
+        0 & 3 & 0
+    \end{pmatrix}
+    \right] $$
+  $$Y = \left[ 
+    \begin{pmatrix}
+        1 & 0 & -1 \\
+        0 & 2 & -2 \\
+    \end{pmatrix} \quad
+    \begin{pmatrix}
+        1 & 1 & 0 \\
+        2 & 0 & 2 \\
+    \end{pmatrix} \quad
+    \begin{pmatrix}
+        0 & 1 & 2 \\
+        1 & 0 & 2
+    \end{pmatrix}
+    \right] $$
+
+The contraction described in \figref{fig:tencon} would yield the tensor $\mathcal{Z} = \mathcal{X} \times_3^1 \mathcal{Y} \in \mathbb{R}^{3 \times 3 \times 3 \times 3}$ with
+each element defined as:
+
+$$\mathcal{Z}(i_1, i_2, j_2, j_3) = \sum_{s=1}^2 \mathcal{X}(i_1, i_2, s) \mathcal{Y}(s, j_2, j_3)$$
+
+Therefore,
+
+$$\mathcal{Z} = \begin{pmatrix}
+\begin{pmatrix}
+    1 & 2 & -3 \\
+    3 & 1 & 2 \\
+    1 & 1 & 4 \\
+\end{pmatrix} &
+\begin{pmatrix}
+    0 & 2 & -2 \\
+    2 & 0 & 2 \\
+    1 & 0 & 2
+\end{pmatrix} &
+\begin{pmatrix}
+    -1 & 0 & 1 \\
+    -1 & -1 & 0 \\
+    0 & -1 & -2
+\end{pmatrix} \\
+\begin{pmatrix}
+    0 & 4 & -4 \\
+    4 & 0 & 4 \\
+    2 & 0 & 4
+\end{pmatrix} &
+\begin{pmatrix}
+    2 & 0 & -2 \\
+    2 & 2 & 0 \\
+    0 & 2 & 4
+\end{pmatrix} &
+\begin{pmatrix}
+    -2 & 4 & 6 \\
+    2 & -2 & 4 \\
+    2 & -2 & 0
+\end{pmatrix} \\
+\begin{pmatrix}
+    -1 & 0 & 1 \\
+    -1 & -1 & 0 \\
+    0 & -1 & -2
+\end{pmatrix} &
+\begin{pmatrix}
+    3 & 6 & -9 \\
+    9 & 3 & 6 \\
+    3 & 3 & 12
+\end{pmatrix} &
+\begin{pmatrix}
+    1 & 0 & -1 \\
+    1 & 1 & 0 \\
+    0 & 1 & 2
+\end{pmatrix} \\
+\end{pmatrix}$$
+\label{ex:bigmatrix}
+\end{example}
+
+\subsection *{Matrix tensor contraction}
+
+Note that \refeq{eq:contraction} is almost in the form of matrix product. If we reshape accordingly
+the tensors $\mathcal{X}$ and $\mathcal{Y}$, we can compute $\mathcal{C}_l^k(X \otimes Y)$ as a matrix product.
+\begin{corollary}
+    Let $X \in \mathbb{K}^{N_1 \times \cdots \times N_k \times \cdots \times N_n}, Y \in \mathbb{K}^{M_1 \times \cdots \times M_l \times \cdots \times M_m}$
+    with $1 \leqslant k \leqslant n$, $1 \leqslant l \leqslant m$, $N_k = M_l$. The matrix product
+$$ \mathcal{X}(\overline{i_1, \dots, i_{k-1}}, \overline{i_k, \dots, i_n}) \cdot \mathcal{Y}(\overline{j_1, \dots, j_{l-1}}, \overline{j_l, \dots, j_m}) $$
+    results in a representation of $\mathcal{T} = \mathcal{X} \times_k^l \mathcal{Y}$
+\end{corollary}
+
+\begin{example}
+    Following from \exref{ex:bigmatrix}, we would write $X \in \mathbb{R}^{9 \times 2}$ and $Y \in \mathbb{R}^{2 \times 9}$ as:
+
+    $$X = \begin{pmatrix}
+        1 & 1 \\ 0 & 1 \\ -1 & 0 \\ 0 & 2 \\ 2 & 0 \\ -2 & 2 \\ -1 & 0 \\ 3 & 3 \\ 1 & 0
+        \end{pmatrix} \qquad
+        Y = \begin{pmatrix}
+            1 & 0 & -1 & 1 & 1 & 0 & 0 & 1 & 2 \\
+            0 & 2 & -2 & 2 & 0 & 2 & 1 & 0 & 2
+        \end{pmatrix}$$
+        Therefore:
+    $$Z = XY = \begin{pmatrix}
+        1&	2&	-3&	 3&	 1&	2&	1&	 1&	 4\\
+        0&	2&	-2&	 2&	 0&	2&	1&	 0&	 2\\
+        -1&	0&	 1&	-1&	-1&	0&	0&	-1&	-2\\
+        0&	4&	-4&	 4&	 0&	4&	2&	 0&	 4\\
+        2&	0&	-2&	 2&	 2&	0&	0&	 2&	 4\\
+        -2&	4&	-2&	 2&	-2&	4&	2&	-2&	 0\\
+        -1&	0&	 1&	-1&	-1&	0&	0&	-1&	-2\\
+        3&	6&	-9&	 9&	 3&	6&	3&	 3&	12\\
+        1&	0&	-1&	 1&	 1&	0&	0&	 1&	 2\\
+    \end{pmatrix}$$
+
+    And we can now reshape $Z \in \mathbb{R}^{9 \times 9}$ as the tensor in $\mathbb{R}^{3\times 3\times 3\times 3}$
+    as $$\mathcal{Z}(i_1, i_2, i_3, i_4) = Z(\overline{i_1, i_2}, \overline{i_3, i_4})$$
+    which in fact, is identical to $\mathcal{Z}$ in \exref{ex:bigmatrix}
+\end{example}
+
+\begin{figure}
+\centering
+\tikz {
+    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
+    \node(i) at (-1, 0) {$i_1$};
+    \node(i2) at (-0.7, 0.8) {$i_2$};
+    \node(ip) at (0, -1) {$\dots$};
+    \node(iq) at (0, 1) {$\dots$};
+    \node(in) at (-0.6, -0.8) {$i_n$};
+    \node(ik) at (0.6, 0.5) {$i_k$};
+    \node(ik1) at (1, -0.7) {$i_{k+1}$}
+    \draw (T) -- (i);
+    \draw (T) -- (i2);
+    \draw (T) -- (in);
+    \draw (T) -- (ip);
+    \draw (T) -- (iq);
+    \draw[--] (T) edge[in=15,out=-40,loop] ();
+}
+\caption{
+    A tensor represented with the Penrose Notation with its indexes $i_k$ and $i_{k+1}$ connected as a loop
+}
+\label{fig:loop}
+\end{figure}
+
+\section{Tensor Trace}
+
+There may be the case that when contracting a series of tensors, we might end up as what
+we see as a loop in the Penrose Notation (see \figref{fig:loop}). Contracting over these two indexes we get the trace
+of the tensor $\mathcal{T}$ respect the indices $i_k$ and $i_{k+1}$ and we denote it as $\Tr(T)$ (See \figref{fig:trace}):
+
+\begin{definition}
+    Given a tensor $\matchal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ with $N_k = N_p$ with $1 \leqslant k, p \leqslant n$ and $k \neq p$,
+    we define the trace of $\mathcal{T}$ respect the indices $k$ and $p$ as the tensor $\Tr_k^p(\mathcal{T})$ of order $n - 2$ with its entries defined as:
+    $$\Tr_k^p(\mathcal{T}) (i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_{p-1}, i_{p+1}, \dots, i_n) = \sum_{j = 1}^{N_k} \mathcal{T}(i_1, \dots, i_{k-1}, j, i_{k+1}, \dots, i_{p-1}, j, i_{p+1}, \dots, i_n)$$
+
+\end{definition}
+
+\begin{figure}[h]
+\centering
+
+    \begin{minipage}{0.2\textwidth}
+        \begin{tikzpicture}
+    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
+    \node(i) at (-1, 0) {$i_1$};
+    \node(i2) at (-0.7, 0.8) {$i_2$};
+    \node(i6) at (0, -1) {$i_6$};
+    \node(i3) at (0, 1) {$i_3$};
+    \node(i7) at (-0.6, -0.8) {$i_7$};
+    \node(i4) at (0.6, 0.5) {$i_4$};
+    \node(i5) at (1, -0.7) {$i_5$}
+    \draw (T) -- (i);
+    \draw (T) -- (i2);
+    \draw (T) -- (i3);
+    \draw (T) -- (i6);
+    \draw (T) -- (i7);
+    \draw[--] (T) edge[in=15,out=-40,loop] ();
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.225\textwidth}
+    \begin{tikzpicture}
+    \node(1) at(-1.5, -0.5);
+    \node(2) at(1.5, -0.5);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
+        node[above, pos=0.45] {$\Tr(\mathcal{T})$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.2\textwidth}
+    \begin{tikzpicture}
+    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
+    \node(i) at (-1, 0) {$i_1$};
+    \node(i2) at (-0.7, 0.8) {$i_2$};
+    \node(i6) at (0, -1) {$i_6$};
+    \node(i3) at (0, 1) {$i_3$};
+    \node(i7) at (-0.6, -0.8) {$i_7$};
+    \draw (T) -- (i);
+    \draw (T) -- (i2);
+    \draw (T) -- (i3);
+    \draw (T) -- (i6);
+    \draw (T) -- (i7);
+
+    \end{tikzpicture}
+\end{minipage}
 
 
+\caption{
+    Representation of the trace of a tensor using the Penrose notation
+}
+\label{fig:trace}
+\end{figure}
 
-
-
-
-
-
-
-
-
+Therefore, now one can ask that if we have an arbitrary graph $G$ represented with the Penrose Notation and it is connected,
+we will be able to totally contract it to a single final tensor.
 
 
 
@@ -610,8 +958,11 @@ and a contraction map $\kappa_G$ defined by contracting factors in $\mathbb{E}_j
 $$\kappa_G : \bigotimes\nolimits_{i=1}^d \left[ \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
 \left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right)  \right] \rightarrow \bigotimes\nolimits_{i=1}^d \mathbb{V}_i$$
 
+Note that we have given this shapes to the tensors that we fix onto each vertex
+$i \in V$ because when we contract the whole graph, we will get a tensor of ${\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n}$.
 Since every directed edge $(i,j)$ must point out of a vertex $i$ and point into a vetex $j$, each copy of $\mathbb{E}_j$ is paired with one
-copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined.
+copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined and it results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+(See \figref{fig:tn_graph})
 
 \begin{figure}[h]
     \centering
@@ -672,8 +1023,9 @@ copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined.
     Example of the correspondance between some directed graph $G$ and the vector spaces $\mathbb{V}_1, \dots, \mathbb{V}_d, \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{E}_1^*,
     \dots, \mathbb{E}_c^*$ using the Penrose notation
 }
-\label{tn:graph}
+\label{fig:tn_graph}
 \end{figure}
+
 
 \begin{definition}[Tensor network state]
     If a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be written as $T = \kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ where
@@ -695,8 +1047,18 @@ $$
 $$
 \end{definition}
 Now, since all vector spaces are determined up to isomorphism by its dimension, when the vector spaces $\mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n$ are unimportant,
-we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. We will also make this substitution on the representation of the
-tensor network in the Penrose notation.
+we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. On the Penrose
+Notation representation of the network, we will not write the vector spaces since they are
+not important.
+
+Also, since $n$ is equal to the number of vertices of $G$, we will sometimes write $\TNS(G; R)$ for a more compact notation.
+
+\begin{definition}
+    Given a tensor network state $\TNS(G, R)$, from the graph given by its Penrose Notation,
+    we will call the edges with a dangling end \textit{free edges}, and the edges that connect two vertex \textit{contracted edges}
+\end{definition}
+For example, in \figref{fig:tn_graph}, the edges labeled as $\mathbb{V}_1, \mathbb{V}_2, \mathbb{V}_3, \mathbb{V}_4$ are 
+free edges and the rest are contracted edges.
 
 Now we will give some examples of common tensor network structures:
 
@@ -709,23 +1071,23 @@ train decomposition or matrix product state of $\mathcal{T}$ are a set of $3$th-
     $\mathcal{G}_i \in \mathbb{R}^{R_{i-1} \times N_i \times R_i}$ and $R_0 = R_n = 1$ such that every element of $\mathcal{T}$ is written in the
     form
     \begin{equation} \label{eq:tt-contraction}
-    \mathcal{T}(i_1,i_2,\dots,i_n) = \sum_{r_0, \dots, r_n}^{R_0, \dots, R_n} \mathcal{G}(r_0, i_1, r_1) \mathcal{G} (r_1, i_2, r_2) \cdots \mathcal{G}(r_{n-1}, i_n, r_n)
+    \mathcal{T}(i_1,i_2,\dots,i_n) = \sum_{r_0, \dots, r_n}^{R_0, \dots, R_n} \mathcal{G}_1(r_0, i_1, r_1) \mathcal{G}_2 (r_1, i_2, r_2) \cdots \mathcal{G}_n(r_{n-1}, i_n, r_n)
 \end{equation}
 We denote $R_0, R_1, \dots, R_n$ as the ranks of the tensor train decomposition, or $TT$-ranks.
 \end{example}
 
 We can easily see that the tensor train decomposition (or TT) is obtained by our definition of a tensor network when $G$ is a path, also
-the contraction of the whole network yields (\ref{eq:tt-contraction})
+the contraction of the whole network yields \refeq{eq:tt-contraction}
 
 
 \begin{figure}[h]
     \centering
    \begin{minipage}{0.3\textwidth}
 \begin{tikzpicture}[scale=0.85, arrows = {-Latex[length=8pt, inset=2pt]}]
-    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-4,0) {$1$};
-    \node(2)[draw, shape=circle, minimum size=0.8cm] at (-1,0) {$2$};
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-4,0) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (-1,0) {$\mathcal{G}_2$};
     \node(3)[shape=circle, minimum size=0.8cm] at (2,0) {$\dots$};
-    \node(4)[draw, shape=circle, minimum size=0.8cm] at (5,0) {$n$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (5,0) {$\mathcal{G}_n$};
     \node(i1) at (-4, 1) {$N_1$};
     \node(i2) at (-1, 1) {$N_2$};
     \node(i4) at (5, 1) {$N_n$};
@@ -782,19 +1144,19 @@ the contraction of the whole network yields (\ref{eq:tt-contraction})
     \normalfont{\cite{zhaoTensorRingDecomposition2016}} Tensor ring decomposition (or TR) or also known a matrix product state with periodic boundary conditions, is obtained when $G$ is a cycle.
 \end{example}
 Tensor Ring decomposition is considered generalization of Tensor Train decomposition, it's contraction is the same as
-(\ref{eq:tt-contraction}) but removing the condition $R_0 = R_1 = 1$.
+\refeq{eq:tt-contraction} but removing the condition $R_0 = R_1 = 1$.
 
 \begin{figure}[h]
 
     \centering
    \begin{minipage}{0\textwidth}
 \begin{tikzpicture}[scale=0.85, arrows = {-Latex[length=8pt, inset=2pt]}]
-    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-1,2) {$1$};
-    \node(2)[draw, shape=circle, minimum size=0.8cm] at (1,2) {$2$};
-    \node(3)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$3$};
-    \node(4)[draw, shape=circle, minimum size=0.8cm] at (1,-2) {$4$};
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-1,2) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (1,2) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$\mathcal{G}_3$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (1,-2) {$\mathcal{G}_4$};
     \node(5)[shape=circle, minimum size=0.8cm] at (-1,-2) {$\dots$};
-    \node(n)[draw, shape=circle, minimum size=0.8cm] at (-2,0) {$n$};
+    \node(n)[draw, shape=circle, minimum size=0.8cm] at (-2,0) {$\mathcal{G}_n$};
 
     \node(i1) at (-1.5, 3) {$N_1$};
     \node(i2) at (1.5, 3) {$N_2$};
@@ -859,53 +1221,112 @@ The fully connected tensor network decomposition is obtenied when $G$ is a compl
 \end{example}
 
 \begin{figure}[h]
-    \begin{tikzpicture}
 
+    \centering
+   \begin{minipage}{0\textwidth}
+\begin{tikzpicture}[scale=0.75, arrows = {-Latex[length=8pt, inset=2pt]}]
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-1.5,3) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (1.5,3) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$\mathcal{G}_3$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (1.5,-3) {$\mathcal{G}_4$};
+    \node(5)[shape=circle, minimum size=0.8cm] at (-1.5,-3) {$\dots$};
+    \node(n)[draw, shape=circle, minimum size=0.8cm] at (-3,0) {$\mathcal{G}_n$};
+
+    \node(i1) at (-2, 4) {$N_1$};
+    \node(i2) at (2, 4) {$N_2$};
+    \node(i3) at (4.5, 0) {$N_3$};
+    \node(i4) at (2, -4.5) {$N_4$};
+    \node(in) at (-4.5, 0) {$N_n$};
+
+    \draw (1) -> (2)
+    \draw (2) -> (3)
+    \draw (3) -> (4)
+    \draw (4) -> (5)
+    \draw (5) -> (n)
+    \draw (n) -> (1)
+
+    \draw (1) -> (3)
+    \draw (1) -> (4)
+
+    \draw (2) -> (n)
+    \draw (2) -> (4)
+
+    \draw (3) -> (n)
+
+    \draw (1) -> (5)
+    \draw (2) -> (5)
+    \draw (3) -> (5)
+
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+    \draw[--] (n) -- (in);
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.235\textwidth}
+    \begin{tikzpicture}
+    \node(1) at(-1.5, -0.5);
+    \node(2) at(1.5, -0.5);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
+        node[above, pos=0.45] {$\kappa_G$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+    \begin{tikzpicture}
+        \node(T)[draw, shape=circle, minimum size=0.8cm] at(0,0) {$T$};
+   \node(i1) at (-1, 0) {$N_1$};
+    \node(i2) at (-0.4, 1) {$N_2$};
+    \node(i3) at (0.4, 1) {$\dots$};
+    \node(i4) at (1, 0) {$N_n$};
+    \draw (T) -- (i1);
+    \draw (T) -- (i2);
+    \draw (T) -- (i3);
+    \draw (T) -- (i4);
     \end{tikzpicture}
+\end{minipage}
+
     \caption{Fully connected tensor network decomposition (FCTN)}
-    \label{fctn:schema}
+    \label{tctn:schema}
 \end{figure}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Approximating tensors to tensor network states}
+\section{Finding approximate tensor states}
 
 Now, one natural question that might occur is, given some tensor $T \in \mathbb{V}_1 \otimes \cdots \times \mathbb{V}_n$ and a 
-tensor network $X = \TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$, can we ensure that $T \in X$? (i.e $T$ is an state of $X$) And if not, given all $\mathcal{X} \in X$,
-can we find an $\mathcal{X}_0 \in X$ such that $\| T - \mathcal{X}_0 \|_F$ is minimal?
+tensor network $X = \TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$, can we ensure that $T \in X$ for some
+$R_1, \dots, R_c \in \mathbb{N}$? And if we cannot, can we find some values $R_1, \dots, R_c \in \mathbb{N}$
+and some state $\mathcal{X}_0 \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$ such that $\| T - \mathcal{X}_0 \|_F$ is minimal?
 
-The following theorem gives us that by some $R_1, \dots, R_c$, every tensor $T$ can be a state of $X$:
+The following theorem gives us that if we make $R_1, \dots, R_c$ big enough, every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
+In fact, these values that guarantees that $T$ is an state are $R_1 = \dots R_c = \rank T$ where $\rank T$ is the \textit{traditional rank}
+of a tensor. We will give now the definition of the traditional rank:
+
+\begin{definition} 
+    We say that a tensor has \textbf{traditional rank} $r$ and we write $\rank{T} = r$
+    with $r \in \mathbb{N}$ being the minimum value such that we can write $T$ as
+$$T= \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$$
+where $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$
+\end{definition}
+
+We can immediatly see that $\rank{T} \leqslant \prod_{i=1}^n N_i$.
+Unlike matrices, determining the rank of a tensor is an NP-hard problem. \cite{hillarMostTensorProblems2013}. Even
+finding the maximum traditional rank of a tensor space (that means finding $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$) it still remains as an open problem.
+We can find an slightly better upper bound for the tensor rank:
+\begin{proposition}
+    \begin{equation} \label{eq:rank-dimensional-bound}
+        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
+    \end{equation}
+
+\begin{proof}
+    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
+    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
+    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
+    determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
+\end{proof}
+\end{proposition}
 
 \begin{theorem} \normalfont{\cite{yeTensorNetworkRanks2019}} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
     There exists $R_1, \dots, R_c \in \mathbb{N}$ such that
@@ -925,27 +1346,318 @@ The following theorem gives us that by some $R_1, \dots, R_c$, every tensor $T$ 
     to a sum of terms of the form $v_p^{(1)} \otimes \cdots \otimes v_p^{(d)}$ for $p = 1, \dots, r$, which is of course $T$
 \end{proof}
 
-This theorem serves as an upper bound for our problem.
-Suppose that $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ and $\rank T = \prod_{i=1}^n N_i$. This theorem says that given any connected
-directed graph $G$ we can express of 
-We will see that in fact, we can find some graphs $G$ where $T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)$
-with $R_1, \dots, R_c < \rank{T}$
+This theorem serves as an upper bound for our problem. But either way it is still very big. We can take a different approach:
+we can fix $G, R_1, \dots, R_c$ and then find the cores of the tensor network that approximate better to our
+objective tensor $T$. That means finding
 
-\section{The tensor tensor network structure space}
+\begin{equation}
+\argmin_{\mathcal{G}_1, \dots, \mathcal{G}_n} \|T - \kappa_G (\mathcal{G}_1, \dots, \mathcal{G}_n) \|_F
+\label{eq:minarg}
+\end{equation}
+We will discuss some algorithms that gives us a solution to \refeq{eq:minarg}
 
-\section{Finding the best structure}
+\subsection{Alternating least squares method}
+
+\cite{malikSamplingBasedDecompositionAlgorithms2022a}
+Suppose we want to only optimize the function \refeq{eq:minarg} for 
+only one variable core $\mathcal{G}_m$ leaving the rest fixed. Then our problem would become
+$$\argmin_{\mathcal{G}_m} \|T - \kappa_G(\mathcal{G}_1, \dots, \mathcal{G}_n)\|_F$$
+Now, we could apply our contraction mapping $\kappa_G$ for all cores excluding $\mathcal{G}_m$ (\figref{fig:als_tr,fig:als_con}).
+We will call this tensor $\mathcal{G}^{\neq m}$. Now, if we consider appropiate matricizations $T^{(m)}$, $G^{\neq m}$ and $G_m$
+of $T$, $\mathcal{G}^{\neq m}$ and $\mathcal{G}_i$ respectively, evaluating the whole tensor network
+is equal to computing the product $G^{\neq m} G_m$, so our problem is equivalent to solve the 
+following linear least squares problem:
+\begin{equation}
+    \argmin_{G_m} \| G^{\neq m} G_m - T^{(m)}\|_2
+\label{eq:als}
+\end{equation}
+Let $x^{(i)}$ be the $i$-th column of $G_m$ and $y^{(i)}$ the $i$-th
+column of $T^{(m)}$. Solving \ref{eq:als} means solving for each $i$ 
+\begin{equation}
+    \argmin_{x^{(i)}} \| G^{\neq m} x^{(i)} - y^{(i)} \|_2
+\end{equation}
+
+Since we can't assure that there exists an exact solution to $G^{\neq m} x^{(i)} = y^{(i)}$,
+we can use the solution to the normal equation $(G^{\neq m})^T G^{\neq m} x^{(i)} = (G^{\neq m})^T y^{(i)}$.
+
+Now we can iteratively change the varying core tensor $\mathcal{G}_i$ until the contraction of the whole tensor network
+is $T$ with some fixed error $\epsilon$:
+
+\begin{algorithm}
+    \caption{Tensor Network ALS}
+
+    \hspace*{\algorithmicindent} \textbf{Input}: A tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ and some fixed error $\epsilon$ \\
+    \hspace*{\algorithmicindent} \textbf{Output}: Core tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$ 
+
+    \begin{algorithmic}[1]
+        \State Initialize tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$
+        \While{$\|T - \kappa_G (\mathcal{G}_1, \dots, \mathcal{G}_n)\|_F > \epsilon$ }
+            \For {$k = 1, \dots, n$}
+            \State $\mathcal{G}_m \leftarrow \argmin_{G_m} \|G^{\neq m} G_m - T^{(m)}\|_2$
+            \EndFor
+        \EndWhile
+        \State \Return $\mathcal{G}_1, \dots, \mathcal{G}_n$
+
+    \end{algorithmic}
+
+\end{algorithm}
 
 
-\cite{liPermutationSearchTensor2022}
+\begin{figure}[h]
+
+    \centering
+   \begin{minipage}{0\textwidth}
+       \begin{tikzpicture}[scale=0.85]
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-1,2) {$\mathcal{G}_2$};
+    \node(2)[draw, shape=circle, fill=lightgray, minimum size=0.8cm] at (1,2) {$\mathcal{G}_3$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$\mathcal{G}_4$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (1,-2) {$\mathcal{G}_5$};
+    \node(5)[draw, shape=circle, minimum size=0.8cm] at (-1,-2) {$\mathcal{G}_6$};
+    \node(n)[draw, shape=circle, minimum size=0.8cm] at (-2,0) {$\mathcal{G}_1$};
+
+\node(I) at(2.5, 4) {$\kappa_G(\mathcal{G}_1, \dots, \mathcal{G}_n)$}
+
+    \node(i1) at (-1.5, 3) {$N_2$};
+    \node(i2) at (1.5, 3) {$N_3$};
+    \node(i3) at (3.25, 0) {$N_4$};
+    \node(i4) at (1.5, -3) {$N_5$};
+    \node(i5) at (-1.5, -3) {$N_6$};
+    \node(in) at (-3.25, 0) {$N_1$};
+
+    \draw (1) -> (2)
+    node[above, pos=0.5] {$R_2$}
+    \draw (2) -> (3)
+    node[above right, pos=0.5] {$R_3$}
+    \draw (3) -> (4)
+    node[below right, pos=0.5] {$R_4$}
+    \draw (4) -> (5)
+    node[below, pos=0.5] {$R_5$}
+    \draw (5) -> (n)
+        node[right, pos=0.5] {$R_6$}
+    \draw (n) -> (1)
+    node[below right, pos=0.5] {$R_1$}
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+    \draw[--] (5) -- (i5);
+    \draw[--] (n) -- (in);
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.235\textwidth}
+    \begin{tikzpicture}
+        \node(a) at (-2, 0);
+    \node(1) at(-1.5, 0);
+    \node(2) at(1.25, 0);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2);
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.35\textwidth}
+    \begin{tikzpicture}[scale=0.85]
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (0,4) {$\mathcal{G}_4$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (0,2) {$\mathcal{G}_5$};
+    \node(5)[draw, shape=circle, minimum size=0.8cm] at (0, 0) {$\mathcal{G}_6$};
+    \node(0)[draw, shape=circle, minimum size=0.8cm] at (0, -2) {$\mathcal{G}_1$};
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0, -4) {$\mathcal{G}_2$};
+
+    \node(ii1) at (0, 5) {};
+    \node(i3) at (-1.5, 4) {$N_4$};
+    \node(i4) at (-1.5, 2) {$N_5$};
+    \node(i5) at (-1.5, 0) {$N_6$};
+    \node(i0) at (-1.5, -2) {$N_1$};
+    \node(i1) at (-1.5, -4) {$N_2$};
+    \node(ii2) at (0, -5) {};
+
+    \node(I) at (2, 4) {$\mathcal{G}^{\neq 2}$};
+
+    \draw (3) -> (4)
+    node[right, pos=0.5] {$R_4$}
+    \draw (4) -> (5)
+    node[right, pos=0.5] {$R_5$}
+    \draw (5) -> (0)
+    node[right, pos=0.5] {$R_6$}
+    \draw (0) -> (1)
+    node[right, pos=0.5] {$R_1$}
+    \draw[--] (1) -- (ii2)
+    node[right] {$R_3$};
+    \draw[--] (ii1) -- (3)
+    node[above right, pos=1] {$R_2$};
+
+
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+    \draw[--] (5) -- (i5);
+    \draw[--] (0) -- (i0);
+    \end{tikzpicture}
+\end{minipage}
+
+\caption{The representation of $\mathcal{G}^{\neq m}$ on the TR decomposition, with $m = 2$ }
+    \label{fig:als_tr}
+\end{figure}
+%
+%
+%
+%
+%
+%
+%
+%
+\begin{figure}[h]
+    \centering
+   \begin{minipage}{0\textwidth}
+       \begin{tikzpicture}[scale=0.8]
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,4) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3.5,4) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (-2,2) {$\mathcal{G}_3$};
+    \node(4)[draw, fill=lightgray, shape=circle, minimum size=0.8cm] at (1.75,2) {$\mathcal{G}_4$};
+    \node(5)[draw, shape=circle, minimum size=0.8cm] at (5,2) {$\mathcal{G}_5$};
+    \node(6)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{G}_6$};
+    \node(7)[draw, shape=circle, minimum size=0.8cm] at (3.5,0) {$\mathcal{G}_7$};
+
+
+    \node(I) at(1.75, 6.5) {$\kappa_G(\mathcal{G}_1, \dots, \mathcal{G}_n)$}
+
+    \node(i1) at (0, 5.25) {$N_1$};
+    \node(i2) at (3.5, 5.25) {$N_2$};
+    \node(i3) at (-2, 3.25) {$N_3$};
+    \node(i4) at (0.75, 2.75) {$N_4$};
+    \node(i5) at (5, 3.25) {$N_5$};
+    \node(i6) at (0, -1.25) {$N_6$};
+    \node(i7) at (3.5, -1.25) {$N_7$};
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+    \draw[--] (5) -- (i5);
+    \draw[--] (6) -- (i6);
+    \draw[--] (7) -- (i7);
+
+    \draw (1) -> (2)
+    node[above, pos=0.5] {$R_1$};
+    \draw (2) -> (5)
+    node[below left, pos=0.5] {$R_2$};
+    \draw (4) -> (2)
+    node[above left, pos=0.5] {$R_3$};
+    \draw (3) -> (6)
+    node[below left, pos=0.5] {$R_4$};
+    \draw (6) -> (4)
+    node[above left, pos=0.5] {$R_5$};
+    \draw (4) -> (7)
+    node[left, pos=0.5] {$R_6$};
+    \draw (7) -> (5)
+    node[above left, pos=0.5] {$R_7$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.235\textwidth}
+    \begin{tikzpicture}
+        \node(a) at (-2, 1);
+    \node(1) at(-1.5, 0);
+    \node(2) at(1.25, 0);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2);
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.35\textwidth}
+    \begin{tikzpicture}[scale=0.8]
+    
+        \node(I) at(1.75, 6.5) {$\mathcal{G}^{\neq 4}$}
+
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,4) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3.5,4) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (-2,2) {$\mathcal{G}_3$};
+    \node(4)[shape=circle, minimum size=0.8cm] at (1.75,2);
+    \node(5)[draw, shape=circle, minimum size=0.8cm] at (5,2) {$\mathcal{G}_5$};
+    \node(6)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{G}_6$};
+    \node(7)[draw, shape=circle, minimum size=0.8cm] at (3.5,0) {$\mathcal{G}_7$};
+
+    \node(i1) at (0, 5.25) {$N_1$};
+    \node(i2) at (3.5, 5.25) {$N_2$};
+    \node(i3) at (-2, 3.25) {$N_3$};
+    \node(i5) at (5, 3.25) {$N_5$};
+    \node(i6) at (0, -1.25) {$N_6$};
+    \node(i7) at (3.5, -1.25) {$N_7$};
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (5) -- (i5);
+    \draw[--] (6) -- (i6);
+    \draw[--] (7) -- (i7);
+
+    \draw (1) -> (2)
+    node[above, pos=0.5] {$R_1$};
+    \draw (2) -> (5)
+    node[below left, pos=0.5] {$R_2$};
+    \draw (4) -> (2)
+    node[above left, pos=0.5] {$R_3$};
+    \draw (3) -> (6)
+    node[below left, pos=0.5] {$R_4$};
+    \draw (6) -> (4)
+    node[above left, pos=0.5] {$R_5$};
+    \draw (4) -> (7)
+    node[left, pos=0.5] {$R_6$};
+    \draw (7) -> (5)
+    node[above left, pos=0.5] {$R_7$};
+
+    \end{tikzpicture}
+\end{minipage}
+
+\caption{The representation of $\mathcal{G}^{\neq m}$ on the TR decomposition, with $m = 2$ }
+    \label{fig:als_con}
+\end{figure}
+
+
+By now, we know that for any tensor $T$, if we choose a graph $G = (V, E)$ we can choose 
+$R_1, \dots, R_c \leqslant \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor$
+such that $T \in \TNS(G, R)$. We can also find thanks to the ALS algorithm the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ of 
+$\TNS(G, R)$. The only thing that remains is how we pick an optimal $G$ for compressing $T$ with a fixed error $\epsilon$, since we know that
+the optimal graph for a tensor network state of a given tensor $T$ depends on the underlying data of $T$ itself.
+
+We will aim to search the tensor network that gives the best compression ratio for $T$, for that, we will define the size 
+of a tensor network:
+
+\begin{definition}
+    \cite{guoTensorNetworkStructure2025}
+    Given a tensor network state $\TNS(G, R)$, we define $$\size(G, R) = \sum_{i=1}^c \size\mathcal{G}_i$$
+\end{definition}
+
+We would want to solve
+
+$$\arg\min_{G, R} \;\size(G, R) \quad s.t \quad \|\kappa_G(\mathcal{G}_1, \dots, \mathcal{G}_c) - T\|_F \leqslant \epsilon \|T\|_F$$
+
+
+
+
+
+
+
+
+
+
+\chapter{Topological search on the tensor network structure space}
+
+Let $\mathcal{X} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ an $n$-order tensor. Let the following problem:
+
+$$ \min_{r \in \mathbb{K}_{K_N} } \phi(K_N, r) \quad s.t\; \mathcal{X} \in \TNS{(K_N, r)} $$ 
+
+
+% \cite{liPermutationSearchTensor2022}
 
 
 TODO:
+Suposo que començar per dir quines parts del graf caldria tallar maybe???
+Fer més representacions gràfiques de segons quina demostració com més clar quedi tot millor
 \begin{itemize}
 \item Descriure $G$-ranks
 \item Algorismes per aproximar TNS per $G$-ranks propers i mínims si es pot fer
 \item Algun algorisme per trobar heuristicament els $G$-ranks adequats? (suposo q depen de compressió ratio i l'error relatiu)
 \item Com podem trobar un $G$ adequat?
-\item Estratègies per contraure tensors més ràpidament? (DRMG)
+\item Estratègies per contraure tensors més ràpidament? (DRMG?)
 \item Algorismes, part pràctica en C/C++
 \item Fer moltes gràfiques
 \item Fer aplicacions per machine learning, etc.
@@ -965,6 +1677,8 @@ TODO:
 
 \chapter{Conclusions}
 
+TODO
+
 Fent servir un s\'{\i}mil geom\`etrico-cartogr\`afic, aquesta mem\`oria constitueix un mapa a escala planet\`aria de la demostraci\'o de la conjectura feble de Goldbach presentada per Helfgott i un mapa a escala continental de la verificaci\'o num\`erica d'aquesta. Estudis posteriors i m\'es profunds haurien de permetre elaborar mapes de menor escala.
 
 La naturalesa dels nombres primers ens ha portat per molts racons diferents de les Matem\`atiques; en no imposar-nos restriccions en la forma de pensar, hem pogut gaudir del viatge i assolir els objectius que ens vam plantejar a l'inici del projecte i anar m\'es enll\`a, sobretot en el camp de la computaci\'o i la manipulaci\'o de grans volums de dades num\`eriques.
@@ -980,16 +1694,18 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 \printbibliography
 
 \appendix
-\chapter{Proofs}
-\section{Tensor contractions}
+\chapter{Chapter 1}
+
+%\section{Tensor contractions}
+
 %\begin{definition}[Tensor contraction]
 %    (https://math.stackexchange.com/questions/1792230/coordinate-free-notation-for-tensor-contraction)
 %\end{definition}
 
-Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_k \otimes \cdots \otimes \mathbb{V}_p \otimes \mathbb{W}_1^* \otimes \cdots
-\otimes \mathbb{W}_l \otimes \cdots \otimes \mathbb{W}_q$
+%Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_k \otimes \cdots \otimes \mathbb{V}_p \otimes \mathbb{W}_1^* \otimes \cdots
+%\otimes \mathbb{W}_l \otimes \cdots \otimes \mathbb{W}_q$
 
  
-\chapter{Experimental results}
+%\chapter{Experimental results}
 \end{document} 
 

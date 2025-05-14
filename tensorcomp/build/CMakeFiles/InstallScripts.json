@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/arans/TFG/tensorcomp/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

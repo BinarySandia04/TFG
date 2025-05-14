@@ -1,0 +1,7 @@
+/home/arans/TFG/tensorcomp/build/CMakeFiles/TensorComp.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/edit_cache.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/rebuild_cache.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/list_install_components.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/install.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/install/local.dir
+/home/arans/TFG/tensorcomp/build/CMakeFiles/install/strip.dir
