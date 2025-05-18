@@ -206,43 +206,46 @@ We can represent the weights of a fully connected neural network as a matrix, th
 since the recent rise on complexity of neural networks, weight matrices can be very large and there is a lot of
 interest on compressing weight matrices without sacrificing accuracy or performance.
 
+Since we can reshape the weight matrix into a tensor, in this thesis, we will aim to compress a tensor
+using tensor networks, a concept that originates from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
+and recently has gained traction on machine learning.
 
+The objective of this thesis is given a tensor $T$, finding the tensor network structure that
+is represented by tensors of smaller rank (called core tensors) that, when the whole
+network is evaluated, represent $T$ well enough given a fixed error $\epsilon$. We will also minimize the computational cost 
+when it comes to contracting the whole network for retrieving the representation of the original tensor.
 
-A well known problem in science and engineering is to retrieve a function given some data. It may be
-for example the solution of a partially differentiable equation given some boundary conditions or initial data or
-even a target function to be learned from some training set data. \cite{yeTensorNetworkRanks2019}
+We will see that finding the best structure is an integer programming problem, that is $NP$-hard. We will deduce
+and give an algorithm that finds a locally best structure by using program synthesis, and finally, we will compare this 
+structure with some other more studied cases of tensor networks, as Tensor Train networks, Tensor Ring networks and
+fully connected tensor networks
 
-Explicar que normalment es que les funcions que resulten d'aixo segurament viuen en un espai molt gran, segurament
-amb una dimensió molt alta i que una cosa
-que s'hi sol fer es assumir per exemple que la nostra funció és pot reescriure com una de low-rank, és a dir, que es pot escriure com la suma
-d'unes altres funcions.
-
-A partir d'això entren en joc un concepte originat de part de la física, les tensor networks. Les tensor networks no són més
-que representacions de tensors, normalment d'ordre alt, que es poden recuperar a partir de contraure diferents tensors d'ordres més
-petits. Resulta que les tensor networks, si representem les dades de la nostra funció com un tensor d'ordre alt, no acaben sent més que
-aproximacions low-rank del nostre problema.
-
-L'objectiu final d'aquest treball es intentar donar una solució óptima a aquest problema utilitzant xarxes tensorials i després mostrar
-alguna aplicació en diferents camps de la física i del machine learning.
-
-En resum hauria d'explicar el problema sencer
-
-\section{Objectives}
-
-TODO: Estructura de la memòria
-
-Parlar sobre alguns problemes dels quals es requereix comprimir matrius bastant grans, com per exemple
-fully connected tensor networks, o estats físics. Així que l'objectiu d'aquest treball consistirà en:
-
-\begin{itemize}
-    \item Explicar com podem representar tensor amb alta dimensional com la contracció d'uns determinats tensors de dimensionalitat molt més baixa
-    \item Explorar de quina forma és més óptima fer aquestes contraccions, i en quin ordre per aconseguir una millor contracció amb menys temps de complexitat
-\end{itemize}
+%\section{Objectives}
 
 \section{Thesis structure}
 
-\section{Preliminaries}
+First we will present some preliminaries about tensor algebra. Then, we will introduce the
+diagrammatic notation made by Roger Penrose in the earlies 1970. We will
+use it for representing both matrix product states and tensor networs.
 
+Then, we will give a formal introduction in tensor networks, based in most part from \cite{yeTensorNetworkRanks2019}.
+We will introduce also well studied tensor networks such as the Tucker decomposition, the tensor train decomposition, the tensor ring decomposition,
+the fully connected tensor network decomposition.
+
+We will make special emphasis on tree tensor networks, since they have some nice properties that we can later use
+for splitting tensor networks. We will also describe the alternating least squares algorithm applied to tensor networks
+for finding approximated states for any tensor network.
+
+Finally, we will explain some algorithms for finding optimal tensor network structures. We will give an algorithm for
+finding a general tensor network structure based following \cite{liPermutationSearchTensor2022} and we will also describe an algorithm for finding an 
+optimal tensor network tree structure using program synthesis following mainly from the paper \cite{guoTensorNetworkStructure2025}
+
+
+
+\chapter{Preliminaries}
+
+
+\section{Graph Theory}
 
 \begin{definition}[Graph]
     \normalfont{\cite{wilsonIntroductionGraphTheory2009}}
@@ -333,7 +336,6 @@ $$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$
 
 
 
-\chapter{Tensors}
 
 In this chapter we will introduce the basics of tensor algebra and we will present some results that will be useful in the
 following chapters
@@ -455,7 +457,27 @@ We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1
 We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, \dots, n))}$
 \end{definition}
 
-TODO: Posar dibuix de tensor unfolding
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \pgfmathsetmacro{\cubex}{2}
+        \pgfmathsetmacro{\cubey}{2}
+        \pgfmathsetmacro{\cubez}{2}
+        \pgfmathsetmacro{\coordx}{0}
+        \pgfmathsetmacro{\coordy}{0}
+        \pgfmathsetmacro{\coordz}{0}
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+        
+
+        \node(j3) at (-1, -1) {$T$};
+        
+
+    \end{tikzpicture}
+    \label{fig:mode_unfolding}
+    \caption{Tensor unfolding}
+\end{figure}
 
 \begin{definition}[Tensor slices]
 %Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
@@ -474,6 +496,28 @@ TODO: Posar dibuix de tensor unfolding
 
     We will denote $\mathcal{T}^{(m)} := \mathcal{T}(:, \dots, :, i_m, :, \dots, :)$ and $\mathcal{T}^{(\neq m)} := \mathcal{T}(i_1, \dots, i_{m-1}, :, i_{m+1}, \dots, i_n)$
 \end{definition}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \pgfmathsetmacro{\cubex}{2}
+        \pgfmathsetmacro{\cubey}{2}
+        \pgfmathsetmacro{\cubez}{2}
+        \pgfmathsetmacro{\coordx}{0}
+        \pgfmathsetmacro{\coordy}{0}
+        \pgfmathsetmacro{\coordz}{0}
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
+        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+        
+
+        \node(j3) at (-1, -1) {$T$};
+        
+
+    \end{tikzpicture}
+    \label{fig:slicing}
+    \caption{Tensor slices}
+\end{figure}
 
 
 \begin{example}
@@ -511,6 +555,8 @@ We will now present an slightly better upper bound for the tensor rank:
     determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
 \end{proof}
 \end{proposition}
+
+\chapter{Tensor networks}
 
 \section{Penrose Notation}
 
@@ -572,7 +618,11 @@ $$
 = \left(\bigotimes\nolimits_{i=1}^{k-1} v_i \otimes \bigotimes\nolimits_{i=k+1}^p v_{i} \otimes
     \bigotimes\nolimits_{i=1}^{l-1} f_i \otimes \bigotimes_{i=l+1}^q f_i \right) f_l(v_k)$$
 $\mathcal{C}_k^l$ is defined as the tensor contraction mapping of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_p \otimes \mathbb{V}_{p+1}^* \otimes
-\cdots \otimes \mathbb{V}_q^*$ by the indices $(k,l)$. We call $\mathcal{C}_k^l(T)$ the contraction of $T$ by indices $(k,l)$
+\cdots \otimes \mathbb{V}_q^*$ by the indices $(k,l)$. We call $\mathcal{C}_k^l(T)$ the contraction of $T$ by indices $(k,l)$. In other words, we apply
+the dual space $\mathbb{V}_k^*$ with $\mathbb{V}_k$.
+
+Now we will introduce the definition of the contraction between two tensors by defining a contraction over the tensor product
+of the two original tensors.
 \end{definition}
 
 \begin{definition}
@@ -583,7 +633,7 @@ $\mathcal{C}_k^l$ is defined as the tensor contraction mapping of $\mathbb{V}_1 
     indices $(k,l)$ as $$X \times^l_k Y := \mathcal{C}_k^l(X \otimes Y)$$
 \end{definition}
 
-We will represent the contraction between two tensors $\mathcal{X} \in \mathbb{K}^{N_1 \times \cdots \times N_n}, \mathcal{Y} \in \mathbb{K}^{M_1 \times \cdots \times M_m}$
+We will represent the contraction between two tensors 
 as their representation in the Penrose notation with the edges that represent the indexes that are contracting by joining them, as seen in \figref{fig:tencon}.
 
 
@@ -847,8 +897,6 @@ $$ \mathcal{X}(\overline{i_1, \dots, i_{k-1}}, \overline{i_k, \dots, i_n}) \cdot
 \label{fig:loop}
 \end{figure}
 
-\section{Tensor Trace}
-
 There may be the case that when contracting a series of tensors, we might end up as what
 we see as a loop in the Penrose Notation (see \figref{fig:loop}). Contracting over these two indexes we get the trace
 of the tensor $\mathcal{T}$ respect the indices $i_k$ and $i_{k+1}$ and we denote it as $\Tr(T)$ (See \figref{fig:trace}):
@@ -917,12 +965,7 @@ Therefore, now one can ask that if we have an arbitrary graph $G$ represented wi
 we will be able to totally contract it to a single final tensor.
 
 
-
-
-
-
-
-\chapter{Tensor Networks}
+\section{Tensor Network States}
 
 The concept of tensor networks originated from a physics background. Roger Penrose described how its
 diagrammatic language could be used in various applications of physics \cite{rogerPenroseApplications}.
@@ -931,17 +974,16 @@ Later, in 1992, Steven R. White developed de Density Matrix Renormalization Grou
 quantum lattice systems. It was considered the first successfull tensor network application \cite{whiteDensityMatrixFormulation1992}.
 
 % Canviar aquest paràgraf
-The commonly use terminology "tensor decomposition" (TD) is equivalent to "tensor network" to some extent. After
+The commonly use terminology "tensor decomposition" is equivalent to "tensor network" to some extent. After
 several years of progress accross different research fields, there is no significant distinction between tensor decomposition
-and tensor networks. TD was employed primarly in signal processing fields \cite{wangTensorNetworksMeet2023}. Traditional TD models can be viewed
+and tensor networks. Tensor decomposition was employed primarly in signal processing fields \cite{wangTensorNetworksMeet2023}. Traditional
+tensor decomposition models can be viewed
 as basic kinds of tensor networks. In this thesis we will study some of the properties of different tensor decomposition methods,
 and their effectivity.
 
-In this chapter, we will define a mathematic definition of a tensor decomposition based on \cite{yeTensorNetworkRanks2019}, we will
+We will define a mathematic definition of a tensor decomposition based on \cite{yeTensorNetworkRanks2019}, we will
 see some common examples of tensor decompositions and we will define the 
 tensor network structure space.
-
-\section{Tensor networks and tensor network states}
 
 Informally, the way we construct a tensor network consists of picking a directed graph $G = (V, \bar{E})$, and for each vertex $i \in V$ we assign
 a vector space $\mathbb{V}_i$ and for each edge $(i,j) \in \bar{E}$ we assign a vector space $\mathbb{E}_i$ to the tail of the edge and its 
@@ -1060,7 +1102,71 @@ Also, since $n$ is equal to the number of vertices of $G$, we will sometimes wri
 For example, in \figref{fig:tn_graph}, the edges labeled as $\mathbb{V}_1, \mathbb{V}_2, \mathbb{V}_3, \mathbb{V}_4$ are 
 free edges and the rest are contracted edges.
 
-Now we will give some examples of common tensor network structures:
+The following theorem gives us that if we make $R_1, \dots, R_c$ big enough, every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
+In fact, these values that guarantees that $T$ is an state are $R_1 = \dots R_c = \rank T$ where $\rank T$ is the \textit{traditional rank}
+of a tensor. We will give now the definition of the traditional rank:
+
+\begin{definition} 
+    We say that a tensor has \textbf{traditional rank} $r$ and we write $\rank{T} = r$
+    with $r \in \mathbb{N}$ being the minimum value such that we can write $T$ as
+$$T= \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$$
+where $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$
+\end{definition}
+
+We can immediatly see that $\rank{T} \leqslant \prod_{i=1}^n N_i$.
+Unlike matrices, determining the rank of a tensor is an NP-hard problem. \cite{hillarMostTensorProblems2013}. Even
+finding the maximum traditional rank of a tensor space (that means finding $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$) it still remains as an open problem.
+We can find an slightly better upper bound for the tensor rank:
+\begin{proposition}
+    \begin{equation} \label{eq:rank-dimensional-bound}
+        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
+    \end{equation}
+
+\begin{proof}
+    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
+    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
+    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
+    determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
+\end{proof}
+\end{proposition}
+
+\begin{theorem} \normalfont{\cite{yeTensorNetworkRanks2019}} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
+    There exists $R_1, \dots, R_c \in \mathbb{N}$ such that
+    $$T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)$$
+    in fact, we can choose $R_1 = \dots = R_c = \rank{T}$
+    \label{thm:finiterank}
+\end{theorem}
+
+\begin{proof} Let $r = \rank{T}$. Then there exist $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$ such that
+    $$T = \sum_{p=1}^r v_1^{(p)} \otimes \cdots \otimes v_n^{(p)}$$
+    We take $R_1 = \dots = R_c = r$ we take for each $i = 1, \dots, n$
+    $$\mathcal{G}_i = \sum_{p=1}^r \left( \bigotimes\nolimits_{j \in \IN(i)} e_p^{(j)} \right) \otimes v_p^{(i)} \otimes 
+    \left( \bigotimes\nolimits_{j \in \OUT(i)} e_p^{(j)*} \right)$$
+
+    Now observe that for each $i = 1, \dots, n$ there exists an unique $h$ such that whenever $j \in \IN(i)\cap \OUT(i)$,
+    $e_p^{(j)}$ and $e_p^{(j)*}$ contract and give $\delta_{pq}$, therefore the summand vanishes except when $p = q$.
+    This together with the assumption that $G$ is a connected graph implies that $\kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ reduces
+    to a sum of terms of the form $v_p^{(1)} \otimes \cdots \otimes v_p^{(d)}$ for $p = 1, \dots, r$, which is of course $T$
+\end{proof}
+
+
+
+\begin{definition} [Tensor G-rank]
+    Given a graph $G$, we define the tensor rank respect to a $G$ as the mapping
+    $$ \begin{align}
+        \rank_G : \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n & \longrightarrow \mathcal{P}(\mathbb{N}^c)  \\ 
+        T &\longmapsto \min {\{(R_1, \dots, R_c) \in \mathbb{N}^c : T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)\}}
+    \end{align}$$
+ 
+    Where $\min(S)$ with $S \subset \mathbb{N}^c$ denotes the minimal elements of $S$. We treat $\mathbb{N}^c$ with its usual
+    partial order:
+    $$ (a_1, \dots, a_c) \leqslant (b_1, \dots, b_c) \Longleftrightarrow a_1 \leqslant b_1, a_2 \leqslant b_2, \dots, a_c \leqslant b_c$$
+    So for example if $S = \{(3,4,5), (2,1,3), (1,3,2)\}$, then $\min(S) = \{(2,1,3), (1,3,2)\}$ Note that by \thmref{thm:finiterank} $\rank_G(T)$ is always a finite set.
+\end{definition}
+
+We will say that if $(r_1, \dots, r_c) \in \rank_G(T)$, we will say that $(r_1, \dots, r_c)$ is a $G$-rank of $T$. We will later see
+that in some tensor network structures, for example in tree tensor networks, the $G$-rank of a tensor $T$ is unique
+
 
 
 \section{Common Tensor network structures}
@@ -1293,59 +1399,6 @@ The fully connected tensor network decomposition is obtenied when $G$ is a compl
 \end{figure}
 
 
-\section{Finding approximate tensor states}
-
-Now, one natural question that might occur is, given some tensor $T \in \mathbb{V}_1 \otimes \cdots \times \mathbb{V}_n$ and a 
-tensor network $X = \TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$, can we ensure that $T \in X$ for some
-$R_1, \dots, R_c \in \mathbb{N}$? And if we cannot, can we find some values $R_1, \dots, R_c \in \mathbb{N}$
-and some state $\mathcal{X}_0 \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$ such that $\| T - \mathcal{X}_0 \|_F$ is minimal?
-
-The following theorem gives us that if we make $R_1, \dots, R_c$ big enough, every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
-In fact, these values that guarantees that $T$ is an state are $R_1 = \dots R_c = \rank T$ where $\rank T$ is the \textit{traditional rank}
-of a tensor. We will give now the definition of the traditional rank:
-
-\begin{definition} 
-    We say that a tensor has \textbf{traditional rank} $r$ and we write $\rank{T} = r$
-    with $r \in \mathbb{N}$ being the minimum value such that we can write $T$ as
-$$T= \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$$
-where $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$
-\end{definition}
-
-We can immediatly see that $\rank{T} \leqslant \prod_{i=1}^n N_i$.
-Unlike matrices, determining the rank of a tensor is an NP-hard problem. \cite{hillarMostTensorProblems2013}. Even
-finding the maximum traditional rank of a tensor space (that means finding $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$) it still remains as an open problem.
-We can find an slightly better upper bound for the tensor rank:
-\begin{proposition}
-    \begin{equation} \label{eq:rank-dimensional-bound}
-        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
-    \end{equation}
-
-\begin{proof}
-    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
-    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
-    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
-    determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
-\end{proof}
-\end{proposition}
-
-\begin{theorem} \normalfont{\cite{yeTensorNetworkRanks2019}} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
-    There exists $R_1, \dots, R_c \in \mathbb{N}$ such that
-    $$T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)$$
-    in fact, we can choose $R_1 = \dots = R_c = \rank{T}$
-\end{theorem}
-
-\begin{proof} Let $r = \rank{T}$. Then there exist $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$ such that
-    $$T = \sum_{p=1}^r v_1^{(p)} \otimes \cdots \otimes v_n^{(p)}$$
-    We take $R_1 = \dots = R_c = r$ we take for each $i = 1, \dots, n$
-    $$\mathcal{G}_i = \sum_{p=1}^r \left( \bigotimes\nolimits_{j \in \IN(i)} e_p^{(j)} \right) \otimes v_p^{(i)} \otimes 
-    \left( \bigotimes\nolimits_{j \in \OUT(i)} e_p^{(j)*} \right)$$
-
-    Now observe that for each $i = 1, \dots, n$ there exists an unique $h$ such that whenever $j \in \IN(i)\cap \OUT(i)$,
-    $e_p^{(j)}$ and $e_p^{(j)*}$ contract and give $\delta_{pq}$, therefore the summand vanishes except when $p = q$.
-    This together with the assumption that $G$ is a connected graph implies that $\kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ reduces
-    to a sum of terms of the form $v_p^{(1)} \otimes \cdots \otimes v_p^{(d)}$ for $p = 1, \dots, r$, which is of course $T$
-\end{proof}
-
 This theorem serves as an upper bound for our problem. But either way it is still very big. We can take a different approach:
 we can fix $G, R_1, \dots, R_c$ and then find the cores of the tensor network that approximate better to our
 objective tensor $T$. That means finding
@@ -1354,9 +1407,69 @@ objective tensor $T$. That means finding
 \argmin_{\mathcal{G}_1, \dots, \mathcal{G}_n} \|T - \kappa_G (\mathcal{G}_1, \dots, \mathcal{G}_n) \|_F
 \label{eq:minarg}
 \end{equation}
-We will discuss some algorithms that gives us a solution to \refeq{eq:minarg}
 
-\subsection{Alternating least squares method}
+Later, we will discuss some algorithms that gives us a solution to \refeq{eq:minarg}. 
+\section{Tree Tensor Networks}
+
+When $G$ is a tree, i.e when there are no cycles inside $G$, we say that $\TNS(G; R)$ is a tree tensor network.
+This includes all tensor train networks. There are a lot of interesting results in tree tensor networks. One
+very useful property is that given a tensor $T$, his $G$ rank when $G$ is a tree, is always unique.
+
+\begin{figure}[h]
+
+    \centering
+\begin{tikzpicture}[scale=0.75, arrows = {-Latex[length=8pt, inset=2pt]}]
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,4) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (-2,1) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (0,1) {$\mathcal{G}_3$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (2,1) {$\mathcal{G}_4$};
+    \node(5)[draw, shape=circle, minimum size=0.8cm] at (-5,-2) {$\mathcal{G}_5$};
+    \node(6)[draw, shape=circle, minimum size=0.8cm] at (-3,-2) {$\mathcal{G}_6$};
+    \node(7)[draw, shape=circle, minimum size=0.8cm] at (-1,-2) {$\mathcal{G}_7$};
+    \node(8)[draw, shape=circle, minimum size=0.8cm] at (2,-2) {$\mathcal{G}_8$};
+
+    \node(i1) at (-1.5, 4) {$N_1$};
+    \node(i2) at (-3.5, 1) {$N_2$};
+    \node(i3) at (0, -0.5) {$N_3$};
+    \node(i4) at (3.5, 1) {$N_4$};
+    \node(i5) at (-5, -3.5) {$N_5$};
+    \node(i6) at (-3, -3.5) {$N_6$};
+    \node(i7) at (-1, -3.5) {$N_7$};
+    \node(i8) at (2, -3.5) {$N_8$};
+
+    \draw (1) -> (2);
+    \draw (1) -> (3);
+    \draw (1) -> (4);
+    
+    \draw (2) -> (5);
+    \draw (2) -> (6);
+    \draw (2) -> (7);
+
+    \draw (4) -> (8);
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+    \draw[--] (5) -- (i5);
+    \draw[--] (6) -- (i6);
+    \draw[--] (7) -- (i7);
+    \draw[--] (8) -- (i8);
+\end{tikzpicture}
+
+    \caption{A tree tensor network}
+    \label{tctn:schema}
+\end{figure}
+
+
+
+
+
+
+
+
+
+\section{The Alternating Least Squares algorithm}
 
 \cite{malikSamplingBasedDecompositionAlgorithms2022a}
 Suppose we want to only optimize the function \refeq{eq:minarg} for 
@@ -1506,7 +1619,7 @@ is $T$ with some fixed error $\epsilon$:
 %
 %
 %
-\begin{figure}[h]
+\begin{figure}[b]
     \centering
    \begin{minipage}{0\textwidth}
        \begin{tikzpicture}[scale=0.8]
@@ -1611,6 +1724,61 @@ is $T$ with some fixed error $\epsilon$:
     \label{fig:als_con}
 \end{figure}
 
+\section{Contracting the tensor network}
+
+The ALS algorithm requires us to contract the network when we update the cores and
+also when we do a contraction for checking for the stopping condition. The order in which we 
+select to contract the cores affects directly the computational cost of the contraction. 
+
+For example, consider the following tensor train network:
+
+\begin{center}
+    \begin{tikzpicture}
+
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$Y$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (6,0) {$Z$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (9,0) {$T$};
+
+    \node(i1) at (0, 1) {$N_1$};
+    \node(i2) at (3, 1) {$N_2$};
+    \node(i3) at (6, 1) {$N_3$};
+    \node(i4) at (9, 1) {$N_4$};
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+
+    \draw (1) -> (2)
+    node[above, pos=0.5] {$R_1$};
+    \draw (2) -> (3)
+    node[above, pos=0.5] {$R_2$};
+    \draw (3) -> (4)
+    node[above, pos=0.5] {$R_3$};
+    \end{tikzpicture}
+\end{center}
+
+The contraction of the whole network is given by
+
+$$T_{ijkl} = \sum_{p,q,r}^{R_1, R_2, R_3} X_{ip} Y_{pjq} Z_{qkr} T_{rl}$$
+
+We could contract first $R_1$, then $R_2$ and finally $R_3$. That means computing:
+$$A_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B_{ijkr} = \sum_{q}^{R_2} A_{ijq} Z_{qkr} \qquad T_{ijkl} = \sum_{r}^{R_3} B_{ijkr} T_{rl}$$
+
+For this computation, we would need $R_1 R_2 N_1 N_2 + R_2 R_3 N_1 N_2 N_3 + R_3 N_1 N_2 N_3 N_4$ products, and we would need to store
+first $A$, then $B$ and then $T$
+
+If we consider a different ordering for the contraction, for example first $R_1$, then $R_3$ and finally $R_2$ we get a different computation cost.
+We would need to compute the matrices
+
+$$A'_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B'_{qkl} = \sum_{r}^{R_3} Z_{qkr} T_{rl} \qquad T_{ijkl} = \sum_{q}^{R_2} A'_{ijq} B'_{qkl}$$
+
+The result of the contraction is the same, but now instead the number of computations is
+changed to $R_1 R_2 N_1 N_2 + R_3 N_1 N_3 N_4 + R_2 N_1 N_2 N_3 N_4$. 
+
+
+\chapter{Topological search on the tensor network structure space}
 
 By now, we know that for any tensor $T$, if we choose a graph $G = (V, E)$ we can choose 
 $R_1, \dots, R_c \leqslant \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor$
@@ -1633,36 +1801,33 @@ $$\arg\min_{G, R} \;\size(G, R) \quad s.t \quad \|\kappa_G(\mathcal{G}_1, \dots,
 
 
 
-
-
-
-
-
-
-\chapter{Topological search on the tensor network structure space}
-
 Let $\mathcal{X} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ an $n$-order tensor. Let the following problem:
 
 $$ \min_{r \in \mathbb{K}_{K_N} } \phi(K_N, r) \quad s.t\; \mathcal{X} \in \TNS{(K_N, r)} $$ 
+
+\section{Counting tensor network structures}
+
+- Fer alternating local enumeration
 
 
 % \cite{liPermutationSearchTensor2022}
 
 
-TODO:
-Suposo que començar per dir quines parts del graf caldria tallar maybe???
-Fer més representacions gràfiques de segons quina demostració com més clar quedi tot millor
-\begin{itemize}
-\item Descriure $G$-ranks
-\item Algorismes per aproximar TNS per $G$-ranks propers i mínims si es pot fer
-\item Algun algorisme per trobar heuristicament els $G$-ranks adequats? (suposo q depen de compressió ratio i l'error relatiu)
-\item Com podem trobar un $G$ adequat?
-\item Estratègies per contraure tensors més ràpidament? (DRMG?)
-\item Algorismes, part pràctica en C/C++
-\item Fer moltes gràfiques
-\item Fer aplicacions per machine learning, etc.
-\item Fixar la mathematical subject classification
-\end{itemize}
+
+% TODO:
+% Suposo que començar per dir quines parts del graf caldria tallar maybe???
+% Fer més representacions gràfiques de segons quina demostració com més clar quedi tot millor
+% \begin{itemize}
+% \item Descriure $G$-ranks
+% \item Algorismes per aproximar TNS per $G$-ranks propers i mínims si es pot fer
+% \item Algun algorisme per trobar heuristicament els $G$-ranks adequats? (suposo q depen de compressió ratio i l'error relatiu)
+% \item Com podem trobar un $G$ adequat?
+% \item Estratègies per contraure tensors més ràpidament? (DRMG?)
+% \item Algorismes, part pràctica en C/C++
+% \item Fer moltes gràfiques
+% \item Fer aplicacions per machine learning, etc.
+% \item Fixar la mathematical subject classification
+% \end{itemize}
 
 
 

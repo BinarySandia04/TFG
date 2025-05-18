@@ -131,6 +131,16 @@
   file = {/home/arans/Zotero/storage/M5NFVT8X/Guo et al. - 2025 - Tensor Network Structure Search Using Program Synthesis.pdf;/home/arans/Zotero/storage/BQWGQLCR/2502.html}
 }
 
+@inproceedings{hashemizadehAdaptiveLearningTensor2020,
+  title = {Adaptive {{Learning}} of {{Tensor Network Structures}}},
+  author = {Hashemizadeh, Meraj and Liu, M. and Miller, Jacob and Rabusseau, Guillaume},
+  date = {2020-08-12},
+  url = {https://www.semanticscholar.org/paper/88d63592664fe2962a9c2e20c56fe499d4809bfa},
+  urldate = {2025-05-17},
+  abstract = {Tensor Networks (TN) offer a powerful framework to efficiently represent very high-dimensional objects. TN have recently shown their potential for machine learning applications and offer a unifying view of common tensor decomposition models such as Tucker, tensor train (TT) and tensor ring (TR). However, identifying the best tensor network structure from data for a given task is challenging. In this work, we leverage the TN formalism to develop a generic and efficient adaptive algorithm to jointly learn the structure and the parameters of a TN from data. Our method is based on a simple greedy approach starting from a rank one tensor and successively identifying the most promising tensor network edges for small rank increments. Our algorithm can adaptively identify TN structures with small number of parameters that effectively optimize any differentiable objective function. Experiments on tensor decomposition, tensor completion and model compression tasks demonstrate the effectiveness of the proposed algorithm. In particular, our method outperforms the state-of-the-art evolutionary topology search [Li and Sun, 2020] for tensor decomposition of images (while being orders of magnitude faster) and finds efficient tensor network structures to compress neural networks outperforming popular TT based approaches [Novikov et al., 2015].},
+  file = {/home/arans/Zotero/storage/N9HCKLEK/Hashemizadeh et al. - 2020 - Adaptive Learning of Tensor Network Structures.pdf}
+}
+
 @online{heScalableRobustTensor2023,
   title = {Scalable and {{Robust Tensor Ring Decomposition}} for {{Large-scale Data}}},
   author = {He, Yicong and Atia, George K.},
@@ -194,6 +204,23 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Machine Learning},
   file = {/home/arans/Zotero/storage/VY77TAB6/Li et al. - 2023 - Alternating Local Enumeration (TnALE) Solving Tensor Network Structure Search with Fewer Evaluation.pdf;/home/arans/Zotero/storage/FHR5VXAJ/2304.html}
+}
+
+@online{liAlternatingLocalEnumeration2023a,
+  title = {Alternating {{Local Enumeration}} ({{TnALE}}): {{Solving Tensor Network Structure Search}} with {{Fewer Evaluations}}},
+  shorttitle = {Alternating {{Local Enumeration}} ({{TnALE}})},
+  author = {Li, Chao and Zeng, Junhua and Li, Chunmei and Caiafa, Cesar and Zhao, Qibin},
+  date = {2023-05-29},
+  eprint = {2304.12875},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2304.12875},
+  url = {http://arxiv.org/abs/2304.12875},
+  urldate = {2025-05-15},
+  abstract = {Tensor network (TN) is a powerful framework in machine learning, but selecting a good TN model, known as TN structure search (TN-SS), is a challenging and computationally intensive task. The recent approach TNLS\textasciitilde\textbackslash cite\{li2022permutation\} showed promising results for this task, however, its computational efficiency is still unaffordable, requiring too many evaluations of the objective function. We propose TnALE, a new algorithm that updates each structure-related variable alternately by local enumeration, \textbackslash emph\{greatly\} reducing the number of evaluations compared to TNLS. We theoretically investigate the descent steps for TNLS and TnALE, proving that both algorithms can achieve linear convergence up to a constant if a sufficient reduction of the objective is \textbackslash emph\{reached\} in each neighborhood. We also compare the evaluation efficiency of TNLS and TnALE, revealing that \$\textbackslash Omega(2\textasciicircum N)\$ evaluations are typically required in TNLS for \textbackslash emph\{reaching\} the objective reduction in the neighborhood, while ideally \$O(N\textasciicircum 2R)\$ evaluations are sufficient in TnALE, where \$N\$ denotes the tensor order and \$R\$ reflects the \textbackslash emph\{``low-rankness''\} of the neighborhood. Experimental results verify that TnALE can find practically good TN-ranks and permutations with vastly fewer evaluations than the state-of-the-art algorithms.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Machine Learning},
+  file = {/home/arans/Zotero/storage/J4TKYP77/Li et al. - 2023 - Alternating Local Enumeration (TnALE) Solving Tensor Network Structure Search with Fewer Evaluation.pdf;/home/arans/Zotero/storage/2BPBZC5Z/2304.html}
 }
 
 @article{liaoDifferentiableProgrammingTensor2019,
@@ -391,6 +418,26 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {/home/arans/Zotero/storage/E5SFIX9L/Obukhov et al. - 2021 - T-Basis a Compact Representation for Neural Networks.pdf;/home/arans/Zotero/storage/G5MT2NQX/2007.html}
+}
+
+@article{orusTensorNetworksComplex2019,
+  title = {Tensor Networks for Complex Quantum Systems},
+  author = {Orús, Román},
+  date = {2019-09},
+  journaltitle = {Nature Reviews Physics},
+  shortjournal = {Nat Rev Phys},
+  volume = {1},
+  number = {9},
+  pages = {538--550},
+  publisher = {Nature Publishing Group},
+  issn = {2522-5820},
+  doi = {10.1038/s42254-019-0086-7},
+  url = {https://www.nature.com/articles/s42254-019-0086-7},
+  urldate = {2025-05-14},
+  abstract = {Originally developed in the context of condensed-matter physics and based on renormalization group ideas, tensor networks have been revived thanks to quantum information theory and the progress in understanding the role of entanglement in quantum many-body systems. Moreover, tensor network states have turned out to play a key role in other scientific disciplines. In this context, here I provide an overview of the basic concepts and key developments in the field. I briefly discuss the most important tensor network structures and algorithms, together with an outline of advances related to global and gauge symmetries, fermions, topological order, classification of phases, entanglement Hamiltonians, holografic duality, artificial intelligence, the 2D Hubbard model, 2D quantum antiferromagnets, conformal field theory, quantum chemistry, disordered systems and many-body localization.},
+  langid = {english},
+  keywords = {Condensed-matter physics,Quantum information,Theoretical physics},
+  file = {/home/arans/Zotero/storage/TC2ICCAW/Orús - 2019 - Tensor networks for complex quantum systems.pdf}
 }
 
 @article{oseledetsTensorTrainDecomposition2011,
