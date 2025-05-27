@@ -271,6 +271,22 @@
   file = {/home/arans/Zotero/storage/UDVKKIQ7/Li et al. - 2020 - Evolutionary Topology Search for Tensor Network Decomposition an Extended Abstract.pdf}
 }
 
+@online{liHeuristicRankSelection2021,
+  title = {Heuristic {{Rank Selection}} with {{Progressively Searching Tensor Ring Network}}},
+  author = {Li, Nannan and Pan, Yu and Chen, Yaran and Ding, Zixiang and Zhao, Dongbin and Xu, Zenglin},
+  date = {2021-05-30},
+  eprint = {2009.10580},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2009.10580},
+  url = {http://arxiv.org/abs/2009.10580},
+  urldate = {2025-05-20},
+  abstract = {Recently, Tensor Ring Networks (TRNs) have been applied in deep networks, achieving remarkable successes in compression ratio and accuracy. Although highly related to the performance of TRNs, rank selection is seldom studied in previous works and usually set to equal in experiments. Meanwhile, there is not any heuristic method to choose the rank, and an enumerating way to find appropriate rank is extremely time-consuming. Interestingly, we discover that part of the rank elements is sensitive and usually aggregate in a narrow region, namely an interest region. Therefore, based on the above phenomenon, we propose a novel progressive genetic algorithm named Progressively Searching Tensor Ring Network Search (PSTRN), which has the ability to find optimal rank precisely and efficiently. Through the evolutionary phase and progressive phase, PSTRN can converge to the interest region quickly and harvest good performance. Experimental results show that PSTRN can significantly reduce the complexity of seeking rank, compared with the enumerating method. Furthermore, our method is validated on public benchmarks like MNIST, CIFAR10/100, UCF11 and HMDB51, achieving the state-of-the-art performance.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computer Vision and Pattern Recognition},
+  file = {/home/arans/Zotero/storage/R4F26AV6/Li et al. - 2021 - Heuristic Rank Selection with Progressively Searching Tensor Ring Network.pdf;/home/arans/Zotero/storage/E9WPG8PI/2009.html}
+}
+
 @article{liHybridFullyConnected2023,
   title = {Hybrid {{Fully Connected Tensorized Compression Network}} for {{Hyperspectral Image Classification}}},
   author = {Li, Heng-Chao and Lin, Zhi-Xin and Ma, Tian-Yu and Zhao, Xi-Le and Plaza, Antonio and Emery, William J.},
@@ -785,6 +801,40 @@
   pubstate = {prepublished},
   keywords = {Computer Science - Numerical Analysis,Mathematics - Numerical Analysis},
   file = {/home/arans/Zotero/storage/CQWTDZRS/Yu y Li - 2022 - Practical Sketching-Based Randomized Tensor Ring Decomposition.pdf;/home/arans/Zotero/storage/MI2VW9VF/2209.html}
+}
+
+@article{zengBayesianTensorNetwork2024,
+  title = {Bayesian Tensor Network Structure Search and Its Application to Tensor Completion},
+  author = {Zeng, Junhua and Zhou, Guoxu and Qiu, Yuning and Li, Chao and Zhao, Qibin},
+  date = {2024-07-01},
+  journaltitle = {Neural Networks},
+  shortjournal = {Neural Networks},
+  volume = {175},
+  pages = {106290},
+  issn = {0893-6080},
+  doi = {10.1016/j.neunet.2024.106290},
+  url = {https://www.sciencedirect.com/science/article/pii/S0893608024002144},
+  urldate = {2025-05-20},
+  abstract = {Tensor network (TN) has demonstrated remarkable efficacy in the compact representation of high-order data. In contrast to the TN methods with pre-determined structures, the recently introduced tensor network structure search (TNSS) methods automatically learn a compact TN structure from the data, gaining increasing attention. Nonetheless, TNSS requires time-consuming manual adjustments of the penalty parameters that control the model complexity to achieve better performance, especially in the presence of missing or noisy data. To provide an effective solution to this problem, in this paper, we propose a parameters tuning-free TNSS algorithm based on Bayesian modeling, aiming at conducting TNSS in a fully data-driven manner. Specifically, the uncertainty in the data corruption is well-incorporated in the prior setting of the probabilistic model. For TN structure determination, we reframe it as a rank learning problem of the fully-connected tensor network (FCTN), integrating the generalized inverse Gaussian (GIG) distribution for low-rank promotion. To eliminate the need for hyperparameter tuning, we adopt a fully Bayesian approach and propose an efficient Markov chain Monte Carlo (MCMC) algorithm for posterior distribution sampling. Compared with the previous TNSS method, experiment results demonstrate the proposed algorithm can effectively and efficiently find the latent TN structures of the data under various missing and noise conditions and achieves the best recovery results. Furthermore, our method exhibits superior performance in tensor completion with real-world data compared to other state-of-the-art tensor-decomposition-based completion methods.},
+  keywords = {Bayesian modeling,Tensor completion,Tensor network decomposition,Tensor network structure search},
+  file = {/home/arans/Zotero/storage/DU6DG8WR/S0893608024002144.html}
+}
+
+@article{zengBayesianTensorNetwork2024a,
+  title = {Bayesian Tensor Network Structure Search and Its Application to Tensor Completion},
+  author = {Zeng, Junhua and Zhou, Guoxu and Qiu, Yuning and Li, Chao and Zhao, Qibin},
+  date = {2024-07},
+  journaltitle = {Neural Networks},
+  shortjournal = {Neural Networks},
+  volume = {175},
+  pages = {106290},
+  issn = {08936080},
+  doi = {10.1016/j.neunet.2024.106290},
+  url = {https://linkinghub.elsevier.com/retrieve/pii/S0893608024002144},
+  urldate = {2025-05-20},
+  abstract = {Tensor network (TN) has demonstrated remarkable efficacy in the compact representation of high-order data. In contrast to the TN methods with pre-determined structures, the recently introduced tensor network structure search (TNSS) methods automatically learn a compact TN structure from the data, gaining increasing attention. Nonetheless, TNSS requires time-consuming manual adjustments of the penalty parameters that control the model complexity to achieve better performance, especially in the presence of missing or noisy data. To provide an effective solution to this problem, in this paper, we propose a parameters tuning-free TNSS algorithm based on Bayesian modeling, aiming at conducting TNSS in a fully data-driven manner. Specifically, the uncertainty in the data corruption is well-incorporated in the prior setting of the probabilistic model. For TN structure determination, we reframe it as a rank learning problem of the fully-connected tensor network (FCTN), integrating the generalized inverse Gaussian (GIG) distribution for low-rank promotion. To eliminate the need for hyperparameter tuning, we adopt a fully Bayesian approach and propose an efficient Markov chain Monte Carlo (MCMC) algorithm for posterior distribution sampling. Compared with the previous TNSS method, experiment results demonstrate the proposed algorithm can effectively and efficiently find the latent TN structures of the data under various missing and noise conditions and achieves the best recovery results. Furthermore, our method exhibits superior performance in tensor completion with real-world data compared to other state-of-the-art tensor-decomposition-based completion methods.},
+  langid = {english},
+  file = {/home/arans/Zotero/storage/5Q9YIAFL/Zeng et al. - 2024 - Bayesian tensor network structure search and its application to tensor completion.pdf}
 }
 
 @online{zhaoTensorRingDecomposition2016,

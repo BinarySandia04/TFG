@@ -16,6 +16,9 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{tikz-cd}
+
+\usetikzlibrary{decorations.pathreplacing}
+
 \usepackage{parskip}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -191,38 +194,124 @@ Vull agrair a ...
 \setcounter{page}{1}
 \chapter{Introduction}
 
-Neural networks are a set of dependant non-linear functions which each individual function corresponds to 
-a neuron (or perceptron). In a fully connected neural network, each neuron applies a linear transformation
-to the input vector through a weight of matrices.
+% TODO: Fer mes intro a les nn, com afecten al món, i tal.
 
-The output of a neuron $j$ in some layer is given by the formula:
+On the last decades, neural networks have emerged as one of the most influential topics inside the fields of
+artificial inteligence and machine learning. Neural networks are inspired on how the human brain works, they are 
+made as a simplification about how our networks interact and in some way they try to emulate the way we think.
+
+In the last years, neural networks have gained a lot of importance, positioning themselves at the center of
+impactful technological advances. Some models that use neural networks at its core are
+for example large language models (LLMs) which serve as advanced virtual agents, diffusers which
+generate images and other media. Other models based on neural networks have been used to make important
+advances in a lot of different fields such as in medicine, transportation, education, entertainment, and others.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture} 
+
+    \node(i1)[draw, shape=circle, minimum size=0.5cm] at (0,-2) {};
+    \node(i2)[draw, shape=circle, minimum size=0.5cm] at (0,-1) {};
+    \node(i3)[draw, shape=circle, minimum size=0.5cm] at (0,0) {};
+    \node(i4)[draw, shape=circle, minimum size=0.5cm] at (0,1) {};
+    \node(i5)[draw, shape=circle, minimum size=0.5cm] at (0,2) {};
+    \node(i6)[draw, shape=circle, minimum size=0.5cm] at (0,3) {};
+    \node(i7)[draw, shape=circle, minimum size=0.5cm] at (0,4) {};
+    \node(i8)[draw, shape=circle, minimum size=0.5cm] at (0,5) {};
+
+    \node(l1)[draw, shape=circle, minimum size=0.5cm] at (2,4) {};
+    \node(l2)[draw, shape=circle, minimum size=0.5cm] at (2,3) {};
+    \node(l3)[draw, shape=circle, minimum size=0.5cm] at (2,2) {};
+    \node(l4)[draw, shape=circle, minimum size=0.5cm] at (2,1) {};
+    \node(l5)[draw, shape=circle, minimum size=0.5cm] at (2,0) {};
+    \node(l6)[draw, shape=circle, minimum size=0.5cm] at (2,-1) {};
+
+    \node(p1)[draw, shape=circle, minimum size=0.5cm] at (4,4) {};
+    \node(p2)[draw, shape=circle, minimum size=0.5cm] at (4,3) {};
+    \node(p3)[draw, shape=circle, minimum size=0.5cm] at (4,2) {};
+    \node(p4)[draw, shape=circle, minimum size=0.5cm] at (4,1) {};
+    \node(p5)[draw, shape=circle, minimum size=0.5cm] at (4,0) {};
+    \node(p6)[draw, shape=circle, minimum size=0.5cm] at (4,-1) {};
+
+    \node(o1)[draw, shape=circle, minimum size=0.5cm] at (6,-2) {};
+    \node(o2)[draw, shape=circle, minimum size=0.5cm] at (6,-1) {};
+    \node(o3)[draw, shape=circle, minimum size=0.5cm] at (6,0) {};
+    \node(o4)[draw, shape=circle, minimum size=0.5cm] at (6,1) {};
+    \node(o5)[draw, shape=circle, minimum size=0.5cm] at (6,2) {};
+    \node(o6)[draw, shape=circle, minimum size=0.5cm] at (6,3) {};
+    \node(o7)[draw, shape=circle, minimum size=0.5cm] at (6,4) {};
+    \node(o8)[draw, shape=circle, minimum size=0.5cm] at (6,5) {};
+
+
+    \foreach \x in {i1, i2, i3, i4, i5, i6, i7, i8}
+        \foreach \y in {l1, l2, l3, l4, l5, l6}
+        {
+            \draw (\x) -- (\y);
+        }
+
+    \foreach \x in {p1, p2, p3, p4, p5, p6}
+        \foreach \y in {l1, l2, l3, l4, l5, l6}
+        {
+            \draw (\x) -- (\y);
+        }
+
+    \foreach \x in {p1, p2, p3, p4, p5, p6}
+        \foreach \y in {o1, o2, o3, o4, o5, o6, o7, o8}
+        {
+            \draw (\x) -- (\y);
+        }
+    \end{tikzpicture}
+    \caption{A representation of a fully connected neural network. Each dot is a neuron and each edge represents a connection}
+\end{figure}
+
+Neural networks are modeled after how real neurons work, but in a simplified manner: each neural network contains a set of neurons which are split in
+different layers. In a fully connected neural network, each neuron has an output that is connected to each neuron of the next layer, and all networks of a layer
+have as inputs the outputs of all the neurons of the previous layer. The first layer is called the input layer and the last layer is called the output layer.
+
+As real neurons work, each connection will have a distinct role on when one neuron should fire or not. So, the outputs of each neuron will depend on its inputs. The output of each neuron in
+a neural network is modeled using usually a non-linear function $f : \mathbb{K}^N \rightarrow \mathbb{K}$,
+with $N$ being the number of neurons on the previous layer.
+
+Each neuron of the neural network also has assigned some weights $w_{ji}$ to each input connection, with the idea that
+some connections will influence the firing of the network more than others. The key to making a neural network "learn" is
+to properly adjust these weights $w_{ji}$ that are also called the \textit{parameters} of the neural network.
+
+So, more formally, the output of a neuron $j$ in some layer will be given by the formula:
 
 $$ y_j(x) = f\left(\sum_{i=1}^N w_{ji} x_i + b_{j}\right) $$ 
 
-Where $w_{ji}$ is the weight assigned to the connection between the neuron $i$ of the previous layer with the neuron
-$j$ of the current layer, $f$ is an activation function and $b_j$ is some bias of the neuron $j$.
+Where $x_{i}$ is the output of the neuron $i$ of the previous layer, and $b_j$ is some bias that is also a parameter of the neural network.
 
-We can represent the weights of a fully connected neural network as a matrix, that we call the \textbf{weight matrix}
-since the recent rise on complexity of neural networks, weight matrices can be very large and there is a lot of
-interest on compressing weight matrices without sacrificing accuracy or performance.
+We can represent the weights of a fully connected neural network as a matrix, that we call the \textbf{weight matrix}.
+Since neural networks have been incresing in complexity during the recent years, these weight matrices can be very large
+and contain a lot of parameters. So naturally there has been a rising interest on compressing weight matrices without sacrificing accuracy or performance.
 
-Since we can reshape the weight matrix into a tensor, in this thesis, we will aim to compress a tensor
-using tensor networks, a concept that originates from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
+The objective of this thesis will be to compress the parameters of neural networks using tensor networks, a concept 
+that originates from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
 and recently has gained traction on machine learning.
 
-The objective of this thesis is given a tensor $T$, finding the tensor network structure that
-is represented by tensors of smaller rank (called core tensors) that, when the whole
-network is evaluated, represent $T$ well enough given a fixed error $\epsilon$. We will also minimize the computational cost 
-when it comes to contracting the whole network for retrieving the representation of the original tensor.
+Tensor networks are a structure that is aimed to represent and efficiently manipulate large tensors by breaking them into
+smaller ones, called core tensors, in which are connected into an specific pattern. Through the thesis we will explain how
+these tensors are connected between them, but the general idea is that after contracting these connections,
+we get a representation of the original tensor.
+
+So, what we will aim to do is to is that given some tensor $T \in \mathbb{K}^{N_1 \times N_2 \times \cdots \times N_n}$ that
+will be our weight matrix reshaped onto a tensor, we will find a tensor network structure that
+represents a good aproximation of $T$. We will find this tensor network structure
+minimizing the relative error of the representation of $T$, the size of the tensor network structure, since we are
+interested in compressing $T$ to fewer parameters, and we will also care about the computational complexity of recovering
+$T$.
 
 We will see that finding the best structure is an integer programming problem, that is $NP$-hard. We will deduce
 and give an algorithm that finds a locally best structure by using program synthesis, and finally, we will compare this 
 structure with some other more studied cases of tensor networks, as Tensor Train networks, Tensor Ring networks and
-fully connected tensor networks
+fully connected tensor networks.
 
 %\section{Objectives}
 
 \section{Thesis structure}
+
+% TODO: Cambiar això una mica
 
 First we will present some preliminaries about tensor algebra. Then, we will introduce the
 diagrammatic notation made by Roger Penrose in the earlies 1970. We will
@@ -242,25 +331,9 @@ optimal tensor network tree structure using program synthesis following mainly f
 
 
 
-\chapter{Preliminaries}
+\chapter{Tensors}
 
 
-\section{Graph Theory}
-
-\begin{definition}[Graph]
-    \normalfont{\cite{wilsonIntroductionGraphTheory2009}}
-    A \textbf{graph} $G$ is defined as a tuple $G = (V,E)$ where $V = V(G)$ is a set of elements called \textbf{vertices} and 
-    $E = E(G) \subset \{\{u, v\} : u, v \in V\}$ is a set of elements called \textbf{edges}.
-\end{definition}
-
-\begin{definition}[Directed Graph]
-    A \textbf{directed graph} $D$ is a tuple $D = (V, \bar{E})$ where $V = V(D)$ are its vertices and
-    $\bar{E} = \bar{E}(D) \subset \{(u,v) : u,v \in V\}$
-\end{definition}
-
-\begin{definition} Given a directed graph $G=(V,\bar{E})$ and a vertex $i \in V$ we define
-    $$\IN(i) = \{j \in V : (j, i) \in \bar{E}\} \qquad \OUT(i) = \{j \in V : (i, j) \in \bar{E} \}$$
-\end{definition}
 \iffalse
 \begin{definition}[Graph isomorphisms]
     We say that two graphs $G, H$ are \textbf{isomorphic} if 
@@ -335,46 +408,87 @@ $$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$
 \fi
 
 
+In this chapter we will construct tensors in a formal way and we will lay down the basics of tensor algebra. We will
+define the notion of rank of a tensor and then,
+we will describe some basic tensor reshaping operations, and with that we will be able to present 
+what is a tensor contraction, which will all become crucial for introducing representations of tensor networks.
 
-
-In this chapter we will introduce the basics of tensor algebra and we will present some results that will be useful in the
-following chapters
-
-\section{Basic tensor definitions}
+\section{Basic tensor definitions and the tensor product space}
 
 We will denote $\mathbb{V}_1, \dots, \mathbb{V}_n$ as finite vector spaces over a field $\mathbb{K}$ ($\mathbb{C}$ if unspecified) of dimension $\dim{\mathbb{V}_i} = N_i \; \forall i = 1, \dots, n$.
 We denote $\mathcal{B}_1, \dots, \mathcal{B}_n$ with ${\mathcal{B}_i = \{e_1^{(i)}, \dots, e_{N_i}^{(i)}\}, i = 1, \dots, n}$ the canonical basis of $\mathbb{V}_1, \dots, \mathbb{V}_n$
 
-\begin{definition}[Tensor]
-    A \textbf{tensor} is a multilineal map ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$
-\end{definition}
+We will present the notion of a tensor. From a mathematical standpoint, it can be defined as a multilinear map:
 
-\begin{definition}[Order of a tensor] Given a tensor $T \in \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow \mathbb{K}$ We define the \textbf{order} of the tensor $T$ as $n$.
-\end{definition}
-
-We will allow that some $\mathbb{V}_i$ are dual spaces of some other vector spaces $\mathbb{W}_i$, i.e $\mathbb{V}_i = \mathbb{W}_i^*$.
 \begin{definition}
-    Let $T \in \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^* \rightarrow \mathbb{K}$.
+    A multilinear map is an application ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$ which satisfies:
+    \begin{enumerate}
+        \item $T(v_1, \dots, \lambda \cdot v_i, \dots, v_n) = \lambda \cdot T(v_1, \dots, v_i, \dots, v_n)$ for all $i = 1, \dots, n, \; \lambda \in \mathbb{K}$
+        \item $T(v_1, \dots, v_i + u, \dots, v_n) = T(v_1, \dots, v_i, \dots, v_n) + T(v_1, \dots, u, \dots, v_n)$ for all ${i = 1, \dots, n, \; u \in \mathbb{V}_i}$
+    \end{enumerate}
+\end{definition}
+
+Lineal maps and bilinear maps are specific cases of multilinear maps with $n=1$ and $n=2$ respectively.
+
+From now on, we will allow that some of the vectors spaces of $\mathbb{V}_1, \dots, \mathbb{V}_n$ to be the dual spaces of other spaces,
+that means, that there may exist some spaces $\mathbb{W}_i$ such that they are the dual space
+of another vector space. We will sometimes write multilinear
+maps as tensors and we will write the multilinear mappings as $T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^*$
+with $n=p+q$. We will write $T$ in this form when we need to explicitly distinguish what vector spaces are duals from another vector space.
+
+
+% TODO: Necessito això més endavant?
+\begin{definition}
+    Let $T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^* \rightarrow \mathbb{K}$
+    a multilinear map.
     We say that the tensor $T$ is $p$-times covariant and $q$-times contravariant.
 \end{definition}
 
-\begin{definition}[Tensor product] Let $L$ be the vector space generated by the base ${V_1 \times \dots \times V_n}$, i.e the
-    set of linear combinations of the elements $(v_1, \dots, v_n), v_i \in \mathbb{V}_i$. Let $\mathcal{R}$ be the linear subspace of
-    $L$ generated by the relation $R$ defined by:
+Now we will present formally the the tensor space and its elements by defining a relation between all the vectors in the free vector space cartesian product
+$\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$. First of all, we will need to define what the free vector space of a set is:
+
+\begin{definition} Let $S$ be a set and $\mathbb{K}$ a field. We denote the free vector space over $S$ as $\mathbb{K}[S]$, which
+    is the vector space containing all lineal combinations of elements from $S$ with coefficients of $\mathbb{K}$, that is:
+    $$\mathbb{K}[S] = \left\{ \sum_{i=1}^n a_i s_i \mid \text{distinct } s_i \in S, n \in \mathbb{N}, a_i \in \mathbb{K}  \right\}$$
+\end{definition}
+
+For example, if whe take $\mathbb{K} = \mathbb{R}$ and $S = (x,y)$, then the elements of $\mathbb{R}[S]$ have the form $ax + by$ with $a, b \in \mathbb{R}$.
+One can easily see that $\mathbb{R}[S]$ is the vector space $\mathbb{R}^2$ with some fixed basis $(x, y)$.
+
+\begin{definition} [Tensor space] Let $\mathbb{L} = \mathbb{K}[\mathbb{V}_1 \times \dots \times \mathbb{V}_n]$.
+    We define an equivalence relation $R$ as: 
     $$(v_1, \dots, \alpha v_i, \dots, v_n) \sim \alpha(v_1, \dots, v_n) \; \forall i = 1, \dots, n, \forall \alpha \in \mathbb{K}$$
     $$(v_1, \dots, v_i + u_i, \dots, v_n) \sim (v_1, \dots, v_i \dots, v_n) + (v_1, \dots, u_i, \dots, v_n) \; \forall i = 1, \dots, n$$
-    The tensor product $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$ is defined as the quotient $L / \mathcal{R}$ and its called 
-    \textbf{tensor product space}. The image of
-    $(v_1, \dots, v_n)$ by the quotient is denoted by $v_1 \otimes \dots \otimes v_n$
+    The tensor product space $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$ is defined as the quotient $\mathbb{L} / R$. One can easily see
+    that $\mathbb{L}/\matchal{R}$ is a vector subspace of $\mathbb{L}$ by seeing that the set $\mathbb{L} / R$ satisfies the properties of
+    a vector space.
+    We denote the equivalence class of $(v_1, \dots, v_n)$ as $v_1 \otimes \dots \otimes v_n$. We call each equivalence class a
+    \textbf{tensor}.
 \end{definition}
+
+One can see that tensor spaces are indeed generalizations of vector spaces. This way of defining tensor spaces
+is equivalent to defining a multilineal sum and a multilineal scalar product over the set of the cartesian product
+of the vector spaces that we are considering.
+
+\begin{example}
+    Given $\mathbb{R}^2$ and $\mathbb{R}^3$ with its canoncial vector space
+    structures, $\mathbb{R}^2 \otimes \mathbb{R}^3$ is defined by the equivalence classes that follow the relations
+    $$(\alpha u, v) \sim \alpha (u, v) \sim (u, \alpha v) \quad \forall \alpha \in \mathbb{K}, \; u \in \mathbb{R}^2, v \in \mathbb{R}^3$$
+    $$(u + u', v) \sim (u, v) + (u' + v) \quad \forall u, u' \in \mathbb{R}^2, v \in \mathbb{R}^3$$
+    $$(u, v + v') \sim (u, v) + (u + v') \quad \forall u \in \mathbb{R}^2, v, v' \in \mathbb{R}^3$$
+    And an element of $\mathbb{R}^2 \otimes \mathbb{R}^3$ would be the representant of $[((1, 2, 3), (0, 4))]$ in which
+    for example other representants of the same equivalence class would be $2 \cdot ((1,2,3), (0, 2))$ or ${((1, 0, 3), (0, 2)) + ((0,2,0), (0, 2))}$
+\end{example}
+
+% \begin{definition}[Order of a tensor] Given a tensor $T \in \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow \mathbb{K}$ We define the \textbf{order} of the tensor $T$ as $n$.
+% \end{definition}
 
 The following theorem gives us a correspondance between each tensor ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$
 and each element of $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$:
 
 \begin{theorem}[Universal property of the tensor product]
-    \normalfont{\cite{romanTensorProducts2008}}
-    The tensor product of two vector spaces $\mathbb{V} \otimes \mathbb{W}$
-    for every bilinear map $h: \mathbb{V} \times \mathbb{W} \rightarrow X$ there exists an unique bilinear map $\tilde{h}: \mathbb{V} \otimes
+    Let $\varphi$ be the quotient mapping from $\mathbb{V} \times \mathbb{W}$ to $\mathbb{V} \otimes \mathbb{W}$. 
+    For every bilinear map $h: \mathbb{V} \times \mathbb{W} \rightarrow X$ where $X$ is any vector space there exists an unique linear map $\tilde{h}: \mathbb{V} \otimes
     \mathbb{W} \rightarrow X$ such that the following diagram commutes:
 
     \centering
@@ -389,96 +503,310 @@ and each element of $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$:
 
 \end{theorem}
 
-We can construct a basis for $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$. We define
-$$\mathcal{B}_{\otimes} = \{e_{i_1}^{(1)} \otimes \cdots \otimes e_{i_n}^{(n)} : 1 \leqslant i_j \leqslant N_j, 1 \leqslant j \leqslant n\}$$
-Where $\{e_1^{(i)}, e_2^{(i)}, \dots, e_{N_i}^{(i)}\}$ is the canonical basis for $\mathbb{V}_i$.
-Constructed this way, $\mathcal{B}_\otimes$ is a (canonical) basis of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$.
+\begin{proof}
+    Let $\varphi(v,w) := [(v,w)] \in \mathbb{V} \otimes \mathbb{W}$. Let $h : \mathbb{V} \times \mathbb{W} \rightarrow X$ be a bilinear
+    map. We define $\tilde H : \mathbb{K}[\mathbb{V} \times \mathbb{W}] \rightarrow X$ by:
+    $$\tilde H \left( \sum_{i=1}^n a_i (v_i, w_i) \right) := \sum_{i=1}^n a_i h(v_i, w_i) $$
+    Let $W = [(0,0)]_R$. $W$ is a vector subspace of $\mathbb{K}[\mathbb{V} \times \mathbb{W}]$ that is spanned by all the elements of the form
+    $$(v, w) + (v, w') - (v, w + w') \qquad (v, w) + (v', w) - (v + v', w)$$
+    $$\alpha (v, w) - (\alpha v, w) \qquad \alpha (v, w) - (v, \alpha w)$$
+    For all $v, v' \in \mathbb{V}$, $w, w' \in \mathbb{W}$ and $\alpha \in \mathbb{K}$. Since $h$ is bilinear, we can see that $\tilde H$ sends every element of $W$ to
+    $0 \in X$, therefore $W \subseteq \ker{ \tilde H}$ and hence $\tilde H$ induces a well-defined linear map $\tilde h: \mathbb{K}[\mathbb{V} \times \mathbb{W}]/R = \mathbb{V} \otimes \mathbb{W} \rightarrow X$
+    that satisfies $\tilde h (v \otimes w) = h(v, w)$
 
-\begin{remark} \label{rem:tenbase} The dimension
+    Suppose that exists another mapping $f : V \otimes W \rightarrow X$ such that $f(v \otimes w) = h(v, w)$, then we would have
+    $$f \left( \sum_{i=1}^n a_i v_i \otimes w_i \right) = \sum_{i=1}^n a_i h(v_i, w_i) = \tilde h \left( \sum_{i=1}^n a_i v_i \otimes w_i \right)$$
+    therefore, the lineal mapping $\tilde h$ is unique
+\end{proof}
+
+The universal property of the tensor product can be easily extended to the tensor product of more than two spaces by changing the condition
+of bilineality to multilineality: If we consider the tensor product $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$, for every
+multilineal map $h : \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow X$ then there exists an unique linear map
+$\tilde h : \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \rightarrow X$ with $h = \varphi \circ \tilde h$
+
+We can now construct explicitly the corresponding vector space (and a basis) of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$.
+We will pick basis $\{e_1^i, e_2^i, \dots, e_{N_i}^i\}$ for each $\mathbb{V}_i$ with $N_i = \dim \mathbb{V}_i$. Then the set
+$$\mathcal{B}_{\otimes} = \{e_{i_1}^1 \otimes \cdots \otimes e_{i_n}^n = [(e_{i_1}^1, \dots, e_{i_n}^n)]_R : 1 \leqslant i_j \leqslant N_j, 1 \leqslant j \leqslant n\}$$
+is a basis of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$. So now, we can directly work with the tensor space since it is a vector space
+and we have a well defined basis. The dimension
     of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$ is ${\dim{\mathbb{V}_1} \cdot \dim{\mathbb{V}_2} \cdots \dim{\mathbb{V}_n}}$ and its elements can be expressed as
     \begin{equation} \label{eq:base-representation}
-T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^{(1)} \otimes \cdots \otimes e_{s_n}^{(n)}
+T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^1 \otimes \cdots \otimes e_{s_n}^n
 \end{equation}
-We will define the size of the tensor $T$ as $\size(T) = \dim \mathbb{V}_1 \cdot \dim \mathbb{V}_2 \cdots \dim \mathbb{V}_n$
-\end{remark}
+We will define the \textbf{size} of the tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ as $\size(T) = \dim \mathbb{V}_1 \cdot \dim \mathbb{V}_2 \cdots \dim \mathbb{V}_n$. We will 
+also say that the \textbf{order} of $T$ is $n$.
 
+Now, we want to be able do the product between two tensor of different tensor product spaces since we will need this for contracting
+tensor networks. In other words, suppose that
+$T \in \mathbb{V}_1 \otimes \cdots \mathbb{V}_n$ and $U \in \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$. We want 
+that a tensor product
+operation results in a tensor $T \otimes U \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$.
+We will define this operation in the following way:
 
 % (POSAR COSES DEL KROENKER PRODUCT, PRESENTARLO)
-\begin{definition}[Tensor product] Given two tensors $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and ${U \in \mathbb{W}_1 \otimes \cdots \otimes
-    \mathbb{W}_m}$ with $\dim \mathbb{V}_i = N_i$, $i = 1, \dots, n$ and $\dim \mathbb{W}_j = M_j$, $j = 1, \dots, m$ 
-    and canonical basis $\{v_1^{(i)}, \dots, v_{N_i}^{(i)}\}$ for each $\mathbb{V}_i$ and $\{w_1^{(j)}, \dots, w_{M_j}^{(j)}\}$ for each $\mathbb{W}_j$
+\begin{definition}[Tensor product] With the above notation and with  $\dim \mathbb{V}_i = N_i$ and $\dim \mathbb{W}_j = M_j$
+    and some basis basis $\{e_1^i, \dots, e_{N_i}^i\}$ of each $\mathbb{V}_i$ and $\{p_1^j, \dots, p_{M_j}^j\}$ of each $\mathbb{W}_j$,
     we define the tensor product
     $T \otimes U$ as
     $$ T \otimes U = \sum_{i_1, \dots, i_n}^{N_1, \dots, N_n} \sum_{j_1, \dots, j_m}^{M_1, \dots, M_m} T_{i_1, \dots, i_n} U_{j_1, \dots, j_m} \cdot
-    v_{i_1}^{(1)} \otimes \cdots \otimes v_{i_n}^{(n)} \otimes w_{j_1}^{(1)} \otimes \cdots \otimes w_{j_m}^{(m)}$$
-    Note that $T \otimes U \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$
-
+    e_{i_1}^1 \otimes \cdots \otimes e_{i_n}^n \otimes p_{j_1}^1 \otimes \cdots \otimes p_{j_m}^m$$
+    Which naturally is an element of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$
 \end{definition}
 
-From \remref{rem:tenbase}, a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be identified as a "$n$-dimensional array" $\mathcal{T}$, i.e,
-a discrete function
+Now, we will present some basic tensor operations. We already know how to add and subtract two tensors of the same tensor product space since its sum is already
+defined by its vector space. We will introduce then a norm for tensors:
+
+\begin{definition}
+    We define the frobenius norm as:
+    $$\begin{align}
+        \| \cdot \|_F : \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n & \longrightarrow \mathbb{R}_+ \\
+        \left( \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot e_{s_1}^1 \otimes \cdots \otimes e_{s_n}^n \right) & \longmapsto 
+        \sqrt{\sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n}^2}
+    \end{align}$$
+\end{definition}
+
+Now we will follow by presenting the notion of the rank of a tensor. We refer as the rank of a tensor as the extension of the
+matrix rank. We say that a tensor $t$ is a rank-$1$ tensor if it can be written as $$t = v^1 \otimes \cdots \otimes v^n$$
+with $v^i \in \mathbb{V}_i$
+
+\begin{definition}
+    We say that a tensor $T$ has rank $r$ and we will write $\rank{T} = r$ with 
+    $r \in \mathbb{N}$ if $r$ is the minimum value such that we can write $T$ as the following form
+    \begin{equation}
+        T= \sum_{p=1}^r v_p^1 \otimes \cdots \otimes v_p^n
+        \label{eq:rank}
+    \end{equation}
+where $v_1^i, \dots, v_r^i \in \mathbb{V}_i, i = 1, \dots, n$
+\end{definition}
+
+We can easily see that the rank of a tensor is bounded by $\prod_{i=1}^n N_i$ since we can decompose every tensor as the sum
+of the elements of a basis of the tensor product space, and so the rank of the tensor must be equal or smaller than the number
+of elements of the basis.
+
+Unlike matrices, determining the rank of a tensor is an NP-hard problem \cite{hillarMostTensorProblems2013}.
+Finding the maximum rank, i.e determining $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$ still remains an unresolved problem.
+
+By manipulating the vectors $v_p^1 \otimes \cdots \otimes v_p^n$ to represent each value of the tensor
+$T_{s_1, \dots, s_n}$, we can find an slightly better upper bound for the tensor rank:
+\begin{proposition}
+    \begin{equation} \label{eq:rank-dimensional-bound}
+        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
+    \end{equation}
+
+\begin{proof}
+    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
+    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
+    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
+    determined by $\prod_{i=1}^n N_i$ parameters, we can impose $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
+\end{proof}
+\end{proposition}
+
+Decomposing a tensor $T$ in rank-$1$ tensors as in \refeq{eq:rank} is known as \textbf{tensor rank decomposition}.
+One could ask if given a tensor $T$ and fixed $r$, can we construct a tensor $T'$ of rank $t$ such that
+$\| T - T' \|_F$ is minimum. The decomposition of $T'$ is called \textbf{canonical polyadic decomposition} and it is
+an special case of a tensor network that we will see on the following chapter.
+
+% TODO: Espera osigui podem intentar dir que si volem representar un tensor de rank noseque necessitem com a minim
+% tals ranks al fer productes? Aixo pot ser molt util
+
+% SI QUE HI HA MIRA EL PAPER DE G-RANKS ET DIU QUE LITERALMENT NECESSITES RANKS MES GRANS QUE EL G RANK DEL TENSOR
+% I ALLA ET SURTEN COSES PER INTENTAR APROXIMAR EL G-RANK D UN TENSOR LOS TENSORES SON CLAVES
+
+\section{Reshaping tensors}
+
+In this section we will introduce reshaping operations for tensors with the object to try to extend some numeric algorithms for
+matrices and to tensors by reshaping the tensors into matrices, doing operations with the matrix-shaped tensors and then recover
+back the original tensor shape. This will be later use for example when we introduce the alternating least squares algorithms for tensor networks.
+
+Any tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be identified as an $n$-dimensional array. In other words, for each
+tensor $T$ we can define a discrete function $\mathcal{T}$ that encodes the representation in a basis of the tensors $T$ as:
 $$\begin{align}
     \mathcal{T}: \prod_{i=1}^n \{1, \dots, N_i\} & \longrightarrow \mathbb{K} \\
-    T(i_1, \dots, i_n) & \longmapsto T_{i_1, \dots, i_n}
+    (i_1, \dots, i_n) & \longmapsto T_{i_1, \dots, i_n}
 \end{align}$$
 
-From now on, we will write the discrete function $\mathcal{T}$ as
-an element of ${\mathbb{K}^{N_1 \times \cdots \times N_n}}$ \cite{yokotaVeryBasicsTensors2024}.
-of $T$ as $\mathcal{T}$. Now we will define some definitions from the underlying definition of the tensor viewed as a discrete function:
-
-Now we will define some definitions that will help us establish a formalized method of mapping $n$-dimensional arrays with
-vectors and matrices:
+From now on we will identify the set of all images of $\mathcal{T}$ as
+an element of ${\mathbb{K}^{N_1 \times \cdots \times N_n}}$.
+% \cite{yokotaVeryBasicsTensors2024}.
+We will often write a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ as an element $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$
+with $\dim \mathbb{V}_i = N_i$. Sometimes we will write $T(i_1, \dots, i_n)$ as the image of $\mathcal{T}$ of $(i_1, \dots, i_n)$.
+Since now we can see a tensor as an $n$-dimensional array thanks to the mapping $\mathcal{T}$, we can 
+start reshaping tensors. But before that we will introduce the linearization operation which simplify the notation a lot when we define
+reshaping operations.
 
 \begin{definition}[Linearization]
     Fixed $N_1, \dots, N_n \in \mathbb{N}$, given $i_1, \dots, i_n \in \mathbb{N}$ such that $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
-    we define the Linearization of the indices $i_1, \dots, i_n$ as the mapping ${\prod_{i=1}^n \{1, \dots, N_i\} \rightarrow \{1, \dots, \prod_{i=1}^n N_i\}}$:
+    we define the \textbf{linearization} of the indices $i_1, \dots, i_n$ as the mapping ${\prod_{i=1}^n \{1, \dots, N_i\} \rightarrow \{1, \dots, \prod_{i=1}^n N_i\}}$ and
+    with its images defined as:
     $$\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$$
 \end{definition}
 
-\begin{lemma}
-    The linearization mapping is bijective
-\end{lemma}
+The purpose of the linearization mapping is to give a bijection within each element of the form $(i_1, \dots, i_n) \in \prod_{i=1}^n \{1, \dots, N_i\}$
+to a positive natural number. For example, consider $n = 3$ and $N_1 = N_2 = N_3 = 3$. The encoding of the tuple $(1, 1, 1)$ corresponds to $1$,
+the tuple $(2, 1, 1)$ to $2$, the tuple $(1, 2, 3)$ to $1 + (2 - 1) \cdot 3 + (3 - 1) \cdot 3 = 10$. One should keep in mind
+that when defining an array in computer science, usually the first element starts at the index $0$, and our linealization operation starts with
+the indices at $1$. Throughout the thesis we will stick to array indices starting at $1$ for consistency, but by doing a change of variables $i_j' = i_j - 1$
+before applying the linealization and then subtracting $1$ also on the image, we will get the same operation but for arrays starting at $0$.
 
-\begin{definition}[Vectorization]
-    Given a tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$, we define the \textbf{vectorization} of $\mathcal{T}$
-    as the first order tensor $\mathcal{V} \in \mathbb{K}^{N_1 N_2 \cdots N_n}$ defined by:
-    $$\mathcal{V}(\overline{i_1 i_2 \dots i_n}) = \mathcal{T}(i_1, i_2, \dots, i_n)$$
-    We will write $\mathcal{V} = \vectorize{\mathcal{T}}$
+We will now define the vectorization operation, which reshapes a tensor $T \in \mathbb{K}^{N_1 \times N_2 \times \cdots \times N_n}$ to a 
+vector of $\mathbb{K}^{N_1 \cdot N_2 \cdots N_n}$
+
+
+\begin{definition}
+    We define the \textbf{vectorization} of $T$
+    as the first order tensor (or vector) $\mathcal{V} \in \mathbb{K}^{N_1 N_2 \cdots N_n}$ defined entrywise as
+    $$\mathcal{V}(\overline{i_1 i_2 \dots i_n}) = T(i_1, i_2, \dots, i_n)$$
+    We will write the vectorization of $T$ as $\vectorize{T}$
 \end{definition}
 
 
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \definecolor{filler}{rgb}{0.9, 0.9, 0.9}
+
+        \pgfmathsetmacro{\cubex}{0.6}
+        \pgfmathsetmacro{\cubey}{0.6}
+        \pgfmathsetmacro{\cubez}{0.6}
+        
+
+        \def\coordlist{0, 0.75, 1.5, 2.25, 3}
+        
+        \foreach \coordz in \coordlist
+            \foreach \coordx in \coordlist
+                \foreach \coordy in \coordlist {
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+                }
+
+                \node(T) at (0, -2.25) {$T \in \mathbb{K}^{5 \times 5 \times 5}$};
+        
+        \node(a) at(4,1);
+        \node(b) at(7,1);
+        \draw[->] (a) -- (b);
+
+        \pgfmathsetmacro{\coordy}{1.5}
+        \pgfmathsetmacro{\coordz}{1}
+        \foreach \coordx in {8.75, 9.5, 10.25, 11, 13} {
+            \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
+            \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
+            \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+        }
+
+        \node(p) at (11.5, 1) {$\dots$};
+
+        \foreach \c in {1,2,3,4,5}
+            \node at(-1.45, 1.75 - \c / 1.35 + 0.5) {$T_\c$};
+       \node at(-1.45 + 0.75, 1.55) {$T_6$};
+        \node at(-1.45 + 0.75, 1.55 - 0.75) {$\dots$};
+        \node at(1.55, -1.45) {$T_{25}$};
+        
+
+\draw [decorate,decoration={brace,amplitude=5pt,mirror,raise=4ex}]
+    (7.75,1) -- (13,1) node[midway,yshift=-3em]{$\vectorize{T}$};
+
+    \node at(8.1, 0.8) {$T_1$};
+    \node at(8.1 + 0.75, 0.8) {$T_2$};
+    \node at(8.1 + 1.5, 0.8) {$T_3$};
+    \node at(8.1 + 2.25, 0.8) {$T_4$};
+    \node at(8.5 + 4.5, 1.55) {$T_{125}$};
+
+    \end{tikzpicture}
+    \label{fig:vectorization}
+    \caption{Tensor vectorization}
+\end{figure}
+
+Reshaping tensors onto matrices will also be very useful since it will let us treat high order tensors as matrices and then apply numerical algorithms
+there.
+
 \begin{definition}[Tensor unfolding]
-Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$, $n \geqslant 2$, $1 \leqslant d \leqslant n$ and $p$ a permutation of the vector $(1,2,\dots, n)$. We define the
-\textbf{generalized unfolding} of the tensor $\mathcal{T}$ as the $2$nd-order tensor 
-$\mathcal{U} \in \mathbb{R}^{\prod_{i=1}^d N_{p_i} \times \prod_{i=d+1}^n N_{p_i}}$:
+Let $T$ be a tensor of order $n$ with $n \geqslant 2$. Let $p$ be a permutation of the vector $(1,2,\dots, n)$. We define the
+\textbf{unfolding} of the tensor $T$ as the $2$nd-order tensor or matrix 
+$\mathcal{U} \in \mathbb{R}^{\prod_{i=1}^d N_{p_i} \times \prod_{i=d+1}^n N_{p_i}}$ entrywise as
 $$ \mathcal{U} (\overline{i_{p_1}, \dots, i_{p_d}}, \overline{i_{p_{d+1}}, \dots, i_{p_n}}) = \mathcal{T}(i_1, \dots, i_n)$$
 
-We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1}, \dots, p_n))}$. 
-We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, \dots, n))}$
+We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1}, \dots, p_n))}$ 
+
+\begin{example}
+    Suppose that we have $X \in \mathbb{R}^{3 \times 2 \times 2}$ defined as
+    $$X = \left[\begin{pmatrix}
+            1 & 0 \\
+            0 & 1
+        \end{pmatrix}, 
+        \begin{pmatrix}
+            1 & 0 \\
+            1 & 1
+        \end{pmatrix},
+        \begin{pmatrix}
+            1 & 0 \\
+            0 & -1
+        \end{pmatrix}
+        \right]$$
+
+        Then $\unfolding{(X, (1, 2), (3))}$ would result in a matrix $\mathbb{R}^{3 \times 4}$ with its elements defined as 
+        $\mathcal{U}(\overline{i_1  i_2}, \overline{i_3}) = X(i_1, i_2, i_3)$. Computing each entry gives
+        $$\unfolding{(X, (1, 2), (3))} = \begin{pmatrix}
+            1 & 0 & 0 & 1 \\
+            1 & 0 & 1 & 1 \\
+            1 & 0 & 0 & -1
+        \end{pmatrix}
+        $$
+    \label{exa:unfold}
+\end{example}
+
+%TODO: Seguir per aqui
+
 \end{definition}
 
 \begin{figure}[h]
     \centering
     \begin{tikzpicture}
-        \pgfmathsetmacro{\cubex}{2}
-        \pgfmathsetmacro{\cubey}{2}
-        \pgfmathsetmacro{\cubez}{2}
-        \pgfmathsetmacro{\coordx}{0}
-        \pgfmathsetmacro{\coordy}{0}
-        \pgfmathsetmacro{\coordz}{0}
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+        \definecolor{filler}{rgb}{0.9, 0.9, 0.9}
+
+        \pgfmathsetmacro{\cubex}{0.6}
+        \pgfmathsetmacro{\cubey}{0.6}
+        \pgfmathsetmacro{\cubez}{0.6}
         
 
-        \node(j3) at (-1, -1) {$T$};
+        \def\coordlist{0, 0.75, 1.5, 2.25, 3}
         
+        \foreach \coordz in \coordlist
+            \foreach \coordx in \coordlist
+                \foreach \coordy in \coordlist {
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
+                     \draw[fill=filler] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
+                }
+
+        \node(T) at (0, -2.25) {$T \in \mathbb{K}^{5 \times 5 \times 5}$};
+
+        \foreach \c in {1,2,3,4,5}
+            \node at(-1.45, 1.75 - \c / 1.35 + 0.5) {$T_\c$};
+        \node at(-1.45 + 0.75, 1.55) {$T_6$};
+        \node at(-1.45 + 0.75, 1.55 - 0.75) {$\dots$};
+        \node at(1.55, -1.45) {$T_{25}$};
+        
+        \node(a) at(4,1);
+        \node (b) at (9,1) {$
+            \begin{pmatrix} 
+                T_1 & T_2 & \dots & T_{25} \\
+                T_{26} & T_{27} & \dots & T_{50} \\
+                \vdots & \vdots & \ddots & \vdots \\
+                T_{101} & T_{102} & \dots & T_{125}
+            \end{pmatrix}$};
+        \draw[->] (a) -- (b);
+
+\draw [decorate,decoration={brace,amplitude=5pt,mirror,raise=4ex}]
+    (7,0.5) -- (11,0.5) node[midway,yshift=-3em]{$\unfolding{(T, (1,2), (3))} \in \mathbb{K}^{25 \times 5}$};
 
     \end{tikzpicture}
-    \label{fig:mode_unfolding}
+    \label{fig:unfolding}
     \caption{Tensor unfolding}
 \end{figure}
 
+
+\iffalse
 \begin{definition}[Tensor slices]
 %Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
 %as $$A(:, j) = \mathbf{a}_j \in \mathbb{R}^I \qquad A(i, :) = \mathbf{\tilde{a}}_j \in \mathbb{R}^J$$
@@ -497,29 +825,6 @@ We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, 
     We will denote $\mathcal{T}^{(m)} := \mathcal{T}(:, \dots, :, i_m, :, \dots, :)$ and $\mathcal{T}^{(\neq m)} := \mathcal{T}(i_1, \dots, i_{m-1}, :, i_{m+1}, \dots, i_n)$
 \end{definition}
 
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-        \pgfmathsetmacro{\cubex}{2}
-        \pgfmathsetmacro{\cubey}{2}
-        \pgfmathsetmacro{\cubez}{2}
-        \pgfmathsetmacro{\coordx}{0}
-        \pgfmathsetmacro{\coordy}{0}
-        \pgfmathsetmacro{\coordz}{0}
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,-\cubey,0) -- ++(\cubex,0,0) -- cycle;
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(0,0,-\cubez) -- ++(0,-\cubey,0) -- ++(0,0,\cubez) -- cycle;
-        \draw[fill=lightgray] (\coordx,\coordy,\coordz) -- ++(-\cubex,0,0) -- ++(0,0,-\cubez) -- ++(\cubex,0,0) -- cycle;
-        
-
-        \node(j3) at (-1, -1) {$T$};
-        
-
-    \end{tikzpicture}
-    \label{fig:slicing}
-    \caption{Tensor slices}
-\end{figure}
-
-
 \begin{example}
     Consider $\mathcal{M} \in \mathbb{K}^{N_1 \times N_2}$ a second order tensor. We can see this tensor as a
     bidimensional array (matrix). The slice $\mathcal{M}(i, :)$ results in the $i$-th row of $\mathcal{M}$.
@@ -531,45 +836,35 @@ We also define $\unfolding_d T := \unfolding{(\mathcal{T}, (1, \dots, d), (d+1, 
     Fixed $i_2, i_3$, the tensor slice of $2$th-order $\mathcal{T} = \mathcal{A}(:, i_2, i_3, :) \in \mathbb{K}^{N_1 \times N_4}$ 
     with its entries defined by ${\mathcal{T}(i_1, i_4) = \mathcal{A}(i_1, i_2, i_3, i_4)}$
 \end{example}
+\fi
 
-\begin{definition}[Rank of a tensor] 
-    We say that a tensor is of rank $r$ and we write $\rank{T} = r$
-    with $r \in \mathbb{N}$ being the minimum value such that we can write $T$ as
-$$T= \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$$
-where $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$
-\end{definition}
 
-One can easily see that $\rank{T} \leqslant \prod_{i=1}^n N_i$.
-Unlike matrices, determining the rank of a tensor is an NP-hard problem. \cite{hillarMostTensorProblems2013}. Even
-finding the maximum rank, (i.e determining $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$) this is still an unresolved problem.
-We will now present an slightly better upper bound for the tensor rank:
-\begin{proposition}
-    \begin{equation} \label{eq:rank-dimensional-bound}
-        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
-    \end{equation}
+\section{Tensor contraction and the Penrose Notation}
 
-\begin{proof}
-    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
-    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
-    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
-    determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
-\end{proof}
-\end{proposition}
+In this section we will define the tensor contraction operation, which is one of the most important operations
+in tensor algebra. The idea behind tensor contraction is that given two tensors from different spaces, say for example
+$T \in \mathbb{R}^{N_1 \times \cdots \times N_n}$ and $U \in \mathbb{R}^{M_1 \times \cdots \times M_m}$, we pick one dimension of
+each tensor $N_i$ and $M_j$ with the same size $N_i = M_j$ and then we obtain a new tensor of order $n + m - 2$ that contains all dimensions except for $N_i$ and $M_j$, and
+each element of the resulting tensor is obtained by generalizing the matrix product opertion but along $N_i$ and $M_j$ dimensions.
 
-\chapter{Tensor networks}
+So, the elements of the tensor contraction $T \times^i_j U$ would be, element-wise:
 
-\section{Penrose Notation}
+$$\sum_{k = 1}^{N_i} T(s_1, \dots, s_{i-1}, k, s_{i+1}, \dots s_n) \cdot U(t_1, \dots, t_{j-1}, k, t_{j+1}, \dots, t_m) $$
 
-The Penrose an intuitive graphical language to represent tensor contractions that
-dates back from at least the early 1970s \cite{rogerPenroseApplications}
+Where $T \times^i_j U \in \mathbb{K}^{N_1 \times \cdots \times N_{i-1} \times N_{i+1} \times \cdots \times N_n \times M_1 \times \cdots \times 
+M_{j-1} \times M_{j+1} \times \cdots \times M_m}$
 
-Given an $n$th-order tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \dots \times N_n}$ the way we draw it using the
+Since the notation of tensor contractions is often very tedius, we will introduce the Penrose Notation for representing tensor contractions in a
+more compact and elegant way. The Penrose notation dates back from at least the early 1970s and was
+firstly used by Robert Penrose, to which the name is owed. \cite{rogerPenroseApplications}
+
+Given an $n$th-order tensor $T \in \mathbb{K}^{N_1 \times \dots \times N_n}$ we represent it using the
 Penrose notation is as a circle with as many edges as the order of the tensor, as seen in \figref{fig:tens}
 
 \begin{figure}[h]
 \centering
 \tikz {
-    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{T}$};
+    \node(T)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$T$};
     \node(i) at (-1, 0) {$i_1$};
     \node(i2) at (-0.7, 0.8) {$i_2$};
     \node(id) at (0.7, 0.8) {$\dots$};
@@ -580,64 +875,54 @@ Penrose notation is as a circle with as many edges as the order of the tensor, a
     \draw (T) -- (in);
 }
 \caption{
-    Representation of a tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation
+    Representation of a tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation
 }
 \label{fig:tens}
 \end{figure}
 
-A lot of times we will not write explicitly the name of the indexes, since we only care about their order. The order
-of the indexes will be determined by their orientation respect to the circle: to get the order we will start from the left and then
-following a clockwise rotation. The order in which we encounter the edges will be the order of the indexes. For example,
-in \figref{fig:tens}, the order would be $i_1, i_2, \dots, i_n$
+The dimensions of the tensor are not explicitly written in the Penrose notation. Instead, only the order
+of the indices is preserved. If they are not explicitly set on the labels of the edges,
+the order of the indexes of the tensor will be determined by their orientation respect to the circle: 
+the order starts from the left and then follows a clockwise rotation. The order in which we encounter the edges will be the order of the indexes. 
+For example, in \figref{fig:tens}, the order would be $i_1, i_2, \dots, i_n$
 
+Then, we represent a contraction of two tensors on the Penrose notation by joining to edges of different tensors. The edges that are
+joined will be the edges that the contraction is performed. As seen in \figref{fig:tencon}.
 
-\section{Tensor contraction}
-
-We would want to generalize the concept of vector dot product, or matrix product or the trace operation into tensors.
-The tensor contraction gives us a generalization of all of the above. The concept of the tensor contraction 
-basically arises from the canonical pairing of a vector space and its dual. Since tensors are elments
-of $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$ with for each
-$\mathbb{W}_j$ being the dual space of some space $\mathbb{V}_i$, one can contract these tensor by pairing these two
-spaces.
-
-Formally, the contraction of two tensors $\mathcal{X}, \mathcal{Y}$ is the image of a fixed contraction $\mathcal{C}_k^l$ map where $k$ is an index (or edge) of the first tensor $\mathcal{X}$ and $l$
-is another index of the second tensor $\mathcal{Y}$:
+Now, we will give a more formal definition of the tensor contraction since there is a natural way in which tensor contraction definition
+appears from applying a vector space with its dual with different tensors. As before, we take two tensors $T$ and $U$ with
+$T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and $U \in \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$. Suppose that there exists
+some vector space of the dimensions of $U$ that is the dual of some space of the tensor $T$, in other words, suppose that exists
+some $i$ and $j$ in which $\mathbb{W}_j = \mathbb{V}_i^*$. Then, the tensor contraction is doing the tensor product of $T$ and $U$ and then applying
+$\mathbb{V}_i$ with its dual afterwards. Doing this gives the following definition:
 
 \begin{definition}
-    \normalfont{\cite{dodsonTensorsMultilinearForms1991}}
-    Let $T \in \left( \bigotimes_{i=1}^{k-1} \mathbb{V}_i \otimes \mathbb{V}_k \otimes \bigotimes_{i=k+1}^{p} \mathbb{V}_i \right) \otimes 
-    \left( \bigotimes_{i=1}^{l-1} \mathbb{W}_{i}^* \otimes \mathbb{W}_l^* \otimes 
-    \bigotimes_{i=l+1}^q \mathbb{W}_i^* \right)$ With $\mathbb{V}_k = \mathbb{W}_l$. Consider the mapping
+%    \normalfont{\cite{dodsonTensorsMultilinearForms1991}}
+    Let $P \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+    and suppose that there exists some $i$ and $j$ such
+    that $\mathbb{V}_j = \mathbb{V}_i^*$ The following map
     $$
-    \mathcal{C}_k^l: 
-    \left(\bigotimes_{i=1}^{p} \mathbb{V}_i \right) \otimes \left( \bigotimes_{i=1}^{q} \mathbb{W}_i^* \right) \longrightarrow 
-    \left( \bigotimes_{i=1}^{k-1} \mathbb{V}_i \otimes \bigotimes_{i=k+1}^p \mathbb{V}_i \right) \otimes \left( \bigotimes_{i=1}^{l-1} \mathbb{W}^*_i \otimes \bigotimes_{i=l+1}^q \mathbb{W}^*_i \right)
+    \begin{align}
+    \mathcal{C}_j^i: 
+    \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n &\longrightarrow 
+    \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_{i-1} \otimes \mathbb{V}_{i+1} \otimes \cdots \otimes \mathbb{V}_{j-1} \otimes \mathbb{V}_{j+1} \otimes \cdots \otimes \mathbb{V}_n \\
+ v_1 \otimes \cdots \otimes v_n
+                                                     &\longmapsto \left( v_1 \otimes \cdots \otimes v_{i-1} \otimes v_{i+1} \otimes \cdots \otimes v_{j-1} \otimes v_{j+1} \otimes \cdots \otimes v_n \right) v_j(v_i)
+\end{align}
 $$
-$$
-\mathcal{C}_k^l \left( \bigotimes\nolimits_{i=1}^p v_i \otimes \bigotimes\nolimits_{i=1}^q f_q \right) 
-= \left(\bigotimes\nolimits_{i=1}^{k-1} v_i \otimes \bigotimes\nolimits_{i=k+1}^p v_{i} \otimes
-    \bigotimes\nolimits_{i=1}^{l-1} f_i \otimes \bigotimes_{i=l+1}^q f_i \right) f_l(v_k)$$
-$\mathcal{C}_k^l$ is defined as the tensor contraction mapping of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_p \otimes \mathbb{V}_{p+1}^* \otimes
-\cdots \otimes \mathbb{V}_q^*$ by the indices $(k,l)$. We call $\mathcal{C}_k^l(T)$ the contraction of $T$ by indices $(k,l)$. In other words, we apply
-the dual space $\mathbb{V}_k^*$ with $\mathbb{V}_k$.
-
-Now we will introduce the definition of the contraction between two tensors by defining a contraction over the tensor product
-of the two original tensors.
+where $v_j \in \mathbb{V}_i^*$. We define 
+$\mathcal{C}_j^i$ as the tensor contraction mapping of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ over the indices $i$ and $j$.
+We call $\mathcal{C}_i^j(T)$ the contraction of $T$ by indices $(i,j)$.
 \end{definition}
 
-\begin{definition}
-
-    Let $X \in \left( \bigotimes_{i=1}^{k-1} \mathbb{V}_i \otimes \mathbb{V}_k \otimes \bigotimes_{i=k+1}^{p} \mathbb{V}_i \right)$ and
-    $Y \in \left( \bigotimes_{i=1}^{l-1} \mathbb{W}_{i} \otimes \mathbb{W}_l^* \otimes 
-    \bigotimes_{i=l+1}^q \mathbb{W}_i \right)$ with $\mathbb{V}_k = \mathbb{W}_l$. We define the contraction between $X$ and $Y$ by the
-    indices $(k,l)$ as $$X \times^l_k Y := \mathcal{C}_k^l(X \otimes Y)$$
-\end{definition}
+Now, we define the \textbf{contraction of two tensors} $T$ and $U$ defined as before with some space $\mathbb{W}_j$ being the dual of
+some $\mathbb{V}_i$ as $\mathcal{C}_j^i (T \otimes U)$. We will sometimes write $T \times_j^i U$
 
 We will represent the contraction between two tensors 
 as their representation in the Penrose notation with the edges that represent the indexes that are contracting by joining them, as seen in \figref{fig:tencon}.
 
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \hfill
 \begin{minipage}{0.2\textwidth}
@@ -663,7 +948,7 @@ as their representation in the Penrose notation with the edges that represent th
     \node(1) at(-1.5, -0.5);
     \node(2) at(3, -0.5);
     \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
-        node[above, pos=0.45] {$\mathcal{C}_{i_3}^{j_1}$};
+        node[above, pos=0.45] {$\mathcal{C}^{i_3}_{j_1}$};
 \end{tikzpicture}
 \end{minipage}
 \hfill
@@ -689,31 +974,26 @@ as their representation in the Penrose notation with the edges that represent th
 \label{fig:tencon}
 \end{figure}
 
-Fixing bases for $\mathbb{V}_1, \dots, \mathbb{V}_p, \mathbb{W}_1, \dots, \mathbb{W}_q$ and representing $X, Y$
-as discrete functions by its representations in those basis, we get a way for computing $\mathcal{C}_k^l(X \otimes Y)$:
-
-\begin{definition}[Base dependant tensor contraction]
-    \normalfont{\cite{zhengFullyConnectedTensorNetwork2021}} Given $\mathcal{X}, \mathcal{Y}$ as the discrete function representations
-    of $X, Y$ from earlier, we can write $\mathcal{C}_k^l(X \otimes Y)$ element-wise as:
+If we fix basis for $\mathbb{V}_1, \dots, \mathbb{V}_p, \mathbb{W}_1, \dots, \mathbb{W}_q$ and we represent $X, Y$
+as discrete functions by its representations in those basis, we get a way for computing $\mathcal{C}_k^l(X \otimes Y)$ as:
     \begin{equation}
     \begin{align}\mathcal{C}_k^l & (i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_p, j_1, \dots, j_{l-1}, j_{l+1}, \dots, j_q) \\  =& \sum_{s=1}^{N_k}
         \mathcal{X}(i_1, \cdots, i_{k-1}, s, i_{k+1}, \cdots, i_p) \mathcal{Y}(j_1, \cdots, j_{l-1}, s, j_{l+1}, \cdots, j_q)
 \end{align}
 \label{eq:contraction}
     \end{equation}
-    \end{definition}
 
 \begin{example}
-    The tensor contraction for two tensors of order $2$ $X \in \mathbb{K}^{N_1 \times N_2}, Y \in \mathbb{K}^{N_2 \times N_3}$ over one edge of each tensor yields the matrix multiplication.
-    Applying \refeq{eq:contraction} we get that
-    $$(\mathcal{X} \times_2^2 \mathcal{Y}) (i_1, j_2) = \sum_{s=1}^{N_2} X(i_1, s) Y(s, j_2)$$
-    And it is equivalent to the conventional matrix product. Visually, using the Penrsone notation we have:
+    The tensor contraction for two tensors $M_1 \in \mathbb{K}^{N_1 \times N_2}$ and $M_2 \in \mathbb{K}^{N_2 \times N_3}$ over one edge of each tensor yields the matrix multiplication.
+    Applying \refeq{eq:contraction} we get that $Z = \mathcl{C}_2^2 (X \otimes Y)$ is defined entry-wise as:
+    $$Z (i_1, j_2) = \sum_{s=1}^{N_2} M_1(i_1, s) M_2(s, j_2)$$
+    And that is identical to the conventional matrix product. Visually, we can represent it using the Penrsone notation:
     \begin{center}
     \hfill
 \begin{minipage}{0.2\textwidth}
     \begin{tikzpicture}
-    \node(X)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{X}$};
-    \node(Y)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$\mathcal{Y}$};
+    \node(X)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
+    \node(Y)[draw, shape=circle, minimum size=0.8cm] at (2,0) {$Y$};
     \node(i1) at (-1, 0) {$i_1$};
     \node(j2) at (3, 0) {$j_2$};
     \draw (X) -- (i1);
@@ -736,7 +1016,7 @@ as discrete functions by its representations in those basis, we get a way for co
 \hfill
 \begin{minipage}{0.225\textwidth}
 \begin{tikzpicture}
-    \node(Z)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{Z}$};
+    \node(Z)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$Z$};
     \node(i1) at (-1, 0) {$i_1$};
     \node(j2) at (1, 0) {$j_2$};
     \draw (Z) -- (i1);
@@ -748,129 +1028,146 @@ as discrete functions by its representations in those basis, we get a way for co
 \end{example}
 
 \begin{example}
-    Suppose that $X \in \mathbb{R}^{3 \times 3 \times 2}, Y \in \mathbb{R}^{2 \times 3 \times 3}$ with their representation
-    in some given basis
-    $$X = \left[ 
-    \begin{pmatrix}
-        1 & 0 & -1 \\
-        0 & 2 & -2 \\
-        -1 & 3 & 1
-    \end{pmatrix} \quad
-    \begin{pmatrix}
-        1 & 1 & 0 \\
-        2 & 0 & 2 \\
-        0 & 3 & 0
-    \end{pmatrix}
-    \right] $$
+    Suppose that we take $X \in \mathbb{R}^{3 \times 2 \times 2}$ from \exref{exa:unfold} and
+    $Y \in \mathbb{R}^{2 \times 2 \times 3}$ defined as:
   $$Y = \left[ 
     \begin{pmatrix}
         1 & 0 & -1 \\
         0 & 2 & -2 \\
-    \end{pmatrix} \quad
+    \end{pmatrix},
     \begin{pmatrix}
         1 & 1 & 0 \\
         2 & 0 & 2 \\
-    \end{pmatrix} \quad
-    \begin{pmatrix}
-        0 & 1 & 2 \\
-        1 & 0 & 2
     \end{pmatrix}
     \right] $$
 
-The contraction described in \figref{fig:tencon} would yield the tensor $\mathcal{Z} = \mathcal{X} \times_3^1 \mathcal{Y} \in \mathbb{R}^{3 \times 3 \times 3 \times 3}$ with
-each element defined as:
+    We want to compute the contraction of $X$ and $Y$ from the second index of each tensor $Z = \mathcl{C}_2^2 (X \otimes Y)$.
+    Note that $Z \in \mathbb{R}^{3 \times 2 \times 2 \times 3}$. Using the Penrose
+    Notation, the contraction would look like
 
-$$\mathcal{Z}(i_1, i_2, j_2, j_3) = \sum_{s=1}^2 \mathcal{X}(i_1, i_2, s) \mathcal{Y}(s, j_2, j_3)$$
+    \begin{center}
+    \hfill
+\begin{minipage}{0.2\textwidth}
+    \begin{tikzpicture}
+    \node(X)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
+    \node(Y)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$Y$};
+
+    \node(i1) at (0, 1) {$i_1$};
+    \node(i3) at (0, -1) {$i_3$};
+    \node(j1) at (3, 1) {$j_1$};
+    \node(j3) at (3, -1) {$j_3$};
+    
+    \draw (X) -- (i1);
+    \draw (X) -- (i3);
+    \draw (Y) -- (j1);
+    \draw (Y) -- (j3);
+    \draw (X) -- (Y) 
+        node[above, pos=0.8] {$j_2$}
+        node[above, pos=0.2] {$i_2$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
+    \node(1) at(-1.5, 1);
+    \node(2) at(3, 1);
+    \node(i) at(3, 0.5);
+    \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
+        node[above, pos=0.45] {$\mathcal{C}^{2}_{2}$};
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.225\textwidth}
+\begin{tikzpicture}
+    \node(Z)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$Z$};
+    \node(i1) at (-1, 0) {$i_1$};
+    \node(i3) at (0, 1) {$i_3$};
+    \node(j1) at (1, 0) {$j_1$};
+    \node(j3) at (0, -1) {$j_3$};
+    \draw (Z) -- (i1);
+    \draw (Z) -- (i3);
+    \draw (Z) -- (j1);
+    \draw (Z) -- (j3);
+\end{tikzpicture}
+\end{minipage}
+
+    \end{center}
+
+And each element of the contracted tensor $Z$ would be defined as:
+
+$$Z(i_1, i_3, j_1, j_3) = \sum_{s=1}^2 X(i_1, s, i_3) Y(j_1, s, j_3)$$
 
 Therefore,
 
-$$\mathcal{Z} = \begin{pmatrix}
+$$Z = \begin{bmatrix}
 \begin{pmatrix}
-    1 & 2 & -3 \\
-    3 & 1 & 2 \\
-    1 & 1 & 4 \\
+    1 & 0 & -1 \\
+    1 & 1 & 0 \\
 \end{pmatrix} &
 \begin{pmatrix}
     0 & 2 & -2 \\
     2 & 0 & 2 \\
-    1 & 0 & 2
-\end{pmatrix} &
-\begin{pmatrix}
-    -1 & 0 & 1 \\
-    -1 & -1 & 0 \\
-    0 & -1 & -2
 \end{pmatrix} \\
 \begin{pmatrix}
-    0 & 4 & -4 \\
-    4 & 0 & 4 \\
-    2 & 0 & 4
+    1 & 2 & -3 \\
+    3 & 1 & 2 \\
 \end{pmatrix} &
 \begin{pmatrix}
-    2 & 0 & -2 \\
-    2 & 2 & 0 \\
-    0 & 2 & 4
-\end{pmatrix} &
-\begin{pmatrix}
-    -2 & 4 & 6 \\
-    2 & -2 & 4 \\
-    2 & -2 & 0
+    0 & 2 & -2 \\
+    2 & 0 & 2 \\
 \end{pmatrix} \\
-\begin{pmatrix}
-    -1 & 0 & 1 \\
-    -1 & -1 & 0 \\
-    0 & -1 & -2
-\end{pmatrix} &
-\begin{pmatrix}
-    3 & 6 & -9 \\
-    9 & 3 & 6 \\
-    3 & 3 & 12
-\end{pmatrix} &
 \begin{pmatrix}
     1 & 0 & -1 \\
     1 & 1 & 0 \\
-    0 & 1 & 2
+\end{pmatrix} &
+\begin{pmatrix}
+    0 & -2 & 2 \\
+    -2 & 0 & -2 \\
 \end{pmatrix} \\
-\end{pmatrix}$$
+\end{bmatrix}$$
 \label{ex:bigmatrix}
 \end{example}
 
-\subsection *{Matrix tensor contraction}
+\subsection* {Computing the tensor contraction using the matrix product}
 
-Note that \refeq{eq:contraction} is almost in the form of matrix product. If we reshape accordingly
+As we previously said, \refeq{eq:contraction} is equivalent to a matrix product, therefore it is possible
+to compute a tensor contraction by multiplying two tensors unfolded in a concrete way.
 the tensors $\mathcal{X}$ and $\mathcal{Y}$, we can compute $\mathcal{C}_l^k(X \otimes Y)$ as a matrix product.
 \begin{corollary}
     Let $X \in \mathbb{K}^{N_1 \times \cdots \times N_k \times \cdots \times N_n}, Y \in \mathbb{K}^{M_1 \times \cdots \times M_l \times \cdots \times M_m}$
     with $1 \leqslant k \leqslant n$, $1 \leqslant l \leqslant m$, $N_k = M_l$. The matrix product
-$$ \mathcal{X}(\overline{i_1, \dots, i_{k-1}}, \overline{i_k, \dots, i_n}) \cdot \mathcal{Y}(\overline{j_1, \dots, j_{l-1}}, \overline{j_l, \dots, j_m}) $$
-    results in a representation of $\mathcal{T} = \mathcal{X} \times_k^l \mathcal{Y}$
+    $$ \mathcal{X}(\overline{i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_n}, \overline{i_k}) \cdot \mathcal{Y}(\overline{j_l}, \overline{j_1, \dots, j_{l-1}, j_{l+1}, \dots, j_m}) $$
+    Results in a $\left(\prod_{i=1}^n N_i \right) / N_k \times \left( \prod_{i=1}^m M_i \right) / M_l$ matrix, which can be reshaped back
+    onto $\mathcl{C}^k_l (X \otimes Y)$.
 \end{corollary}
 
 \begin{example}
-    Following from \exref{ex:bigmatrix}, we would write $X \in \mathbb{R}^{9 \times 2}$ and $Y \in \mathbb{R}^{2 \times 9}$ as:
+    Following from \exref{ex:bigmatrix}, we will reshape the tensors $X$ and $Y$ for computing $Z$ by only performing a matrix product.
+    We need to first compute the matrices $\mathcal{X} = \unfolding{(X, (1, 3), (2))} \in \mathbb{R}^{6 \times 2}$
+    and $\mathcal{Y} = \unfolding{(Y, (2), (1, 3))} \in \mathbb{R}^{2 \times 6}$. These
+    unfoldings result in:
 
     $$X = \begin{pmatrix}
-        1 & 1 \\ 0 & 1 \\ -1 & 0 \\ 0 & 2 \\ 2 & 0 \\ -2 & 2 \\ -1 & 0 \\ 3 & 3 \\ 1 & 0
+        1 & 0 \\ 0 & 1 \\ 1 & 1 \\
+        0 & 1 \\ 1 & 0 \\ 0 & -1
         \end{pmatrix} \qquad
         Y = \begin{pmatrix}
-            1 & 0 & -1 & 1 & 1 & 0 & 0 & 1 & 2 \\
-            0 & 2 & -2 & 2 & 0 & 2 & 1 & 0 & 2
+            1 & 0 & -1 & 1 & 1 & 0 \\
+            0 & 2 & -2 & 2 & 0 & 2
         \end{pmatrix}$$
         Therefore:
     $$Z = XY = \begin{pmatrix}
-        1&	2&	-3&	 3&	 1&	2&	1&	 1&	 4\\
-        0&	2&	-2&	 2&	 0&	2&	1&	 0&	 2\\
-        -1&	0&	 1&	-1&	-1&	0&	0&	-1&	-2\\
-        0&	4&	-4&	 4&	 0&	4&	2&	 0&	 4\\
-        2&	0&	-2&	 2&	 2&	0&	0&	 2&	 4\\
-        -2&	4&	-2&	 2&	-2&	4&	2&	-2&	 0\\
-        -1&	0&	 1&	-1&	-1&	0&	0&	-1&	-2\\
-        3&	6&	-9&	 9&	 3&	6&	3&	 3&	12\\
-        1&	0&	-1&	 1&	 1&	0&	0&	 1&	 2\\
+        1 & 0 & -1 & 1 & 1 & 0 \\
+        0 & 2 & -2 & 2 & 0 & 2 \\
+        1 & 2 & -3 & 3 & 1 & 2 \\
+        0 & 2 & -2 & 2 & 0 & 2 \\
+        1 & 0 & -1 & 1 & 1 & 0 \\
+        0 & -2 & 2 & -2 & 0 & -2
     \end{pmatrix}$$
 
     And we can now reshape $Z \in \mathbb{R}^{9 \times 9}$ as the tensor in $\mathbb{R}^{3\times 3\times 3\times 3}$
-    as $$\mathcal{Z}(i_1, i_2, i_3, i_4) = Z(\overline{i_1, i_2}, \overline{i_3, i_4})$$
-    which in fact, is identical to $\mathcal{Z}$ in \exref{ex:bigmatrix}
+    as $$Z(i_1, i_3, j_1, j_3) = Z(\overline{i_1, i_3}, \overline{j_1, j_3})$$
+    which in fact, is identical to $Z$ in \exref{ex:bigmatrix}
 \end{example}
 
 \begin{figure}
@@ -900,13 +1197,6 @@ $$ \mathcal{X}(\overline{i_1, \dots, i_{k-1}}, \overline{i_k, \dots, i_n}) \cdot
 There may be the case that when contracting a series of tensors, we might end up as what
 we see as a loop in the Penrose Notation (see \figref{fig:loop}). Contracting over these two indexes we get the trace
 of the tensor $\mathcal{T}$ respect the indices $i_k$ and $i_{k+1}$ and we denote it as $\Tr(T)$ (See \figref{fig:trace}):
-
-\begin{definition}
-    Given a tensor $\matchal{T} \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ with $N_k = N_p$ with $1 \leqslant k, p \leqslant n$ and $k \neq p$,
-    we define the trace of $\mathcal{T}$ respect the indices $k$ and $p$ as the tensor $\Tr_k^p(\mathcal{T})$ of order $n - 2$ with its entries defined as:
-    $$\Tr_k^p(\mathcal{T}) (i_1, \dots, i_{k-1}, i_{k+1}, \dots, i_{p-1}, i_{p+1}, \dots, i_n) = \sum_{j = 1}^{N_k} \mathcal{T}(i_1, \dots, i_{k-1}, j, i_{k+1}, \dots, i_{p-1}, j, i_{p+1}, \dots, i_n)$$
-
-\end{definition}
 
 \begin{figure}[h]
 \centering
@@ -961,49 +1251,68 @@ of the tensor $\mathcal{T}$ respect the indices $i_k$ and $i_{k+1}$ and we denot
 \label{fig:trace}
 \end{figure}
 
-Therefore, now one can ask that if we have an arbitrary graph $G$ represented with the Penrose Notation and it is connected,
-we will be able to totally contract it to a single final tensor.
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Tensor networks}
+
+In this chapter we will start by presenting tensor networks from a mathematically formal standpoint. Then, we will present the notion
+of the tensor $G$-rank that will be useful for determining if a tensor network can represent a tensor. We will present some common
+tensor network structures. After that, we will discuss over the ordering in which its the most optimal to contract a tensor network
+and we will give an algorithm that finds an optimal order of contraction, and finally, we will present the alternating least
+squares algorithm applied to generic tensor networks for explicitly finding the tensor cores of a tensor network.
+
+The concept of tensor networks originated from a physics background. Roger Penrose described how its
+diagrammatic language could be used in various applications of physics \cite{rogerPenroseApplications}. Later, 
+in 1992, Steven R. White developed de Density Matrix Renormalization Group (DRMG) algorithm for
+quantum lattice systems. It was considered the first successfull tensor network application \cite{whiteDensityMatrixFormulation1992}.
+
+\begin{definition}[Graph]
+    \normalfont{\cite{wilsonIntroductionGraphTheory2009}}
+    A \textbf{graph} $G$ is defined as a tuple $G = (V,E)$ where $V = V(G)$ is a set of elements called \textbf{vertices} and 
+    $E = E(G) \subset \{\{u, v\} : u, v \in V\}$ is a set of elements called \textbf{edges}.
+\end{definition}
+
+\begin{definition}[Directed Graph]
+    A \textbf{directed graph} $D$ is a tuple $D = (V, \bar{E})$ where $V = V(D)$ are its vertices and
+    $\bar{E} = \bar{E}(D) \subset \{(u,v) : u,v \in V\}$
+\end{definition}
+
+\begin{definition} Given a directed graph $G=(V,\bar{E})$ and a vertex $i \in V$ we define
+    $$\IN(i) = \{j \in V : (j, i) \in \bar{E}\} \qquad \OUT(i) = \{j \in V : (i, j) \in \bar{E} \}$$
+\end{definition}
 
 
 \section{Tensor Network States}
 
-The concept of tensor networks originated from a physics background. Roger Penrose described how its
-diagrammatic language could be used in various applications of physics \cite{rogerPenroseApplications}.
-
-Later, in 1992, Steven R. White developed de Density Matrix Renormalization Group (DRMG) algorithm for
-quantum lattice systems. It was considered the first successfull tensor network application \cite{whiteDensityMatrixFormulation1992}.
-
-% Canviar aquest paràgraf
-The commonly use terminology "tensor decomposition" is equivalent to "tensor network" to some extent. After
-several years of progress accross different research fields, there is no significant distinction between tensor decomposition
-and tensor networks. Tensor decomposition was employed primarly in signal processing fields \cite{wangTensorNetworksMeet2023}. Traditional
-tensor decomposition models can be viewed
-as basic kinds of tensor networks. In this thesis we will study some of the properties of different tensor decomposition methods,
-and their effectivity.
-
-We will define a mathematic definition of a tensor decomposition based on \cite{yeTensorNetworkRanks2019}, we will
-see some common examples of tensor decompositions and we will define the 
-tensor network structure space.
-
-Informally, the way we construct a tensor network consists of picking a directed graph $G = (V, \bar{E})$, and for each vertex $i \in V$ we assign
+The way tensor networks are constructed consists of picking a connected directed graph $G = (V, \bar{E})$, and for each vertex $i \in V$ we assign
 a vector space $\mathbb{V}_i$ and for each edge $(i,j) \in \bar{E}$ we assign a vector space $\mathbb{E}_i$ to the tail of the edge and its 
-dual covector space $\mathbb{E}_i^*$ to the head of the edge. We will also demand that the graph $G$ is connected.
+dual covector space $\mathbb{E}_i^*$ to the head of the edge. In other words, tensor networks can be seen as a series of contractions between
+a set of tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$ which once all of them are contracted results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
 
 More formally, let $\mathbb{V}_1, \dots, \mathbb{V}_d$ be vector spaces with $\dim{\mathbb{V}_i} = N_i, i = 1, \dots, d$. Let
-$\mathbb{E}_1, \dots, \mathbb{E}_c$ be finite vector spaces with $\dim{\mathbb{E}_i} = R_i, i = 1, \dots, c$. For each $i \in V$ we associate
-the tensor product space
-$$\left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
+$\mathbb{E}_1, \dots, \mathbb{E}_c$ be finite vector spaces with $\dim{\mathbb{E}_i} = R_i, i = 1, \dots, c$. For each vertex $i \in V$ 
+we will associate the tensor product space
+$$\xi_i := \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
 \left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right)$$
 
-and a contraction map $\kappa_G$ defined by contracting factors in $\mathbb{E}_j$ with factors of $\mathbb{E}^*_j$
-
-$$\kappa_G : \bigotimes\nolimits_{i=1}^d \left[ \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
-\left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right)  \right] \rightarrow \bigotimes\nolimits_{i=1}^d \mathbb{V}_i$$
+A tensor network is completly defined by the graph $G$ and all the tensor product spaces $\xi_1, \dots, \xi_n$. We will also associate
+to the tensor network a contraction mapping $\mathcal{C}_G$ defined by contracting factors
+in $\mathbb{E}_j$ with factors of $\mathbb{E}^*_j$:
+$$\mathcal{C}_G : \bigotimes\nolimits_{i=1}^n \xi_i \longrightarrow \bigotimes\nolimits_{i=1}^d \mathbb{V}_i$$
 
 Note that we have given this shapes to the tensors that we fix onto each vertex
 $i \in V$ because when we contract the whole graph, we will get a tensor of ${\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n}$.
 Since every directed edge $(i,j)$ must point out of a vertex $i$ and point into a vetex $j$, each copy of $\mathbb{E}_j$ is paired with one
-copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined and it results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+copy of $\mathbb{E}^*_$, so the contraction $\mathcal{C}_G$ is well defined and it results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
 (See \figref{fig:tn_graph})
 
 \begin{figure}[h]
@@ -1011,10 +1320,10 @@ copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined and it re
 
     \begin{minipage}{0.3\textwidth}
 \begin{tikzpicture}[scale=0.85, arrows = {-Latex[length=8pt, inset=2pt]}]
-    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-3,1.5) {$1$};
-    \node(2)[draw, shape=circle, minimum size=0.8cm] at (-3,-1.5) {$2$};
-    \node(3)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$3$};
-    \node(4)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$4$};
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (-3,1.5) {$\mathcal{G}_1$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (-3,-1.5) {$\mathcal{G}_2$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$\mathcal{G}_3$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$\mathcal{G}_4$};
     \node(i1) at (-3, 2.5) {$\mathbb{V}_1$};
     \node(i2) at (-4, -1.5) {$\mathbb{V}_2$};
     \node(i3) at (0, 1) {$\mathbb{V}_3$};
@@ -1045,7 +1354,7 @@ copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined and it re
     \node(1) at(-1.5, -0.5);
     \node(2) at(2.5, -0.5);
     \draw[-{Stealth[length=12pt, inset=2pt]}] (1) -- (2)
-        node[above, pos=0.45] {$\kappa_G(\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_d)$};
+    node[above, pos=0.45] {$\mathcal{C}_G(\mathcal{G}_1, \mathcal{G}_2, \mathcal{G}_3, \mathcal{G}_4)$};
 \end{tikzpicture}
 \end{minipage}
 \begin{minipage}{0.25\textwidth}
@@ -1062,38 +1371,33 @@ copy of $\mathbb{E}^*_$, so the contraction $\kappa_G$ is well defined and it re
     \end{tikzpicture}
 \end{minipage}
 \caption{
-    Example of the correspondance between some directed graph $G$ and the vector spaces $\mathbb{V}_1, \dots, \mathbb{V}_d, \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{E}_1^*,
-    \dots, \mathbb{E}_c^*$ using the Penrose notation
+    Example of a tensor network and a tensor network state evaluation using the Penrose notation.
 }
 \label{fig:tn_graph}
 \end{figure}
 
+By picking some tensors $\mathcal{G}_i \in \xi_i$ and evaluating them through $\mathcal{C}_G$
+we get a tensor $T$ that we will call \textbf{tensor network state}. We will call the tensors $\mathcal{G}_i$
+\textbf{core tensors}. 
 
-\begin{definition}[Tensor network state]
-    If a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ can be written as $T = \kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ where
-    $$\mathcal{G}_i \in \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
-\left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right)$$
-then we will say that $T$ is a \textbf{tensor network state} associated to the graph $G$ with cores $\mathcal{G}_i \in \mathbb{V}_i, i = 1, \dots, n$
+\begin{definition}
+    A tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ is a tensor state of a tensor network if it
+    can be written as $T = \mathcal{C}_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ with $\mathcal{G}_i \in \xi_i$
 \end{definition}
 
-\begin{definition}[Tensor network]
-    We will define all the resulting tensors that are possible by varying $\mathcal{G}_1, \dots, \mathcal{G}_n$ and then contracting through $\kappa_G$ as the tensor network
-associated to $G$ and the vector spaces $\mathbb{V}_1, \dots, \mathbb{V}_n, \mathbb{E}_1, \dots, \mathbb{E}_c$ and we will write this set
-as $\TNS(G; \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n)$, i.e
+\begin{definition}
+    We will define the set of all possible tensor states 
+    of a tensor network as the set $\TNS(G; \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n)$, i.e
 $$
-\begin{align}
-    \TNS(G; \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n) := & \Bigg\{ \kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n) \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n : \\
-                                                                                     & \mathcal{G}_i \in \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
-\left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right) \Bigg\}
-\end{align}
+    \TNS(G; \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n) := \Bigg\{ \kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n) \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n : \mathcal{G}_i \in \xi_i \Bigg\}
 $$
 \end{definition}
-Now, since all vector spaces are determined up to isomorphism by its dimension, when the vector spaces $\mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n$ are unimportant,
-we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. On the Penrose
-Notation representation of the network, we will not write the vector spaces since they are
-not important.
+The vector spaces $\mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n$ are not really important 
+on the Penrose representation of the tensor network, and we will usually not write them. Also, since all vector spaces are determined up to isomorphism by its dimension, 
+we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. 
 
-Also, since $n$ is equal to the number of vertices of $G$, we will sometimes write $\TNS(G; R)$ for a more compact notation.
+And since $n$ is equal to the number of vertices of $G$ and $c$ is equal to the number
+of edges of $G$, we will write $\TNS(G; R)$ for a more compact notation.
 
 \begin{definition}
     Given a tensor network state $\TNS(G, R)$, from the graph given by its Penrose Notation,
@@ -1102,35 +1406,31 @@ Also, since $n$ is equal to the number of vertices of $G$, we will sometimes wri
 For example, in \figref{fig:tn_graph}, the edges labeled as $\mathbb{V}_1, \mathbb{V}_2, \mathbb{V}_3, \mathbb{V}_4$ are 
 free edges and the rest are contracted edges.
 
-The following theorem gives us that if we make $R_1, \dots, R_c$ big enough, every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
-In fact, these values that guarantees that $T$ is an state are $R_1 = \dots R_c = \rank T$ where $\rank T$ is the \textit{traditional rank}
-of a tensor. We will give now the definition of the traditional rank:
+\section{Tensor Network Ranks}
 
-\begin{definition} 
-    We say that a tensor has \textbf{traditional rank} $r$ and we write $\rank{T} = r$
-    with $r \in \mathbb{N}$ being the minimum value such that we can write $T$ as
-$$T= \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$$
-where $v_1^{(i)}, \dots, v_r^{(i)} \in \mathbb{V}_i, i = 1, \dots, n$
+% TODO: Por aqui
+In this section will present the notion of $G$-rank of a tensor. The $G$-rank of a tensor is very useful because it
+tells what is the minimum set of ranks that we need to choose to guarante that our tensor $T$ can be represented by
+our tensor network. By estimating the $G$-rank of a tensor we can get an idea of which ranks are optimal for representing $T$
+
+As we defined the rank for a tensor $T$ as the minimum number
+of $1$-rank tensors that compose the tensor $T$, we will define the $G$-rank as the minimum ranks that a tensor network state
+needs for representing $T$. More formally,
+
+\begin{definition} [Tensor G-rank]
+    Given a graph $G$, we define the tensor rank respect to a $G$ or $G$-rank as
+        $$\rank_G (T) = \min {\{(R_1, \dots, R_c) \in \mathbb{N}^c : T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)\}}$$
+ 
+    Where $\min(S)$ with $S \subset \mathbb{N}^c$ denotes the minimal elements of $S$. We treat $\mathbb{N}^c$ with its usual
+    partial order:
+    $$ (a_1, \dots, a_c) \leqslant (b_1, \dots, b_c) \Longleftrightarrow a_1 \leqslant b_1, a_2 \leqslant b_2, \dots, a_c \leqslant b_c$$
+    So for example if $S = \{(3,4,5), (2,1,3), (1,3,2)\}$, then $\min(S) = \{(2,1,3), (1,3,2)\}$
 \end{definition}
 
-We can immediatly see that $\rank{T} \leqslant \prod_{i=1}^n N_i$.
-Unlike matrices, determining the rank of a tensor is an NP-hard problem. \cite{hillarMostTensorProblems2013}. Even
-finding the maximum traditional rank of a tensor space (that means finding $\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$) it still remains as an open problem.
-We can find an slightly better upper bound for the tensor rank:
-\begin{proposition}
-    \begin{equation} \label{eq:rank-dimensional-bound}
-        \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor
-    \end{equation}
-
-\begin{proof}
-    Let $r = \rank{T}$. We can write $T = \sum_{p=1}^r v_p^{(1)} \otimes \cdots \otimes v_p^{(n)}$. Now, each term of this
-    sum has $\sum_{i=1}^n N_i$ adjustable parameters, since each $v_p^{(i)}$ is a vector of $\mathbb{V}_i$ with its dimension being $N_i$.
-    So, in total we will have $r \sum_{i=1}^n N_i$ adjustable parameters in our decomposition. Since our tensor $T$ is completly
-    determined by $\prod_{i=1}^n N_i$ parameters, we can impose that $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
-\end{proof}
-\end{proposition}
-
-\begin{theorem} \normalfont{\cite{yeTensorNetworkRanks2019}} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
+Now, we will see that $\rank_G(T)$ is a finite set. The following theorem gives us that if we make $R_1, \dots, R_c$ big enough, 
+every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
+In fact, these values that guarantee that $T$ is an state are $R_1 = \dots R_c = \rank T$
+\begin{theorem} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
     There exists $R_1, \dots, R_c \in \mathbb{N}$ such that
     $$T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)$$
     in fact, we can choose $R_1 = \dots = R_c = \rank{T}$
@@ -1149,27 +1449,69 @@ We can find an slightly better upper bound for the tensor rank:
     to a sum of terms of the form $v_p^{(1)} \otimes \cdots \otimes v_p^{(d)}$ for $p = 1, \dots, r$, which is of course $T$
 \end{proof}
 
+Now, by picking the ranks as $R_1 = \dots = R_c = \rank{T}$ is usually not optimal, since we will end up that our tensor network
+will use more memory to represent $T$ than the memory we need to write $T$ itself.
 
+We will proceed to show that the $G$-rank can be a lot more smaller than the tensor rank, and in fact, we will prove that
+exists tensor networks that can represent tensors in a more efficient way than the canonical polyadic decomposition that we have
+seen in chapter $2$.
 
-\begin{definition} [Tensor G-rank]
-    Given a graph $G$, we define the tensor rank respect to a $G$ as the mapping
-    $$ \begin{align}
-        \rank_G : \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n & \longrightarrow \mathcal{P}(\mathbb{N}^c)  \\ 
-        T &\longmapsto \min {\{(R_1, \dots, R_c) \in \mathbb{N}^c : T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)\}}
-    \end{align}$$
- 
-    Where $\min(S)$ with $S \subset \mathbb{N}^c$ denotes the minimal elements of $S$. We treat $\mathbb{N}^c$ with its usual
-    partial order:
-    $$ (a_1, \dots, a_c) \leqslant (b_1, \dots, b_c) \Longleftrightarrow a_1 \leqslant b_1, a_2 \leqslant b_2, \dots, a_c \leqslant b_c$$
-    So for example if $S = \{(3,4,5), (2,1,3), (1,3,2)\}$, then $\min(S) = \{(2,1,3), (1,3,2)\}$ Note that by \thmref{thm:finiterank} $\rank_G(T)$ is always a finite set.
-\end{definition}
+\begin{figure}
+    \centering
 
-We will say that if $(r_1, \dots, r_c) \in \rank_G(T)$, we will say that $(r_1, \dots, r_c)$ is a $G$-rank of $T$. We will later see
-that in some tensor network structures, for example in tree tensor networks, the $G$-rank of a tensor $T$ is unique
+    \begin{minipage}{0.45\textwidth}
+        \centering
+\begin{tikzpicture}
+    \node(1)[draw, fill, shape=circle, minimum size=0.3cm] at (-3,1.5);
+    \node(2)[draw, fill, shape=circle, minimum size=0.3cm] at (-3,-1.5);
+    \node(3)[draw, fill, shape=circle, minimum size=0.3cm] at (0,0);
 
+    \draw (1) -- (2)
+    \draw (2) -- (3)
+    \draw (3) -- (1)
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}
+    \node(1)[draw, fill, shape=circle, minimum size=0.3cm] at (-3,0);
+    \node(2)[draw, fill, shape=circle, minimum size=0.3cm] at (-1.5,0);
+    \node(3)[draw, fill, shape=circle, minimum size=0.3cm] at (0,0);
 
+    \draw (1) -- (2)
+    \draw (2) -- (3)
+    \end{tikzpicture}
+\end{minipage}
+\
+    
+    \caption{The graphs $C_3$ and $P_3$}
+    \label{fig:simplegraphs}
+\end{figure}
+
+\begin{theorem}
+    For $n \geqslant 3$ there exists a connected simple graph $G$ with $n$ vertices and $c$ edges
+    such that for any tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+    the tensor rank $\rank (T) = r$ is much larger than the $G$-rank $\rank_G(T) = (r_1, \dots, r_n)$. More specifically,
+    $$r \gg r_1 + \dots + r_n$$
+    \begin{proof}
+        We first start by proving $n = 3$ and then we will extend our proof for the cases $n > 3$. For $n=3$ the only connected
+        simple graphs are the cycle graph and path graph of three nodes which we denote $C_3$ and $P_3$ respectively. (See \cref{fig:simplegraphs})
+        We attach the vector spaces $\mathbb{V}_1, \mathbb{V}_2, \mathbb{V}_3$ to each vertex of these two graphs
+    \end{proof}
+\end{theorem}
+
+% TODO
+
+And finally, we will present an algorithm that tries to compute an approximate of the real $G$-rank of a tensor,
+if $G$ is a tree.
+
+ % TODO
 
 \section{Common Tensor network structures}
+
+\begin{example}[Canonical polyadic decomposition]
+\end{example}
 
 \begin{example}[Tensor Train decomposition]
     \normalfont{\cite{oseledetsTensorTrainDecomposition2011}} Let $\mathcal{T} \in \mathbb{R}^{N_1 \times \cdots \times N_n}$. A tensor
@@ -1408,13 +1750,6 @@ objective tensor $T$. That means finding
 \label{eq:minarg}
 \end{equation}
 
-Later, we will discuss some algorithms that gives us a solution to \refeq{eq:minarg}. 
-\section{Tree Tensor Networks}
-
-When $G$ is a tree, i.e when there are no cycles inside $G$, we say that $\TNS(G; R)$ is a tree tensor network.
-This includes all tensor train networks. There are a lot of interesting results in tree tensor networks. One
-very useful property is that given a tensor $T$, his $G$ rank when $G$ is a tree, is always unique.
-
 \begin{figure}[h]
 
     \centering
@@ -1463,6 +1798,60 @@ very useful property is that given a tensor $T$, his $G$ rank when $G$ is a tree
 
 
 
+
+
+\section{Contracting the tensor network}
+
+The ALS algorithm requires us to contract the network when we update the cores and
+also when we do a contraction for checking for the stopping condition. The order in which we 
+select to contract the cores affects directly the computational cost of the contraction. 
+
+For example, consider the following tensor train network:
+
+\begin{center}
+    \begin{tikzpicture}
+
+    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
+    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$Y$};
+    \node(3)[draw, shape=circle, minimum size=0.8cm] at (6,0) {$Z$};
+    \node(4)[draw, shape=circle, minimum size=0.8cm] at (9,0) {$T$};
+
+    \node(i1) at (0, 1) {$N_1$};
+    \node(i2) at (3, 1) {$N_2$};
+    \node(i3) at (6, 1) {$N_3$};
+    \node(i4) at (9, 1) {$N_4$};
+
+    \draw[--] (1) -- (i1);
+    \draw[--] (2) -- (i2);
+    \draw[--] (3) -- (i3);
+    \draw[--] (4) -- (i4);
+
+    \draw (1) -> (2)
+    node[above, pos=0.5] {$R_1$};
+    \draw (2) -> (3)
+    node[above, pos=0.5] {$R_2$};
+    \draw (3) -> (4)
+    node[above, pos=0.5] {$R_3$};
+    \end{tikzpicture}
+\end{center}
+
+The contraction of the whole network is given by
+
+$$T_{ijkl} = \sum_{p,q,r}^{R_1, R_2, R_3} X_{ip} Y_{pjq} Z_{qkr} T_{rl}$$
+
+We could contract first $R_1$, then $R_2$ and finally $R_3$. That means computing:
+$$A_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B_{ijkr} = \sum_{q}^{R_2} A_{ijq} Z_{qkr} \qquad T_{ijkl} = \sum_{r}^{R_3} B_{ijkr} T_{rl}$$
+
+For this computation, we would need $R_1 R_2 N_1 N_2 + R_2 R_3 N_1 N_2 N_3 + R_3 N_1 N_2 N_3 N_4$ products, and we would need to store
+first $A$, then $B$ and then $T$
+
+If we consider a different ordering for the contraction, for example first $R_1$, then $R_3$ and finally $R_2$ we get a different computation cost.
+We would need to compute the matrices
+
+$$A'_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B'_{qkl} = \sum_{r}^{R_3} Z_{qkr} T_{rl} \qquad T_{ijkl} = \sum_{q}^{R_2} A'_{ijq} B'_{qkl}$$
+
+The result of the contraction is the same, but now instead the number of computations is
+changed to $R_1 R_2 N_1 N_2 + R_3 N_1 N_3 N_4 + R_2 N_1 N_2 N_3 N_4$. 
 
 
 
@@ -1724,61 +2113,29 @@ is $T$ with some fixed error $\epsilon$:
     \label{fig:als_con}
 \end{figure}
 
-\section{Contracting the tensor network}
-
-The ALS algorithm requires us to contract the network when we update the cores and
-also when we do a contraction for checking for the stopping condition. The order in which we 
-select to contract the cores affects directly the computational cost of the contraction. 
-
-For example, consider the following tensor train network:
-
-\begin{center}
-    \begin{tikzpicture}
-
-    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
-    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$Y$};
-    \node(3)[draw, shape=circle, minimum size=0.8cm] at (6,0) {$Z$};
-    \node(4)[draw, shape=circle, minimum size=0.8cm] at (9,0) {$T$};
-
-    \node(i1) at (0, 1) {$N_1$};
-    \node(i2) at (3, 1) {$N_2$};
-    \node(i3) at (6, 1) {$N_3$};
-    \node(i4) at (9, 1) {$N_4$};
-
-    \draw[--] (1) -- (i1);
-    \draw[--] (2) -- (i2);
-    \draw[--] (3) -- (i3);
-    \draw[--] (4) -- (i4);
-
-    \draw (1) -> (2)
-    node[above, pos=0.5] {$R_1$};
-    \draw (2) -> (3)
-    node[above, pos=0.5] {$R_2$};
-    \draw (3) -> (4)
-    node[above, pos=0.5] {$R_3$};
-    \end{tikzpicture}
-\end{center}
-
-The contraction of the whole network is given by
-
-$$T_{ijkl} = \sum_{p,q,r}^{R_1, R_2, R_3} X_{ip} Y_{pjq} Z_{qkr} T_{rl}$$
-
-We could contract first $R_1$, then $R_2$ and finally $R_3$. That means computing:
-$$A_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B_{ijkr} = \sum_{q}^{R_2} A_{ijq} Z_{qkr} \qquad T_{ijkl} = \sum_{r}^{R_3} B_{ijkr} T_{rl}$$
-
-For this computation, we would need $R_1 R_2 N_1 N_2 + R_2 R_3 N_1 N_2 N_3 + R_3 N_1 N_2 N_3 N_4$ products, and we would need to store
-first $A$, then $B$ and then $T$
-
-If we consider a different ordering for the contraction, for example first $R_1$, then $R_3$ and finally $R_2$ we get a different computation cost.
-We would need to compute the matrices
-
-$$A'_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B'_{qkl} = \sum_{r}^{R_3} Z_{qkr} T_{rl} \qquad T_{ijkl} = \sum_{q}^{R_2} A'_{ijq} B'_{qkl}$$
-
-The result of the contraction is the same, but now instead the number of computations is
-changed to $R_1 R_2 N_1 N_2 + R_3 N_1 N_3 N_4 + R_2 N_1 N_2 N_3 N_4$. 
 
 
-\chapter{Topological search on the tensor network structure space}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Tensor network structure search}
+
+
+Tensor network structure search prioblem aims to generally find the most compressed tensor network
+models for computational purposes while maintaining the expressivity of the network. That means, that our
+tensor network is capable of giving good representations of the set of tensors that we want to represent with it.
 
 By now, we know that for any tensor $T$, if we choose a graph $G = (V, E)$ we can choose 
 $R_1, \dots, R_c \leqslant \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor$
@@ -1786,9 +2143,50 @@ such that $T \in \TNS(G, R)$. We can also find thanks to the ALS algorithm the c
 $\TNS(G, R)$. The only thing that remains is how we pick an optimal $G$ for compressing $T$ with a fixed error $\epsilon$, since we know that
 the optimal graph for a tensor network state of a given tensor $T$ depends on the underlying data of $T$ itself.
 
-We will aim to search the tensor network that gives the best compression ratio for $T$, for that, we will define the size 
-of a tensor network:
+% We will aim to search the tensor network that gives the best compression ratio for $T$, for that, we will define the size 
+% of a tensor network:
 
+Suppose that we have defined a loss function $\pi_D : \mathbb{R}^{N_1 \times N_2 \times \cdots \times N_n} \rightarrow \mathbb{R}_+$
+involving $D$, with $D$ being a dataset.
+For example, if our objective is compressing an objective tensor $T_o \in \mathbb{R}^{N_1 \times N_2 \times \cdots \times N_n}$,
+we could define our loss function as the relative error of our evaluated tensor respect to the objective tensor:
+$$\pi_D(T) = \frac{\| T - T_o \|_F}{\| T_o \|_F} $$
+The tensor network structure search problem is defined as solving the following discrete optimization problem:
+\begin{equation}
+\min_{(G, R) \in \mathbb{G} \times \mathbb{F}_G} \left(  \phi(G, R) + \lambda \cdot \min_{\mathcal{Z} \in TNS(G,R)} \pi_D(\mathcal{Z}) \right)
+\label{eq:tnss}
+\end{equation}
+where $\mathbb{G}$ is the space of all graphs, $G \in \mathbb{G}$ is a graph of $N$ vertices and $K$ edges, ${R = (r_1, \dots, r_K) \in \mathbb{F}_G \subseteq
+\mathbb{Z}_+^K}$ are the ranks of the tensor network, $\phi(G, R)$ represents a function that determines the complexity of the
+tensor network, and $\lambda > 0$ is a tuning parameter.
+
+The intuition behind presenting this optimization problem is that the inner minimization that depends on the tuning parameter $\lambda$
+serves to evaluate the expressivity of the tensor network.
+
+% TODO: Link works
+
+We call the problem \ref{eq:tnss} as Tensor Network Structure Selection (TN-SS). TN-SS is a very generalized problem.
+There has been a lot of research on solving it under certain conditions:
+\begin{itemize}
+    \item Tensor Network Rank Selection (TN-RS), it restricts $G$ to be a fixed graph, and its objective is to find the
+tensor network ranks $R \in \mathbb{F}_G$.
+    \item Tensor Network Permutation Selection (TN-PS) fixes the ranks $R$ and search over the set
+of all the simple graphs that are isomorphic to $G$.
+    \item Lastly, Tensor Network Topology Selection (TN-TS) searches over the set of all simple graphs of $N$ vertices and
+        the tensor ranks $R$ are fixed
+\end{itemize}
+
+In this chapter we will present the tensor network structure search algorithm using alternating local enumeration (TnALE), which is based
+on \cite{liAlternatingLocalEnumeration2023a}
+
+The purpose of the TnALE algorithm is to solve \ref{eq:tnss}, but for each evaluation that it does, it needs another algorithm for evaluating
+the inner minimum inside the equation. It requires that we already know how to compute $\min_{\mathcal{Z} \in TNS(G,R)} \pi_D (\mathcal{Z})$
+
+
+
+
+
+\iffalse
 \begin{definition}
     \cite{guoTensorNetworkStructure2025}
     Given a tensor network state $\TNS(G, R)$, we define $$\size(G, R) = \sum_{i=1}^c \size\mathcal{G}_i$$
@@ -1811,7 +2209,7 @@ $$ \min_{r \in \mathbb{K}_{K_N} } \phi(K_N, r) \quad s.t\; \mathcal{X} \in \TNS{
 
 
 % \cite{liPermutationSearchTensor2022}
-
+\fi
 
 
 % TODO:
