@@ -888,65 +888,10 @@
   file = {/home/arans/Zotero/storage/GMHGJRJC/Zhou et al. - 2024 - Tensor Star Tensor Decomposition and Its Applications to Higher-order Compression and Completion.pdf;/home/arans/Zotero/storage/CQLCFDBY/2403.html}
 }
 
-@article{rohrig-zollnerPerformanceLowrankTensortrain2022,
-  title = {Performance of the Low-Rank Tensor-Train {{SVD}} ({{TT-SVD}}) for Large Dense Tensors on Modern Multi-Core {{CPUs}}},
-  author = {Röhrig-Zöllner, Melven and Thies, Jonas and Basermann, Achim},
-  date = {2022-08},
-  journaltitle = {SIAM Journal on Scientific Computing},
-  shortjournal = {SIAM J. Sci. Comput.},
-  volume = {44},
-  number = {4},
-  eprint = {2102.00104},
-  eprinttype = {arXiv},
-  eprintclass = {math},
-  pages = {C287-C309},
-  issn = {1064-8275, 1095-7197},
-  doi = {10.1137/21M1395545},
-  url = {http://arxiv.org/abs/2102.00104},
-  urldate = {2025-05-28},
-  abstract = {There are several factorizations of multi-dimensional tensors into lower-dimensional components, known as `tensor networks'. We consider the popular `tensor-train' (TT) format and ask: How efficiently can we compute a low-rank approximation from a full tensor on current multi-core CPUs? Compared to sparse and dense linear algebra, kernel libraries for multi-linear algebra are rare and typically not as well optimized. Linear algebra libraries like BLAS and LAPACK may provide the required operations in principle, but often at the cost of additional data movements for rearranging memory layouts. Furthermore, these libraries are typically optimized for the compute-bound case (e.g.\textbackslash{} square matrix operations) whereas low-rank tensor decompositions lead to memory bandwidth limited operations. We propose a `tensor-train singular value decomposition' (TT-SVD) algorithm based on two building blocks: a `Q-less tall-skinny QR' factorization, and a fused tall-skinny matrix-matrix multiplication and reshape operation. We analyze the performance of the resulting TT-SVD algorithm using the Roofline performance model. In addition, we present performance results for different algorithmic variants for shared-memory as well as distributed-memory architectures. Our experiments show that commonly used TT-SVD implementations suffer severe performance penalties. We conclude that a dedicated library for tensor factorization kernels would benefit the community: Computing a low-rank approximation can be as cheap as reading the data twice from main memory. As a consequence, an implementation that achieves realistic performance will move the limit at which one has to resort to randomized methods that only process part of the data.},
-  keywords = {Computer Science - Mathematical Software,Computer Science - Numerical Analysis,Mathematics - Numerical Analysis},
-  file = {/home/arans/Zotero/storage/5H6JTNVK/Röhrig-Zöllner et al. - 2022 - Performance of the low-rank tensor-train SVD (TT-SVD) for large dense tensors on modern multi-core C.pdf;/home/arans/Zotero/storage/GMK4JIEC/2102.html}
-}
-
-  @article{christandlTensorRankNot2018,
-  title = {Tensor Rank Is Not Multiplicative under the Tensor Product},
-  author = {Christandl, Matthias and Jensen, Asger Kjærulff and Zuiddam, Jeroen},
-  date = {2018-04},
-  journaltitle = {Linear Algebra and its Applications},
-  shortjournal = {Linear Algebra and its Applications},
-  volume = {543},
-  eprint = {1705.09379},
-  eprinttype = {arXiv},
-  eprintclass = {math},
-  pages = {125--139},
-  issn = {00243795},
-  doi = {10.1016/j.laa.2017.12.020},
-  url = {http://arxiv.org/abs/1705.09379},
-  urldate = {2025-05-28},
-  abstract = {The tensor rank of a tensor t is the smallest number r such that t can be decomposed as a sum of r simple tensors. Let s be a k-tensor and let t be an l-tensor. The tensor product of s and t is a (k + l)-tensor. Tensor rank is sub-multiplicative under the tensor product. We revisit the connection between restrictions and degenerations. A result of our study is that tensor rank is not in general multiplicative under the tensor product. This answers a question of Draisma and Saptharishi. Specifically, if a tensor t has border rank strictly smaller than its rank, then the tensor rank of t is not multiplicative under taking a sufficiently hight tensor product power. The "tensor Kronecker product" from algebraic complexity theory is related to our tensor product but different, namely it multiplies two k-tensors to get a k-tensor. Nonmultiplicativity of the tensor Kronecker product has been known since the work of Strassen. It remains an open question whether border rank and asymptotic rank are multiplicative under the tensor product. Interestingly, lower bounds on border rank obtained from generalised flattenings (including Young flattenings) multiply under the tensor product.},
-  keywords = {Computer Science - Computational Complexity,Mathematics - Commutative Algebra,Quantum Physics},
-  file = {/home/arans/Zotero/storage/NCTSG5WW/Christandl et al. - 2018 - Tensor rank is not multiplicative under the tensor product.pdf;/home/arans/Zotero/storage/TNEWSLUQ/1705.html}
-}
-
-@article{schindlerAlgorithmsTensorNetwork2020,
-  title = {Algorithms for {{Tensor Network Contraction Ordering}}},
-  author = {Schindler, Frank and Jermyn, Adam S.},
-  date = {2020-09-01},
-  journaltitle = {Machine Learning: Science and Technology},
-  shortjournal = {Mach. Learn.: Sci. Technol.},
-  volume = {1},
-  number = {3},
-  eprint = {2001.08063},
-  eprinttype = {arXiv},
-  eprintclass = {cs},
-  pages = {035001},
-  issn = {2632-2153},
-  doi = {10.1088/2632-2153/ab94c5},
-  url = {http://arxiv.org/abs/2001.08063},
-  urldate = {2025-04-01},
-  abstract = {Contracting tensor networks is often computationally demanding. Well-designed contraction sequences can dramatically reduce the contraction cost. We explore the performance of simulated annealing and genetic algorithms, two common discrete optimization techniques, to this ordering problem. We benchmark their performance as well as that of the commonly-used greedy search on physically relevant tensor networks. Where computationally feasible, we also compare them with the optimal contraction sequence obtained by an exhaustive search. We find that the algorithms we consider consistently outperform a greedy search given equal computational resources, with an advantage that scales with tensor network size. We compare the obtained contraction sequences and identify signs of highly non-local optimization, with the more sophisticated algorithms sacrificing run-time early in the contraction for better overall performance.},
-  keywords = {Computer Science - Neural and Evolutionary Computing,Computer Science - Numerical Analysis,Mathematics - Numerical Analysis,Physics - Computational Physics,Quantum Physics},
-  file = {/home/arans/Zotero/storage/TRC8TKKJ/Schindler y Jermyn - 2020 - Algorithms for Tensor Network Contraction Ordering.pdf;/home/arans/Zotero/storage/7QUGXYLM/2001.html}
+@online{AutomaticDifferentiationTorchautograd,
+  title = {Automatic {{Differentiation}} with Torch.Autograd — {{PyTorch Tutorials}} 2.7.0+cu126 Documentation},
+  url = {https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html},
+  urldate = {2025-06-03},
+  file = {/home/arans/Zotero/storage/BQNI822G/autogradqs_tutorial.html}
 }
 
