@@ -3323,28 +3323,7 @@ fixed some $G \in \mathbb{G}$ and $R \in \mathbb{F}_G$.
 % \item Fixar la mathematical subject classification
 % \end{itemize}
 
-\chapter{Applications of TN low rank approximations}
-
-\section{Image compression}
-
-An RGB image is a set of $n \times m$ pixels. Each pixel contains
-three channels (red, green and blue) in which a color is represented. Therefore, we can encode an image
-as three tensors $T_R,T_G,R_B \in \mathbb{R}^{n \times m}$ with each of its indexes
-being on the interval $[0,1] \subset \mathbb{R}$.
-
-First, we could make the order of the tensor $T$ higher by reshaping accordingly the divisors of $n$ or $m$. For example,
-if we have a $256 \times 256$ image, we could reshape $T_R, T_G$ and $T_B$ as tensors of $\mathbb{R}^{4 \times 8 \times 8 \times 4 \times 8 \times 8 }$
-
-Then after doing this reshaping, for each channel we could pick a graph $G^{(0)}$ with the number of nodes being equal as the order of the tensors. Following our example,
-$G$ should have $6$ nodes. We can also pick some initial ranks $R^{(0)} = (R_1, \dots, R_c)$. Then we can apply the ALS algorithm for
-finding some cores $\mathcal{G}_1, \dots, \mathcal{G}_6$ that once contracted following $G^{(0)}$ will yield to a good approximation
-of each tensor $\mathcal{T}_R, \mathcal{T}_G, \mathcal{T}_B$
-
-We could also before applying the ALS algorithm, apply the TnALE algorithm for finding if there is a more optimal structure than $(G^{(0)}, R^{(0)})$ and
-then do again the ALS algorithm.
-
-Following our example, for recovering the image format we reshape back the tensors $\mathcal{T}_R, \mathcal{T}_G, \mathcal{T}_B \in \mathbb{R}^{4 \times 8 \times 8 \times 4 \times 8 \times 8}$
-into matrices of $\mathbb{R}^{256 \times 256}$.
+\chapter{Applying TN low-rank approximations on FCNN}
 
 \section{Neural networks}
 
@@ -3438,6 +3417,10 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 \appendix
 \chapter{Experiments and results}
 
+The following experiments were performed on PyTorch running on CUDA on a system
+equipped with a AMD Ryzen 7 3700X 3.6GHz CPU, an NVIDIA GeForce RTX 2080 Super with 8GB of VRAM and
+32GB of RAM.
+
 \section{Core finding algorithms}
 In this section we will compare the TN-ALS algorithm and the backpropagation algorithm in finding the cores that
 best represent a pseudorandom tensor $T$ across different tensor network structures. To make the experiment reproducible,
@@ -3476,9 +3459,395 @@ T_F = \reshape(v_F, (1), (N_1, \dots, N_n)) \qquad
 T_G = \reshape(v_G, (1), (N_1, \dots, N_n))$$
 $$T_H = \reshape(v_H, (1), (N_1, \dots, N_n))$$
 
-\section{Structure search}
+We tested $6$ different tensor network structures. The graphs $G_1, \dots, G_6$ are as defined in \ref{fig:ap-graphs}
+the ranks of each graph are $R_1 = (5, 5, 5)$, $R_2 = (10, 10, 10)$, $R_3 = (7,7,7,7,7)$, $R_4 = (7,7,7,7,7,7)$,
+$R_5 = (12, 12, 12 ,12)$ and $R_6 = (3,3,3,3,3,3,3,3,3,3,3,3,3,3,3)$.
 
-\section{Image compression}
+As we can observe from \ref{fig:ap-table-backprop}, we can see that in the most cases the TN-ALS surpasses the backpropagation
+algorithm for finding core tensors with less relative error.
+
+\begin{figure}[H]
+\begin{adjustwidth}{-30pt}{-30pt}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-1.png}
+        \caption*{$G_1$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-2.png}
+        \caption*{$G_2$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-3.png}
+        \caption*{$G_3$}
+    \end{minipage}
+
+   \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-4.png}
+        \caption*{$G_4$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-5.png}
+        \caption*{$G_5$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/graph-backprop-6.png}
+        \caption*{$G_6$}
+    \end{minipage}
+\end{adjustwidth}
+    \caption{The graphs $G_1, \dots, G_6$ used for each test. Source: own elaboration.}
+    \label{fig:ap-graphs}
+\end{figure}
+
+\begin{figure}
+    \centering
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lllllll}
+\hline
+          &          & Time & CR & $T_F$ Rel. Error & $T_G$ Rel. Error & $T_H$ Rel. Error\\ \hline
+    $(G_1, R_1)$ & TN-ALS   & 5s & $1.34$ & $\mathbf{6.9456 \times 10^{-3}}$            & $\mathbf{1.0652 \times 10^{-2}}$            & $7.9986 \times 10^{-2}$           \\
+                 & Backprop &  & & $2.1491 \times 10^{-2}$                     & $5.0026 \times 10^{-2}$                     & $\mathbf{6.1857 \times 10^{-2}}$          \\ \hline
+    $(G_2, R_2)$ & TN-ALS   & 5s & $4.55$ & $\mathbf{1.9582 \times 10^{-4}}$            & $\mathbf{8.9858 \times 10^{-5}}$        & $\mathbf{0.113449}$           \\
+                 & Backprop & &  & $2.8724 \times 10^{-2}$                     & $2.8724 \times 10^{-2}$                     & $0.115987$           \\ \hline
+    $(G_3, R_3)$ & TN-ALS   & 5s & $40.82$ & $\mathbf{4.7541 \times 10^{-3}}$            & $\mathbf{9.5917 \times 10^{-3}}$        & $\mathbf{4.4717 \times 10^{-2}}$           \\
+                 & Backprop & & & $3.1899 \times 10^{-2}$                     & $4.9388 \times 10^{-2}$                     & $4.5730 \times 10^{-2}$           \\ \hline
+    $(G_4, R_4)$ & TN-ALS   & 5s & $12$ & $\mathbf{7.1427 \times 10^{-4}}$            & $\mathbf{1.6699 \times 10^{-3}}$        & $\mathbf{1.1705 \times 10^{-2}}$           \\
+                 & Backprop & & & $8.3855 \times 10^{-2}$                     & $8.7846 \times 10^{-2}$                     & $4.5468 \times 10^{-2}$           \\ \hline
+    $(G_5, R_5)$ & TN-ALS   & 5s & $5.24$ & $\mathbf{4.5774 \times 10^{-2}}$            & $\mathbf{6.8181 \times 10^{-2}}$        & $0.203061$           \\
+                 & Backprop & & & $5.3277 \times 10^{-2}$                     & $7.4776 \times 10^{-2}$                     & $\mathbf{0.200155}$           \\ \hline
+    $(G_6, R_6)$ & TN-ALS   & 10s & $68.59$ & $\mathbf{1.9251 \times 10^{-3}}$           & $\mathbf{2.4820 \times 10^{-3}}$        & $\mathbf{2.0864 \times 10^{-2}}$           \\
+                 & Backprop & & & $0.880255$                                 & $0.751659$                                  & $0.572296$         \\ \hline
+\end{tabular}
+
+\caption{Relative error obtained by running the TN-ALS algorithm and the backpropagation algorithm for approximating
+    the tensors $T_F, T_G$ and $T_H$ fot the same fixed amount of time. The CR column denotes the compression ratio of each structure.
+In each test the result with less relative error is marked in bold test. Source: own elaboration}
+\label{fig:ap-table-backprop}
+\end{figure}
+
+\section{Structure search and image compression}
+
+On the next experiment we evaluated the performance of the TnALE algorithm by compressing an image with peppers.
+
+An RGB image is a set of $n \times m$ pixels. Each pixel contains
+three channels (red, green and blue) in which a color is represented. 
+For simplicity, in this experiment we will only encode grayscale images since grayscale images
+only need to store one channel. Therefore, we can encode a channel as
+as a tensors $T \in \mathbb{R}^{n \times m}$ with each of its indexes
+being on the interval $[0,1] \subset \mathbb{R}$.
+
+First, we could make the order of the tensor $T$ higher by reshaping accordingly the divisors of $n$ or $m$. For example,
+if we have a $128 \times 128$ image, we could reshape $T$ as tensor of $\mathbb{R}^{8 \times 8 \times 4 \times 8 \times 8 }$
+
+Then reshaping, for each channel we could pick a graph $G^{(0)}$ with the number of nodes being equal as the order of the tensors. Following our example,
+$G$ should have $6$ nodes. We can also pick some initial ranks $R^{(0)} = (R_1, \dots, R_c)$. Then we can apply the ALS algorithm for
+finding some cores $\mathcal{G}_1, \dots, \mathcal{G}_6$ that once contracted following $G^{(0)}$ will yield to a good approximation
+of $T$
+
+Now, we apply the TnALE algorithm for finding if there is a more optimal structure than $(G^{(0)}, R^{(0)})$. Once we found a good
+structure candidate $(G^*, R^*)$ we then perform the TnALS algorithm using this structure.
+
+Then, to recover the channel back we contract all the core tensors and then undo the reshape operation to recover the matrix that
+encodes the image channel. Following our example, we would reshape the tensor $T \in \mathbb{R}^{ 8 \times 8 \times 4 \times 8 \times 8}$
+obtained by contracting the cores found by TnALS into a matrix of $\mathbb{R}^{128 \times 128}$.
+
+The main objective of this experiment is to demonstrate the compression capabilities of the optimal structure of the TnALE algorithm by
+doing image compression. For measuring the error we used the relative error of the objective tensor representing the grayscale channel
+of the original tensor respect to the tensor that the contraction of the cores yields.
+
+In this experiment we compressed the Peppers image grayscaled and resized as a $128 \times 128$. 
+We fixed $5$ initial pairs of initial structures $(G^{(1)}, R^{(1)}), \dots, (G^{(5)}, R^{(5)})$.
+For each structure we first computed the core tensors using the TnALS algorithms directly, and then
+we made the TnALE algorithm find a better structure by varying $\lambda \in \{0.25, 0.5, 1, 2, 4, 8, 12\}$. We use the
+TnALE algorithm two times: first, we make broad search by doing $3$ iterations of it with radius $5$ that are able to modify
+the topology of the original graph $G_0$. We made that if the algorithm decided to add an edge, it will try doing so by putting initial
+ranks $\{1, 2, 5\}$. Then, we do again the TnALE algorithm with $3$ iterations with radius $2$ and we let $G$ fixed so that
+the structure can be relaxed to adjust its ranks. On both TnALE algorithms, for evaluating the structure we use the
+TnALS algorithm with $5$ iterations applying the Tikhonov factor for faster computation. Since we can't be sure if
+the Tikhonov factor has converged in $5$ iterations, we make an approximation of the real relative error that would
+yield the structure by picking the minimum value of the relative error in these $5$ iterations.
+After we have found an optimal structure, we finally perform the TnALS algorithm with $200$ iterations. 
+
+\begin{figure}
+\begin{adjustwidth}{-30pt}{-30pt}
+    \centering
+
+\begin{tabular}{lllllll}
+\hline
+                     &                  & CR     & Rel. Error & TN-ALS & TN-ALE First Pass & TN-ALE Second Pass \\ \hline
+$(G^{(1)}, R^{(1)})$ & Original         & 11.63  & 0.13159    & 3.08s  &                   &                    \\
+                     & $\lambda = 0.25$ & 455.11 & 0.19703    & 3.08s  & 4.84s             & 0.23s              \\
+                     & $\lambda = 0.5$  & 105.02 & 0.16981    & 1.95s  & 6.65s             & 1.56s              \\
+                     & $\lambda = 1$    & 34.13  & 0.13397    & 2.45s  & 7.49s             & 2.97s              \\
+                     & $\lambda = 2$    & 23.81  & 0.12605    & 2.40s  & 9.81s             & 2.99s              \\
+                     & $\lambda = 4$    & 10.06  & 0.10416    & 3.24s  & 22.85s            & 4.66s              \\
+                     & $\lambda = 8$    & 4.61   & 0.07901    & 6.43s  & 55.36s            & 10.77s             \\
+                     & $\lambda = 12$   & 2.16   & 0.05304    & 14.10s & 122.91s           & 20.13s             \\ \hline
+$(G^{(2)}, R^{(2)})$ & Original         & 7.11   & 0.09592    & 3.56s  &                   &                    \\
+                     & $\lambda = 0.25$ & 455.11 & 0.19703    & 1.39s  & 5.65s             & 0.64s              \\
+                     & $\lambda = 0.5$  & 50.56  & 0.14933    & 2.09s  & 6.07s             & 2.92s              \\
+                     & $\lambda = 1$    & 32.51  & 0.13736    & 2.29s  & 6.68s             & 3.63s              \\
+                     & $\lambda = 2$    & 18.62  & 0.12109    & 2.77s  & 8.55s             & 4.22s              \\
+                     & $\lambda = 4$    & 9.62   & 0.10570    & 3.45s  & 17.28s            & 4.98s              \\
+                     & $\lambda = 8$    & 3.52   & 0.07178    & 8.65s  & 190.7s            & 11.59s             \\
+                     & $\lambda = 12$   & 2.12   & 0.05678    & 15.39s & 143.14s           & 29.29s             \\ \hline
+$(G^{(3)}, R^{(3)})$ & Original         & 2.58   & 0.06481    & 9.81s  &                   &                    \\
+                     & $\lambda = 0.25$ & 240.94 & 0.18556    & 1.81s  & 6.55s             & 3.20s              \\
+                     & $\lambda = 0.5$  & 102.4  & 0.16595    & 2.15s  & 6.51s             & 2.44s              \\
+                     & $\lambda = 1$    & 47.08  & 0.14801    & 2.40s  & 8.67s             & 4.29s              \\
+                     & $\lambda = 2$    & 18.12  & 0.12340    & 2.76s  & 17.66s            & 5.79s              \\
+                     & $\lambda = 4$    & 12.41  & 0.11887    & 3.18s  & 15.78s            & 5.15s              \\
+                     & $\lambda = 8$    & 3.53   & 0.07238    & 10.19s & 61.14s            & 22.02s             \\
+                     & $\lambda = 12$   & 2.11   & 0.04997    & 21.57s & 284.93s           & 29.51s             \\ \hline
+$(G^{(4)}, R^{(4)})$ & Original         & 4.26   & 0.08985    & 5.46s  &                   &                    \\
+                     & $\lambda = 0.25$ & 113.78 & 0.17616    & 2.03s  & 11.63s            & 2.39s              \\
+                     & $\lambda = 0.5$  & 89.04  & 0.16479    & 1.92s  & 11.59s            & 2.62s              \\
+                     & $\lambda = 1$    & 40.96  & 0.14096    & 2.26s  & 11.62s            & 2.78s              \\
+                     & $\lambda = 2$    & 24.38  & 0.13249    & 2.45s  & 11.99s            & 3.11s              \\
+                     & $\lambda = 4$    & 11.91  & 0.11154    & 3.11s  & 12.73s            & 6.07s              \\
+                     & $\lambda = 8$    & 3.28   & 0.06162    & 6.84s  & 28.71s            & 13.91s             \\
+                     & $\lambda = 12$   & 2.75   & 0.06293    & 8.81s  & 70.02s            & 17.61s             \\ \hline
+$(G^{(5)}, R^{(5)})$ & Original         & 3.92   & 0.07800    & 6s     &                   &                    \\
+                     & $\lambda = 0.25$ & 204.8  & 0.18553    & 1.95s  & 13.86s            & 3.58s              \\
+                     & $\lambda = 0.5$  & 70.62  & 0.15677    & 2.14s  & 13.89s            & 3.97s              \\
+                     & $\lambda = 1$    & 39.38  & 0.14342    & 2.38s  & 13.96s            & 4.92s              \\
+                     & $\lambda = 2$    & 16.38  & 0.12128    & 2.92s  & 14.62s            & 5.46s              \\
+                     & $\lambda = 4$    & 9.57   & 0.10488    & 3.39s  & 14.78s            & 6.38s              \\
+                     & $\lambda = 8$    & 6.82   & 0.09066    & 3.89s  & 21.7s             & 12.79s             \\
+                     & $\lambda = 12$   & 2.33   & 0.05597    & 10.43s & 58.08s            & 22.48s            
+\end{tabular}
+
+\end{adjustwidth}
+
+\caption{Table containing the results of the TnALE evaluation compressing the pepper.png image. Source: own elaboration}
+\end{figure}
+
+\begin{figure}
+\begin{adjustwidth}{-30pt}{-30pt}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 0.25
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 0.5
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 1
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 2
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 4
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+    % l = 8
+
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+
+    % l = 12
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(1)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(2)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(3)}$; Original}
+    \end{minipage}
+   \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(4)}$; Original}
+    \end{minipage}
+    \begin{minipage}[t]{0.19\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/}
+        \caption*{$G^{(5)}$; Original}
+    \end{minipage}
+\end{adjustwidth}
+    
+
+    \caption{The structures found by the TnALE algorithm}
+\end{figure}
 
 \section{Neural Netowork compression}
 
