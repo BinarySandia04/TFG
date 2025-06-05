@@ -7,6 +7,7 @@ import itertools
 import copy
 import math
 import time
+import random
 from PIL import Image
 from torchvision import transforms
 from itertools import combinations
@@ -122,14 +123,55 @@ def find_permutation(X, Y):
 
     return permutation
 
+#ef graph_neighborhood(G):
+#    nodes = list(G.nodes())
+#
+#    for u, v in combinations(nodes, 2):
+#        mapping = {u: v, v: u}  # swap u and v
+#        G_swapped = nx.relabel_nodes(G, mapping, copy=True)
+#        yield G_swapped
+
+
 def graph_neighborhood(G):
+    """
+    Generator that yields non-isomorphic graphs obtained by adding or removing
+    exactly one edge from G.
+    
+    Parameters:
+        G (networkx.Graph): The original graph.
+    
+    Yields:
+        networkx.Graph: A new graph with one edge added or removed.
+    """
+    seen = set()
     nodes = list(G.nodes())
+    existing_edges = set(G.edges())
+    l = len(existing_edges)
 
+    def canonical_form(H):
+        # You could use: nx.to_graph6_bytes(H) for a hashable canonical label
+        return nx.to_graph6_bytes(H, header=False)  # Compact & canonical
+
+    i = 0
+    # 1. Remove one edge at a time
+    for u, v in existing_edges:
+        H = G.copy()
+        H.remove_edge(u, v)
+        key = canonical_form(H)
+        if key not in seen:
+            seen.add(key)
+            yield (H, i, True)
+        i += 1
+    
+    # 2. Add one non-existing edge at a time
     for u, v in combinations(nodes, 2):
-        mapping = {u: v, v: u}  # swap u and v
-        G_swapped = nx.relabel_nodes(G, mapping, copy=True)
-        yield G_swapped
-
+        if (u, v) not in existing_edges and (v, u) not in existing_edges:
+            H = G.copy()
+            H.add_edge(u, v)
+            key = canonical_form(H)
+            if key not in seen:
+                seen.add(key)
+                yield (H, i, False)
 
 class TN(torch.nn.Module):
     def initTensor(self, shape):
@@ -236,7 +278,7 @@ class TN(torch.nn.Module):
         (G, R): The optimal G and R
     """
     @staticmethod
-    def tn_ale(G0, R0, radius, iters, objective, print_iters=False, max_rank=20, tuning_param=0.5):
+    def tn_ale(G0, R0, radius, iters, objective, print_iters=False, max_rank=20, tuning_param=0.5, update_graph=False):
         G, R = (G0, R0)
         h = TN.evaluate_structure(G, R, objective, tuning_param=tuning_param)
         p = (G, R)
@@ -262,12 +304,24 @@ class TN(torch.nn.Module):
                         h = evaluation
                 G, R = p
             # We now update G
-            for nG in graph_neighborhood(G):
-                evaluation = TN.evaluate_structure(nG, R, objective, tuning_param=tuning_param)
-                if h > evaluation:
-                    p = (nG, R)
-                    h = evaluation
-            G, R = p
+            if update_graph:
+                for nG, index, rem in graph_neighborhood(G):
+                    if rem:
+                        Rp = copy.deepcopy(R)
+                        del Rp[index]
+                        evaluation = TN.evaluate_structure(nG, Rp, objective, tuning_param=tuning_param)
+                        if h > evaluation:
+                            p = (nG, Rp)
+                            h = evaluation
+                    else:
+                        for x in [1, radius//2, radius]:
+                            Rp = copy.deepcopy(R)
+                            Rp.insert(index, x)
+                            evaluation = TN.evaluate_structure(nG, Rp, objective, tuning_param=tuning_param)
+                            if h > evaluation:
+                                p = (nG, Rp)
+                                h = evaluation
+                G, R = p
             # Second rank update
             for k in range(len(R) - 1, 0, -1):
                 minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=tuning_param, max_rank=max_rank)
@@ -291,6 +345,7 @@ class TN(torch.nn.Module):
             if print_iters:
                 print("Iter " + str(d) + " done")
                 print("R: " + str(R))
+                print("G edges: " + str(G.edges()))
         return (G, R)
 
     
@@ -312,9 +367,9 @@ class TN(torch.nn.Module):
     def evaluate_structure(G, R, objective, tuning_param=2):
         # We do one iteration of ALS):
         tn = TN(G, objective.shape, R)
-        err = TN.als(tn, objective, 0, iter_num=2)[0]
+        graph = TN.als(tn, objective, 0, iter_num=5)[1]
         icr = tn.get_tn_size() / objective.numel()
-        return icr + err * tuning_param
+        return icr + min(graph[1]) * tuning_param
     
     @staticmethod
     def eval(t):
@@ -368,7 +423,7 @@ class TN(torch.nn.Module):
         return (t_data[p-1], t_data[core], n_data[p-1], n_data[core])
     
     @staticmethod
-    def als(tn, t, err, iter_num=float('inf'), print_iters=False, tikhonov=False):
+    def als(tn, t, err, iter_num=float('inf'), print_iters=False, tikhonov=False, max_time=float('inf')):
         lambda_reg = 1e-5
         iters = 1
         rel_err = torch.norm(TN.eval(tn) - t).item() / torch.norm(t).item()
@@ -376,6 +431,7 @@ class TN(torch.nn.Module):
         time_resh = 0
         x = []
         y = []
+        start_time = time.time()
         
         while rel_err >= err:
             rel_err = torch.norm(TN.eval(tn) - t).item() / torch.norm(t).item()
@@ -393,9 +449,9 @@ class TN(torch.nn.Module):
                 cont_ten, orig_ten, cont_data, orig_data = TN.get_contraction_except(tn, k)
 
                 uuid_order = []
-                for x in orig_data:
-                    if x[1] != -1:
-                        uuid_order.append(x[1])
+                for p in orig_data:
+                    if p[1] != -1:
+                        uuid_order.append(p[1])
 
                 # Volem una permutació que deixi en uuid_order els edges de cont_ten
                 perm = [-1] * len(cont_ten.shape)
@@ -429,11 +485,11 @@ class TN(torch.nn.Module):
                 
                 # I fem reshape!
                 obj_mat = torch.reshape(t_obj, (nx, orig_data[0][0]))
-                start_time = time.time()
                 
                 # core = torch.linalg.lstsq(cont_mat, obj_mat)[0]
                 
-                
+                if time.time() - start_time > max_time:
+                    return (rel_err, (x, y))
                 #ATA = cont_mat.T @ cont_mat + lambda_reg * torch.eye(cont_mat.shape[1], device=cont_mat.device, dtype=cont_mat.dtype)
                 #ATb = cont_mat.T @ obj_mat
                 #core = torch.linalg.solve(ATA, ATb)
@@ -445,6 +501,7 @@ class TN(torch.nn.Module):
                     core = torch.linalg.pinv(cont_mat) @ obj_mat
                 
                 end_time = time.time()
+                
 
                 # Ara busquem el core
                 shape = orig_ten.shape
@@ -464,7 +521,7 @@ class TN(torch.nn.Module):
 
         
     @staticmethod
-    def als_grad(tn, t, iter_num=10000, epoch=100, lr=0.1, print_iters=False):
+    def als_grad(tn, t, iter_num=100000, epoch=100, lr=0.1, print_iters=False, max_time=float('inf')):
         rel_err = torch.norm(TN.eval(tn) - t).item() / torch.norm(t).item()
 
         time_resh = 0
@@ -473,6 +530,7 @@ class TN(torch.nn.Module):
 
         optimizer = torch.optim.Adam(tn.params.values(), lr=lr)
         
+        start_time = time.time()
         for iters in range(iter_num):
             if print_iters and (iters % 10 == 0 or iter_num < 30):
                 if iter_num < 300 or iters % 100 == 0:
@@ -492,6 +550,8 @@ class TN(torch.nn.Module):
             y.append(rel_err)
             
             iters += 1
+            if time.time() - start_time > max_time:
+                return (rel_err, (x,y))
             #return
         if print_iters:
             print("time_resh: " + str(time_resh))
