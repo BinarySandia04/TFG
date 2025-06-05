@@ -4,10 +4,15 @@
 \usepackage[english]{babel}
 \usepackage{epsfig}
 \usepackage{csquotes}
-\usepackage{biblatex}
+\usepackage[sorting=none]{biblatex}
+\usepackage{graphicx} % in real document delete demo option
+\usepackage{subcaption}
+\usepackage{nicematrix}
+\usepackage{changepage}
 
 \addbibresource{refs.bib}
 \addbibresource{man-refs.bib}
+
 
 \parskip=5pt
 \parindent=15pt
@@ -79,6 +84,7 @@
 \DeclareMathOperator{\Tr}{Tr}
 \DeclareMathOperator{\size}{Size}
 \DeclareMathOperator{\Det}{Det}
+\DeclareMathOperator{\Diag}{Diag}
 
 % --------------------------------------------------
 \usepackage{fancyhdr}
@@ -92,6 +98,8 @@
 \begin{document}
 
 \bibstyle{plain}
+
+
 
 \thispagestyle{empty}
 
@@ -111,7 +119,7 @@
 \vspace*{1.5cm}
 \rule{16cm}{0.1mm}\\
 \begin{Huge}
-\textbf{SEARCHING OPTIMAL LOW-RANK APPROXIMATIONS USING TENSOR NETWORKS} \\
+\textbf{SEARCH OF OPTIMAL LOW-RANK APPROXIMATIONS USING TENSOR NETWORKS} \\
 \end{Huge}
 \rule{16cm}{0.1mm}\\
 
@@ -146,30 +154,32 @@
 \section*{Abstract}
 
 Tensor network structure search has been interesting research topic since the raise on
-complexity of deep learning models and quantum mechanics. This is an Undegraduate Thesis whose main goal is to give an 
+complexity of deep learning models and quantum mechanics. This Bachelor Thesis main goal is to give an 
 automated search of an optimal tensor network structure for representing a given
 tensor with some fixed error.
 
-For these purpose we first give an introduction to tensors, tensor networks and then we present some examples
-of well studied tensor networks, including Tucker decomposition, Tensor Train decomposition, Tensor Ring decomposition
-and Fully Connected Tensor Network decomposition. 
+For these purpose we first give an introduction to some basic tensor algebra, we present tensor networks and tensor
+network states. Then we present algorithms that find the cores of a tensor network that better represent an objective tensor.
+We also present an algorithm for finding optimal tensor network structures that can guarantee that we will find
+the most optimal cores.
 
-Then with some practical experiments we demonstrate that it is possible to find more optimized structures
-without significant losses on performance and accuracy, and finally we will present
-an algorithm for finding these optimized structures.
+Finally, we prove that these algorithms converge under certain assumptions and then we perform
+some practical experiments that empirically proves that it is possible to find other more optimized low-rank decompositions of tensors
+without significant losses on performance and accuracy.
 
 \section*{Resum}
 
 La recerca de l'estructura òptima de xarxes de tensors ha estat un tema d'interès des de l'augment en la complexitat dels models d'aprenentatge profund i de la mecànica quàntica. 
-Aquest és un treball de final de grau que té com a objectiu principal oferir una cerca automatitzada 
+Aquest treball de final de grau té com a objectiu principal oferir una cerca automatitzada 
 d’una estructura òptima de xarxa de tensors per representar un tensor donat amb un error fixat.
 
-Per aconseguir aquest propòsit, primer oferim una introducció als tensors, a les xarxes de tensors, i tot seguit presentem alguns exemples de xarxes de tensors ben estudiades, 
-incloent-hi la descomposició de Tucker, la descomposició en tren de tensors (Tensor Train), la descomposició en anell
-de tensors (Tensor Ring) i la descomposició de xarxa de tensors totalment connectada.
+Per aconseguir aquest propòsit, primer oferim una introducció als tensors, a les xarxes tensorials. 
+Aleshores presentem algoritmes que troben els nuclis de la xarxa tensorial que millor representen un tensor objectiu.
+També presentem un algoritme per trobar quina estructura de xarxa tensorial ens pot garantir que poguem trobar els nuclis més optims.
 
-A continuació, amb alguns experiments pràctics, demostrem que és possible trobar estructures més optimitzades sense pèrdues significatives 
-en el rendiment i la precissió de la representació, i finalment presentem un algoritme per trobar aquestes estructures optimitzades.
+Finalment demostrem que aquests algoritmes convergeixen sota algunes suposicions i després fem
+uns quants experiments que empíricament mostren que és possible trobar altres descomposicions de baix rang de tensors
+sense que suposin una pèrdua significant en rendiment i precissió.
 
 % TODO: Omplir això
 % 15A69 - Multilinear Algebra, Tensor Calculus, Graph Theory, no se
@@ -205,69 +215,70 @@ In the last years, neural networks have gained a lot of importance, positioning 
 impactful technological advances. Some models that use neural networks at its core are
 for example large language models (LLMs) which serve as advanced virtual agents, diffusers which
 generate images and other media. Other models based on neural networks have been used to make important
-advances in a lot of different fields such as in medicine, transportation, education, entertainment, and others.
+advances in a lot of different fields such as in medicine \cite{mengApplicationLargeLanguage2024},
+transportation \cite{nieExploringRolesLarge2025}, 
+education \cite{abd-alrazaqLargeLanguageModels2023}, and others.
 
 \begin{figure}[h]
     \centering
     \begin{tikzpicture} 
 
-    \node(i1)[draw, shape=circle, minimum size=0.5cm] at (0,-2) {};
     \node(i2)[draw, shape=circle, minimum size=0.5cm] at (0,-1) {};
     \node(i3)[draw, shape=circle, minimum size=0.5cm] at (0,0) {};
     \node(i4)[draw, shape=circle, minimum size=0.5cm] at (0,1) {};
     \node(i5)[draw, shape=circle, minimum size=0.5cm] at (0,2) {};
     \node(i6)[draw, shape=circle, minimum size=0.5cm] at (0,3) {};
     \node(i7)[draw, shape=circle, minimum size=0.5cm] at (0,4) {};
-    \node(i8)[draw, shape=circle, minimum size=0.5cm] at (0,5) {};
 
-    \node(l1)[draw, shape=circle, minimum size=0.5cm] at (2,4) {};
     \node(l2)[draw, shape=circle, minimum size=0.5cm] at (2,3) {};
     \node(l3)[draw, shape=circle, minimum size=0.5cm] at (2,2) {};
     \node(l4)[draw, shape=circle, minimum size=0.5cm] at (2,1) {};
     \node(l5)[draw, shape=circle, minimum size=0.5cm] at (2,0) {};
-    \node(l6)[draw, shape=circle, minimum size=0.5cm] at (2,-1) {};
 
-    \node(p1)[draw, shape=circle, minimum size=0.5cm] at (4,4) {};
     \node(p2)[draw, shape=circle, minimum size=0.5cm] at (4,3) {};
     \node(p3)[draw, shape=circle, minimum size=0.5cm] at (4,2) {};
     \node(p4)[draw, shape=circle, minimum size=0.5cm] at (4,1) {};
     \node(p5)[draw, shape=circle, minimum size=0.5cm] at (4,0) {};
-    \node(p6)[draw, shape=circle, minimum size=0.5cm] at (4,-1) {};
 
-    \node(o1)[draw, shape=circle, minimum size=0.5cm] at (6,-2) {};
     \node(o2)[draw, shape=circle, minimum size=0.5cm] at (6,-1) {};
     \node(o3)[draw, shape=circle, minimum size=0.5cm] at (6,0) {};
     \node(o4)[draw, shape=circle, minimum size=0.5cm] at (6,1) {};
     \node(o5)[draw, shape=circle, minimum size=0.5cm] at (6,2) {};
     \node(o6)[draw, shape=circle, minimum size=0.5cm] at (6,3) {};
     \node(o7)[draw, shape=circle, minimum size=0.5cm] at (6,4) {};
-    \node(o8)[draw, shape=circle, minimum size=0.5cm] at (6,5) {};
 
 
-    \foreach \x in {i1, i2, i3, i4, i5, i6, i7, i8}
-        \foreach \y in {l1, l2, l3, l4, l5, l6}
+    \foreach \x in {i2, i3, i4, i5, i6, i7}
+        \foreach \y in {l2, l3, l4, l5}
         {
-            \draw (\x) -- (\y);
+            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
         }
 
-    \foreach \x in {p1, p2, p3, p4, p5, p6}
-        \foreach \y in {l1, l2, l3, l4, l5, l6}
+    \foreach \x in {p2, p3, p4, p5}
+        \foreach \y in {l2, l3, l4, l5}
         {
-            \draw (\x) -- (\y);
+            \draw[-{Stealth[scale=1]}] (\y) -- (\x);
         }
 
-    \foreach \x in {p1, p2, p3, p4, p5, p6}
-        \foreach \y in {o1, o2, o3, o4, o5, o6, o7, o8}
+    \foreach \x in {p2, p3, p4, p5}
+        \foreach \y in {o2, o3, o4, o5, o6, o7}
         {
-            \draw (\x) -- (\y);
+            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
         }
+
+    \node(t1) at (0, 5) {Input};
+    \node(t2) at (6, 5) {Output};
+    \node(t3) at (3, 4) {Hidden};
     \end{tikzpicture}
-    \caption{A representation of a fully connected neural network. Each dot is a neuron and each edge represents a connection}
+
+    \caption{A representation of a fully connected neural network. Each dot is a neuron and each edge represents a connection. Source: own elaboration}
+    \label{fig:fcnn}
 \end{figure}
 
 Neural networks are modeled after how real neurons work, but in a simplified manner: each neural network contains a set of neurons which are split in
 different layers. In a fully connected neural network, each neuron has an output that is connected to each neuron of the next layer, and all neurons of a layer
 have as inputs the outputs of all the neurons of the previous layer. The first layer is called the input layer and the last layer is called the output layer.
+All the layers in between are called hidden layers.
 
 As real neurons work, each connection will have a distinct role on when one neuron should fire or not. So, the outputs of each neuron will depend on its inputs. The output of each neuron in
 a neural network is modeled using usually a non-linear function $f : \mathbb{K}^N \rightarrow \mathbb{K}$,
@@ -289,7 +300,8 @@ and can contain a lot of parameters. So naturally there has been a rising intere
 
 The main goal of this thesis will be to compress the parameters of neural networks using tensor networks, a concept 
 that originates from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
-and recently has recently attracted significant interest on machine learning.
+and recently has attracted significant interest on machine learning. We will also give another application
+by compressing images.
 
 Tensor networks are a structure that is aimed to represent and efficiently manipulate large tensors by breaking them into
 smaller ones, called core tensors, which are connected into a specific pattern. Through the thesis we will explain how
@@ -301,35 +313,49 @@ will be our weight matrix reshaped onto a tensor, we will find a tensor network 
 represents a good aproximation of $T$. This structure will minimize the relative error of the representation of $T$,
 the size of the TNS, since we are
 interested in compressing $T$ to fewer parameters, and we will also care about the computational complexity of recovering
-$T$.
+$T$. We will also present the alternating least square method adapted on finding the cores of the best tensor network state. 
+We will also find the cores of the tensor network using backpropagation, and we will compare both algorithms.
 
-We will see that finding the best structure is an integer programming problem, that is $NP$-hard. We will deduce
-an algorithm that finds a locally best structure by using program synthesis, and finally, we will compare this 
-structure with some other more studied cases of tensor networks, such as Tensor Train networks, Tensor Ring networks and
-fully connected tensor networks.
+We will see that finding the best structure is an integer programming problem and
+we will describe the TnALE algorithm that finds a locally best structure using gradient-less optimization.
 
 %\section{Objectives}
 
+\newpage % Perque quedi bé
 \section{Thesis structure}
 
 % TODO: Cambiar això una mica
 
-First we will present some preliminaries about tensor algebra. Then, we will introduce the
-diagrammatic notation made by Roger Penrose in the earlies 1970. We will
-use it for representing both matrix product states and tensor networs.
+The second chapter of the thesis will focus on the preliminaries about tensor algebra. We will introduce 
+tensors from a mathematical standpoint presenting the tensor product space.
+We will see that the tensor product space forms vector space and then we will describe
+some operations between tensors.
 
-Then, we will give a formal introduction in tensor networks, based in most part from \cite{yeTensorNetworkRanks2019}.
-We will introduce also well studied tensor networks such as the Tucker decomposition, the tensor train decomposition, the tensor ring decomposition,
-the fully connected tensor network decomposition.
+After that, we will also describe some reshaping operations that can be applied to tensors to transform its
+orders i.e their number of dimensions. These reshaping operations will be useful on the following chapters
+since we will need them for applying the TN-ALS algorithm and also for the last chapter of applications, when
+we transform matrices into tensors and then apply our low-rank approximation that will use tensor networks.
 
-We will make special emphasis on tree tensor networks, since they have some nice properties that we can later use
-for splitting tensor networks. We will also describe the alternating least squares algorithm applied to tensor networks
-for finding approximated states for any tensor network.
+On the third chapter we will present the basics of the Penrose Notation and we will give a formal
+definition to tensor networks (TNs) and tensor network states (TNS). We will give some
+common examples of tensor networks and after that we will define the notion
+of the rank of a tensor related to a TNS, called $G$-rank. We will see that the $G$-rank can be a lot smaller
+than the traditional tensor rank as it is discussed in \cite{yeTensorNetworkRanks2019},
+proving that there exists better compression methods than the canonical
+polyadic decomposition, which we will see on the same chapter.
 
-Finally, we will explain some algorithms for finding optimal tensor network structures. We will give an algorithm for
-finding a general tensor network structure based following \cite{liPermutationSearchTensor2022} and we will also describe an algorithm for finding an 
-optimal tensor network tree structure using program synthesis following mainly from the paper \cite{guoTensorNetworkStructure2025}
+On the fourth chapter we will describe the main algorithms of this thesis. First, we will give two algorithms
+that fixed a TN, finds a low-rank decomposition of smaller tensors that can represent our original tensor
+with a certain error. These algorithms are the tensor network alternating least squares (TN-ALE) and
+we will also solve this problem using backpropagation.
 
+Then, we will unfix the tensor structure and we will present the TnALE algorithm which finds the most optimal
+tensor network structure for representing a tensor T by evaluating a loss function that depends on the
+structure itself. TnALE also saves doing the evaluation of some tensor network structures and lastly we will prove
+that TnALE converges to a certain structure and that we can save these structure evaluations, under some assumptions.
+
+Finally on the fifth chapter we will apply all of these algorithms for practical cases such as compressing images and
+the most important, compressing the weight matrices of fully connected neural networks.
 
 
 \chapter{Tensors}
@@ -430,26 +456,12 @@ We will present the notion of a tensor. From a mathematical standpoint, it can b
 
 Linear maps and bilinear maps are specific cases of multilinear maps with $n=1$ and $n=2$ respectively.
 
-All tensors will be multilinear
-maps as tensors. $T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^*$
-with $n=p+q$. We will write
-$T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^*$
-when we need to explicitly distinguish what vector spaces are duals from another vector space.
-
-
-% TODO: Necessito això més endavant?
-\begin{definition}
-    Let $T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_p \times \mathbb{W}_1^* \times \cdots \times \mathbb{W}_q^* \rightarrow \mathbb{K}$
-    a multilinear map.
-    We say that the tensor $T$ is $p$-times covariant and $q$-times contravariant.
-\end{definition}
-
 Now we will present formally the tensor space and its elements by defining a relation between all the vectors in the free vector space over the cartesian product
 $\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$. First of all, we will need to define what the free vector space of a set is:
 
 \begin{definition} Let $S$ be a set and $\mathbb{K}$ a field. We denote the free vector space over $S$ as $\mathbb{K}[S]$, which
     is the vector space containing all linear combinations of elements from $S$ with coefficients of $\mathbb{K}$, i.e:
-    $$\mathbb{K}[S] = \left\{ \sum_{i=1}^n a_i s_i \mid s_i \in S, n \in \mathbb{N}, a_i \in \mathbb{K}  \right\}$$
+    $$\mathbb{K}[S] = \left\{ \sum_{i=1}^n a_i s_i \mid s_i \in S, n \in \mathbb{Z}_+, a_i \in \mathbb{K}  \right\}$$
 \end{definition}
 
 \begin{example} If we take $\mathbb{K} = \mathbb{R}$ and $S = (x,y)$, then the elements of $\mathbb{R}[S]$ have the form $ax + by$ with $a, b \in \mathbb{R}$.
@@ -620,7 +632,7 @@ the tensor product is a generalization of it.
 Now, we already know how to add and subtract two tensors of the same tensor product space since its sum is already
 defined by its vector space. We will introduce a tensor norm since in the following chapters we will want to know if
 a tensor is "small" or "big", and also but not less important, we want to know if two tensors are near each other
-to test convergance for algorithms involving tensor networks. In our case we will stick to the Frobenius norm:
+to test convergence for algorithms involving tensor networks. In our case we will stick to the Frobenius norm:
 
 
 \begin{definition}
@@ -643,7 +655,7 @@ with $v^i \in \mathbb{V}_i$. Therefore, the rank of a tensor will be $r$ if it c
 
 \begin{definition}
     We say that a tensor $T$ has rank $r$ as $\rank{T} = r$ with 
-    $r \in \mathbb{N}$ if $r$ is the minimum value such that we can write $T$ as the following form
+    $r \in \mathbb{Z}_+$ if $r$ is the minimum value such that we can write $T$ as the following form
     \begin{equation}
         T= \sum_{p=1}^r \lambda_p v_p^1 \otimes \cdots \otimes v_p^n
         \label{eq:rank}
@@ -721,7 +733,7 @@ Now we will introduce the linearization operation which simplify the notation a 
 reshaping operations.
 
 \begin{definition}[Linearization]
-    Fixed $N_1, \dots, N_n \in \mathbb{N}$, given $i_1, \dots, i_n \in \mathbb{N}$ such that $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
+    Fixed $N_1, \dots, N_n \in \mathbb{Z}_+$, given $i_1, \dots, i_n \in \mathbb{Z}_+$ such that $1 \leqslant i_1, \leqslant N_1, \dots, 1 \leqslant i_n \leqslant N_n$,
     we define the \textbf{linearization} of the indices $i_1, \dots, i_n$ as the mapping ${\prod_{i=1}^n \{1, \dots, N_i\} \rightarrow \{1, \dots, \prod_{i=1}^n N_i\}}$ and
     with its images defined as:
     $$\overline {i_1, i_2, \dots, i_n} = \sum_{j=2}^{n} \left( (i_j - 1) \prod_{k=1}^j N_k \right) + i_1$$
@@ -800,7 +812,7 @@ vector of $\mathbb{K}^{N_1 \cdot N_2 \cdots N_n}$
 
     \end{tikzpicture}
     \label{fig:vectorization}
-    \caption{Tensor vectorization}
+    \caption{Representation of tensor vectorization. Source: own elaboration}
 \end{figure}
 
 We will also define the permutation of two modes of a tensor. That means swapping arguments of the function $\mathcal{T}$
@@ -813,7 +825,7 @@ following some permutation $\sigma \in S_n$.
 \end{definition}
 
 \begin{example}
-    Let $M \in \mathbb{K}^{N_1 \times N_2}$. The matrix transposition $M^T$ can be written as $M_{(2, 1)}$ 
+    Let $N_1, N_2 \in \mathbb{Z}_+$ and $M \in \mathbb{K}^{N_1 \times N_2}$. The matrix transposition $M^T$ can be written as $M_{(2, 1)}$ 
 \end{example}
 
 \begin{example}
@@ -914,42 +926,22 @@ We will write $\mathcal{U} = \unfolding{(\mathcal{T}, (p_1, \dots, p_d), (p_{d+1
 
     \end{tikzpicture}
     \label{fig:unfolding}
-    \caption{Tensor unfolding}
+    \caption{Representation of tensor unfolding. Source: own elaboration}
 \end{figure}
 
+Now we will introduce the reverse operation of the tensor unfolding: tensor folding.
 
-\iffalse
-\begin{definition}[Tensor slices]
-%Consider a matrix $A = [\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_J] = [\mathbf{\tilde a}_1, \mathbf{\tilde a}_2, \dots, \mathbf{\tilde a}_I]^T \in \mathbb{R}^{I \times J}$. We define the slices of a matrix
-%as $$A(:, j) = \mathbf{a}_j \in \mathbb{R}^I \qquad A(i, :) = \mathbf{\tilde{a}}_j \in \mathbb{R}^J$$
-
-    Let $\mathcal{T} \in \mathbb{K}^{N_1\times \cdots \times N_n}$. Consider $S \subset \{1, \dots, n\}$ a subset of modes (dimensions)
-    of $\mathcal{T}$. Let $\mathbf{i}_S = (i_k)_{k \in S}$. We define the \textbf{slice of $\mathcal{T}$} as the tensor $\mathcal{T}_{\mathbf{i}_S}$
-    of order $n - \#S$
-    $$\begin{align}
-        \mathcal{T}_{\mathbf{i}_S} : \prod_{k \not\in S} \{1, \dots, N_k\} & \longrightarrow \mathbb{K} \\
-        \mathcal{T}_{\mathbf{i}_S}(i_{j_1}, \dots, i_{j_m}) & \longmapsto \mathcal{T}(i_1, \dots, i_n)
-    \end{align}$$
-    Where $\{j_1, \dots, j_m\} = \{1, \dots, n\} \setminus S$. 
-
-    Sometimes we will also implicitly specify $\mathbf{i}_S$ by writing $\mathcal{T}(a_1, \dots, a_n)$ and replacing $a_j$ with $i_j$ if $j \in S$ and "$:$" otherwise
-
-    We will denote $\mathcal{T}^{(m)} := \mathcal{T}(:, \dots, :, i_m, :, \dots, :)$ and $\mathcal{T}^{(\neq m)} := \mathcal{T}(i_1, \dots, i_{m-1}, :, i_{m+1}, \dots, i_n)$
+\begin{definition}[Tensor folding]
+    Let $\sigma \in S_n$, $1 \leqslant d \leqslant n$. Let $N = \prod_{i=1}^d$, $\mathcal{U} = \prod{i=d+1}^n$ and $M$ be a matrix of $\mathbb{K}^{N \times M}$.
+    We define the \textbf{folding} of $M$ following $\sigma$ as the tensor $T \in \mathbb{K}^{N_{\sigma(1)} \times \cdots \times N_{\sigma(n)}}$ defined entrywise as:
+    $$T(i_1, \dots, i_n) = \mathcal{U}(\overline{i_{\sigma^{-1}(1)}, \dots, i_{\sigma^{-1}(d)}}, \overline{i_{\sigma^{-1}(d+1)}, \dots, i_{\sigma^{-1}(n)}})$$
+    We will write $T = \folding(\mathcal{U}, (\sigma(1), \dots, \sigma(d)), (\sigma(d+1), \dots, \sigma(n)))$
 \end{definition}
 
-\begin{example}
-    Consider $\mathcal{M} \in \mathbb{K}^{N_1 \times N_2}$ a second order tensor. We can see this tensor as a
-    bidimensional array (matrix). The slice $\mathcal{M}(i, :)$ results in the $i$-th row of $\mathcal{M}$.
-    The slice $\mathcal{M}(:, j)$ results in the $j$-th column of $\mathcal{M}$
-\end{example}
-
-\begin{example}
-    Consider a $4$th-order tensor $\mathcal{T} \in \mathbb{K}^{N_1 \times N_2 \times N_3 \times N_4}$. 
-    Fixed $i_2, i_3$, the tensor slice of $2$th-order $\mathcal{T} = \mathcal{A}(:, i_2, i_3, :) \in \mathbb{K}^{N_1 \times N_4}$ 
-    with its entries defined by ${\mathcal{T}(i_1, i_4) = \mathcal{A}(i_1, i_2, i_3, i_4)}$
-\end{example}
-\fi
-
+% TODO: Fer una outro millor?
+Now that we have defined tensors and all the basic operations of tensor algebra, in the following chapter we will
+construct tensor networks using the contraction operation that we have seen in this chapter. On chapter 4, the reshaping
+operations will reappear when we present the algorithms that find tensor network cores.
 
 \chapter{Tensor networks}
 
@@ -1003,7 +995,7 @@ Penrose notation is as a circle with as many edges as the order of the tensor, a
     \draw (T) -- (in);
 }
 \caption{
-    Representation of a tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation
+    Representation of a tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ using the Penrose notation. Source: own elaboration
 }
 \label{fig:tens}
 \end{figure}
@@ -1114,7 +1106,7 @@ as their representation in the Penrose notation with the edges that represent th
 
 \caption{
     Representation in the Penrose notation of the contraction between two tensors $\mathcal{X} \in \mathbb{K}^{N_1 \times N_2 \times N_3}, \mathcal{Y} \in \mathbb{K}^{M_1 \times M_2 \times M_3}$
-    by their indices $i_3$ and $j_1$ with $N_1, N_2, N_3, M_1, M_2, M_3 \in \mathbb{N}$ and $N_3 = M_1$
+    by their indices $i_3$ and $j_1$ with $N_1, N_2, N_3, M_1, M_2, M_3 \in \mathbb{Z}_+$ and $N_3 = M_1$. Source: own elaboration
 }
 \label{fig:tencon}
 \end{figure}
@@ -1175,7 +1167,20 @@ as discrete functions by its representations in those basis, we get a way for co
 \begin{example}
     Suppose that we take $X \in \mathbb{R}^{3 \times 2 \times 2}$ from \exref{exa:unfold} and
     $Y \in \mathbb{R}^{2 \times 2 \times 3}$ defined as:
-  $$Y = \left[ 
+  $$X = \left[\begin{pmatrix}
+            1 & 0 \\
+            0 & 1
+        \end{pmatrix}, 
+        \begin{pmatrix}
+            1 & 0 \\
+            1 & 1
+        \end{pmatrix},
+        \begin{pmatrix}
+            1 & 0 \\
+            0 & -1
+        \end{pmatrix}
+        \right] \qquad
+  Y = \left[ 
     \begin{pmatrix}
         1 & 0 & -1 \\
         0 & 2 & -2 \\
@@ -1242,7 +1247,20 @@ And each element of the contracted tensor $Z$ would be defined as:
 
 $$Z(i_1, i_3, j_1, j_3) = \sum_{s=1}^2 X(i_1, s, i_3) Y(j_1, s, j_3)$$
 
-Therefore,
+For example, by fixing $i_1 = i_3 = 1$ we can compute
+the first "inner matrix" of $Z$:
+
+$$Z(1, 1, j_1, j_3) = \sum_{s=1}^2 X(1, s, 1) Y(j_1, s, j_3)$$
+
+This sum is equal to
+$$X(1, 1, 1) Y(j_1, 1, j_3) + X(1, 2, 1) Y(j_1, 2, j_3) = Y(j_1, 1, j_3) = 
+\begin{pmatrix}
+    1 & 0 & -1 \\
+    1 & 1 & 0
+\end{pmatrix}
+$$
+
+If we do the same for the rest of indices $i_1, i_3$, we get
 
 $$Z = \begin{bmatrix}
 \begin{pmatrix}
@@ -1357,7 +1375,7 @@ any tensor. We denote by $I_n$ as the tensor identity of order $n$. $I_2$ are id
 
     \caption{
         The identity matrix represented using the Penrose Notation. Contracting a mode over the identity yields the same
-        tensor.
+        tensor. Source: own elaboration.
     }
     \label{fig:pen_identity}
 \end{figure}
@@ -1422,7 +1440,7 @@ using \defref{def:contraction}.
 
 
 \caption{
-    Representation of the trace of a tensor using the Penrose notation
+    Representation of the trace of a tensor using the Penrose notation. Source: own elaboration.
 }
 \label{fig:trace}
 \end{figure}
@@ -1454,7 +1472,7 @@ A diagonal tensor $\Lambda \in \mathbb{K}^{N \times \cdots \times N$ of order $n
     \end{tikzpicture}
     \end{center}
 
-    \caption{Diagonal tensor represented using the Penrose Notation}
+    \caption{Diagonal tensor represented using the Penrose Notation. Source: own elaboration.}
 \end{figure}
 \subsection*{Outer product}
 
@@ -1492,7 +1510,7 @@ since they are not connected. In this case, the outer product of the two tensors
 
     \end{tikzpicture}
 \end{minipage}
-    \caption{Representation of the outer product using the Penrose notation}
+    \caption{Representation of the outer product using the Penrose notation. Source: own elaboration.}
     \label{fig:penrose_outer}
 \end{figure}
 
@@ -1651,7 +1669,7 @@ copy of $\mathbb{E}^*_$, so the contraction $\mathcal{C}_G$ is well defined and 
     \end{tikzpicture}
 \end{minipage}
 \caption{
-    Example of a tensor network and a tensor network state evaluation using the Penrose notation.
+    Example of a tensor network and a tensor network state evaluation using the Penrose notation. Source: own elaboration.
 }
 \label{fig:tn_graph}
 \end{figure}
@@ -1661,8 +1679,8 @@ we get a tensor $T$ that we will call \textbf{tensor network state}. We will cal
 \textbf{core tensors}. 
 
 \begin{definition}
-    A tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ is a tensor state of a tensor network if it
-    can be written as $T = \mathcal{C}_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ with $\mathcal{G}_i \in \xi_i$
+    A tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ is a \textbf{tensor state of a tensor network} if it
+    can be written as $T = \mathcal{C}_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ with $\mathcal{G}_i \in \xi_i$.
 \end{definition}
 
 \begin{definition}
@@ -1725,7 +1743,7 @@ free edges and the rest are contracted edges.
 \end{example}
 
 \begin{example}
-    \nocite{oseledetsTensorTrainDecomposition2011} A tensor
+    A tensor
 train decomposition or matrix product state of $T$ are a set of $3$th-order tensors $\mathcal{G}_1,\mathcal{G}_2,\dots,\mathcal{G}_n$ with
     $\mathcal{G}_i \in \mathbb{K}^{R_{i-1} \times N_i \times R_i}$ and $R_0 = R_n = 1$ such that every element of $T$ is written in the
     form
@@ -1785,11 +1803,11 @@ the contraction of the whole network yields \refeq{eq:tt-contraction}
     \end{tikzpicture}
 \end{minipage}
 
-    \caption{Tensor Train decomposition}
+    \caption{Tensor Train decomposition. Source: own elaboration.}
     \label{tt:scheme}
 \end{figure}
 
-Tensor train decompositions are very well studied because since they are a chain of products of matrices, there are a lot
+Tensor train decompositions are very well studied because they are a chain of products of matrices, there are a lot
 of mathematical theory that can be applied in this structure, for example, for finding the cores of the TT decomposition
 one could fix a core, reshape and unfold onto a matrix the objective tensor $T$, apply then SVD and update the cores according to
 the decomposition. A more detailed algorithm can be found in \cite{rohrig-zollnerPerformanceLowrankTensortrain2022}. Since in this thesis
@@ -1805,13 +1823,13 @@ is more general and not focused on tensor train decompositions we will skip this
 
 
 \begin{example}
-    \nocite{zhaoTensorRingDecomposition2016} Tensor ring decomposition (or TR) or also known a matrix product state with periodic boundary conditions, is obtained when $G$ is a cycle.
+    Tensor ring decomposition (or TR) or also known a matrix product state with periodic boundary conditions, is obtained when $G$ is a cycle.
 \end{example}
 Tensor Ring decomposition is considered generalization of Tensor Train decomposition, it's contraction is the same as
-\refeq{eq:tt-contraction} but removing the condition $R_0 = R_1 = 1$. Tensor Rings have also been widely studied
+\refeq{eq:tt-contraction} but removing the condition $R_0 = R_1 = 1$. Zhao et. al. explain that Tensor Rings have also been widely studied
 because of their circular invariance: shifting the cores on the tensor network results in an equivalent tensor network
 that once its evaluated results in the objective tensor with its dimensions fixed. Thanks to this fact, one can still
-apply SVD decomposition on tensor rings \cite{zhaoTensorRingDecomposition2016}.
+apply SVD decomposition on Tensor Rings \cite{zhaoTensorRingDecomposition2016}.
 
 \begin{figure}[h]
     \centering
@@ -1873,7 +1891,7 @@ apply SVD decomposition on tensor rings \cite{zhaoTensorRingDecomposition2016}.
     \end{tikzpicture}
 \end{minipage}
 
-    \caption{Tensor Ring (TR) decomposition}
+    \caption{Tensor Ring (TR) decomposition. Source: own elaboration.}
     \label{tr:schema}
 \end{figure}
 
@@ -1950,7 +1968,7 @@ The fully connected tensor network decomposition is obtenied when $G$ is a compl
     \end{tikzpicture}
 \end{minipage}
 
-    \caption{Fully connected tensor network decomposition (FCTN)}
+    \caption{Fully connected tensor network decomposition (FCTN). Source: own elaboration.}
     \label{tctn:schema}
 \end{figure}
 
@@ -2022,10 +2040,10 @@ of $1$-rank tensors that compose the tensor $T$, we will define the $G$-rank as 
 needs for representing $T$. More formally,
 
 \begin{definition} [Tensor G-rank]
-    Given a graph $G$, we define the tensor rank respect to a $G$ or $G$-rank as
-        $$\rank_G (T) = \min {\{(R_1, \dots, R_c) \in \mathbb{N}^c : T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)\}}$$
+    Given a graph $G$, we define the tensor rank respect to a $G$ or \textbf{$G$-rank} as
+        $$\rank_G (T) = \min {\{(R_1, \dots, R_c) \in \mathbb{Z}_+^c : T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)\}}$$
  
-    Where $\min(S)$ with $S \subset \mathbb{N}^c$ denotes the minimal elements of $S$. We treat $\mathbb{N}^c$ with its usual
+    Where $\min(S)$ with $S \subset \mathbb{Z}_+^c$ denotes the minimal elements of $S$. We treat $\mathbb{Z}_+^c$ with its usual
     partial order:
     $$ (a_1, \dots, a_c) \leqslant (b_1, \dots, b_c) \Longleftrightarrow a_1 \leqslant b_1, a_2 \leqslant b_2, \dots, a_c \leqslant b_c$$
     So for example if $S = \{(3,4,5), (2,1,3), (1,3,2)\}$, then $\min(S) = \{(2,1,3), (1,3,2)\}$
@@ -2035,7 +2053,7 @@ Now, we will see that $\rank_G(T)$ is a finite set. The following theorem gives 
 every tensor $T$ can be a state of $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$.
 In fact, these values that guarantee that $T$ is an state are $R_1 = \dots R_c = \rank T$
 \begin{theorem} Let $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ and let $G$ be a connected graph with $n$ vertices and $c$ edges.
-    There exists $R_1, \dots, R_c \in \mathbb{N}$ such that
+    There exists $R_1, \dots, R_c \in \mathbb{Z}_+$ such that
     $$T \in \TNS(G; R_1, \dots, R_c, N_1, \dots, N_d)$$
     in fact, we can choose $R_1 = \dots = R_c = \rank{T}$
     \label{thm:finiterank}
@@ -2063,18 +2081,24 @@ seen in chapter $2$.
 The following theorem says that there exists some tensor networks and some tensors that make this claim true:
 \begin{theorem}
     For $n \geqslant 3$ there exists a connected simple graph $G$ with $n$ vertices and $c$ edges
-    such there exists a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
-    with tensor rank $\rank (T) = r$ is much larger than the $G$-rank $\rank_G(T) = (r_1, \dots, r_n)$. More specifically,
+    such that there exists a tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+    where its tensor rank $\rank (T) = r$ is significantly larger than its $G$-rank $\rank_G(T) = (r_1, \dots, r_n)$. More specifically,
     $$r \gg r_1 + \dots + r_n$$
 \end{theorem}
-% TODO
 
 The proof of this theorem can be found in \cite{yeTensorNetworkRanks2019}. In the paper the authors find that for 
 representing a tensor network that contracts to a tensor $T \in (\mathbb{C}^{n\times n})^* \otimes (\mathbb{C}^{n \times n})^* \otimes \mathbb{C}^{n \times n}
 \cong \mathbb{C}^{n\times n\times n}$ picking $G$ as $C_3$ and $P_3$ the inequality holds for $n = 3$. Then, the proof
-constructs from $T$ for $n > 3$. We won't enter in more details onto the proof
-of the theorem.
+constructs from $T$ for $n > 3$.
+% TODO
+This theorem shows that the $G$-rank can offer a more compact representation of tensors than the classical tensor rank. Nontheless,
+the theorem is not proven for generic tensor product spaces, in which proving that the $G$-rank could be smaller
+than the classical tensor rank are more difficult.
 
+In this chapter we have presented tensor networks and tensor network states, and we have proved that sometimes this representations
+of a tensor can be more compact than the traditional rank decomposition. What remains now is how 
+to find the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ of a given tensor network structure that give this compact decomposition. Which we will see
+in the following chapter.
 % TODO: Aixo pel capitol 4
 %And finally, we will present an algorithm that tries to compute an approximate of the real $G$-rank of a tensor,
 %if $G$ is a tree.
@@ -2189,7 +2213,8 @@ algorithm. The goal of the ALS algorithm is finding cores $\mathcal{G}_1, \dots,
 
 \section{The Alternating Least Squares algorithm}
 
-\nocite{malikSamplingBasedDecompositionAlgorithms2022a}
+In this subsection we will discuss the Alternating Least Squares algorithm that Malik et. al. present on section 5 of
+\cite{malikSamplingBasedDecompositionAlgorithms2022}
 
 We will denote $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ as our objective tensor. Let $G = (V, E)$, $c = \#E$ and $R = (r_1, \dots, r_c)$.
 We would want to find some cores
@@ -2292,7 +2317,7 @@ We will call this contracted tensor $\mathcal{G}^{\neq m}$.
     \end{tikzpicture}
 \end{minipage}
 
-\caption{The representation of $\mathcal{G}^{\neq m}$ on the TR decomposition, with $m = 2$ }
+\caption{The representation of $\mathcal{G}^{\neq m}$ on the TR decomposition, with $m = 2$. Source: own elaboration.}
     \label{fig:als_tr}
 \end{figure}
 %
@@ -2404,7 +2429,7 @@ We will call this contracted tensor $\mathcal{G}^{\neq m}$.
     \end{tikzpicture}
 \end{minipage}
 
-\caption{The representation of $\mathcal{G}^{\neq 4}$ over some arbitrary TN }
+\caption{The representation of $\mathcal{G}^{\neq 4}$ over some arbitrary TN. Source: own elaboration. }
     \label{fig:als_con}
 \end{figure}
 
@@ -2412,11 +2437,12 @@ We will call this contracted tensor $\mathcal{G}^{\neq m}$.
 The last contractions that remain between $\mathcal{G}^{\neq m}$ and $\mathcal{G}_m$ are equivalent to evaluating the whole network.
 Now, if we consider appropiate matricizations $T^{(m)}$, $G^{\neq m}$ and $G_m$, these contractions can be computed calculating the matrix
 product $G^{\neq m} G_m$, so our minimization problem is now equivalent to solving the 
-following least squares problem:
+least squares problem. That is, given $A \in \mathbb{K}^{m \times n}$ and $B \in \mathbb{K}^{m \times k}$, find $X \in \mathbb{K}^{n \times k}$ such that
 \begin{equation}
-    \argmin_{G_m} \| G^{\neq m} G_m - T^{(m)}\|_F
-\label{eq:als}
+    \argmin_{X} \| AX - B\|_2
+    \label{eq:als}
 \end{equation}
+In our case, $A = G^{\neq m}, X = G_m$ and $B = T^{(m)}$.
 Let $x^{(i)}$ be the $i$-th column of $G_m$ and $y^{(i)}$ the $i$-th
 column of $T^{(m)}$. Solving \ref{eq:als} means solving for each $i$ 
 \begin{equation}
@@ -2424,12 +2450,165 @@ column of $T^{(m)}$. Solving \ref{eq:als} means solving for each $i$
     \label{eq:als_lsq}
 \end{equation}
 
-Since we can't assure that there exists an exact solution to $G^{\neq m} x^{(i)} = y^{(i)}$,
-we can use the solution to the normal equation $(G^{\neq m})^T G^{\neq m} x^{(i)} = (G^{\neq m})^T y^{(i)}$.
+\subsubsection{Solving the least squares problem by using normal equations}
 
-Once we have solved \eqref{eq:als_lsq}, we can reshape back $G_m$ to $\mathcal{G}_m$.
-We can iteratively change the varying core tensor $\mathcal{G}_i$ until the contraction of the whole tensor network
-is $T$ with some fixed error $\epsilon$. The Tensor Network ALS algorithm does this entire process:
+Note that since we cannot guarantee that $(G^{\neq m})^{-1}$ is invertible, we cannot explicitly solve the linear system 
+$G^{\neq m} x^{(i)} = y^{(i)}$. Also, since computing the inverse of a matrix is expensive, we will use the following proposition
+for solving \eqref{eq:als_lsq}:
+
+\begin{proposition}
+    If $x$ satisfies $A^T(Ax - b) = 0$ then $x$ is a solution to the least-squares problem, i.e, $x$ minimizes $\|Ax - b\|_2$
+
+    \begin{proof}
+        Let $y \in \mathbb{R}^n$ be any vector. Then,
+        $$\begin{align}
+            \|A(x + y) - b\|_2^2 &= [A(x+y) - b]^T [A(x+y) - b] \\ 
+                                 &= (Ax - b)^T(Ax - b) + 2(Ay)^T(Ax - b) + (Ay)^T(Ay) \\
+                                 &= \|Ax - b\|_2^2 + 2y^T A^T (Ax - b) + \|Ay\|_2^2 \\
+                                 &= \|Ax - b\|_2^2 + \|Ay\|_2^2 \\
+                                 &\geqslant \|Ax - b\|_2^2
+        \end{align}$$
+    \end{proof}
+\end{proposition}
+
+Thanks to this proposition, any problem of the form $\argmin_x \|Ax - b\|_2$ will have as a solution a vector $x$
+such that $A^T Ax = A^T b$. In our case, we get that solving \refeq{eq:als_lsq} is equivalent to solving the linear system
+\begin{equation}
+    (G^{\neq m})^T G^{\neq m} x^{(i)} = (G^{\neq m})^T y^{(i)}
+    \label{eq:normal_eq}
+\end{equation}
+
+Nontheless, we can't still gurantee that this system has a solution since we don't know if $(G^{\neq m})^T G^{\neq m}$ is invertible.
+We could solve this inconvinience applying the Tikhonov regularization. Instead of solving \refeq{eq:normal_eq},
+we will solve the lineal system
+$$((G^{\neq m})^T G^{\neq m} + \gamma I) \, \hat x^{(i)} = (G^{\neq m})^T y^{(i)}$$
+where $\gamma > 0$ is called the \textbf{Tikhonov factor}. We will pick a small Tikhonov factor (usually \gamma < $10^{-5}$) to assure that it doesn't smooth too
+much the solutions of the least squares problem.
+
+Keep in mind that by adding any small perturbance to a linear system will not lead to the exact solution of $x^{(i)}$, but instead
+to a very close approximation $\hat x^{(i)}$. Therefore, the convergence of the algorithm can be affected by adding the Tikhonov factor.
+
+\subsubsection{Solving the least squares problem by the pseudoinverse of the SVD}
+
+Another approach on solving \eqref{eq:als} that does not depend about if $A$ is singular or not,
+is to apply the single value decomposition. The following method that we will describe is the same that uses the
+implementation of the function \verb/torch.linalg.lstsq/ of the PyTorch library that is used for solving the least squares problem
+\cite{PyTorchDocumentationPyTorch} as a fallback (if the matrix $A$ is well-conditioned, PyTorch uses more efficient methods such as QR factorization).
+
+
+Given a matrix $A \in \mathbb{K}^{n \times m}$ we denote its conjugate transpose as $A^*$. If $\mathbb{K} = \mathbb{R}$ then $A^* = A^T$
+
+\begin{theorem}[SVD Factoriation]
+    Any matrix $A \in \mathbb{K}^{n \times m}$ can be decomposed as
+    $$ A =U \Sigma V^*$$
+    Where $U \in \mathbb{K}^{n \times n}, V \in \mathbb{K}^{m \times m}$ are unitary matrices (i.e, $U^*U =UU^*= I_n$ and $V^*V = VV^* = I_m$) and
+$\Sigma \in \mathbb{K}^{n \times m}$ is a rectangular diagonal matrix, i.e:
+$$\Sigma = \Diag{\left( \sigma_1, \dots, \sigma_r, 0, \dots, 0 \right)}$$
+The entries of $\Sigma$ are called \textbf{singular values} of $A$.
+    They are usually ordered as $\sigma_1 \geqslant \sigma_2 \geqslant \dots \geqslant \sigma_r \geqslant 0$ where $r = \rank(A)$
+    We call this factorization the \textbf{SVD factorization} of $A$.
+
+    \begin{proof}
+        We can suppose that $A \neq 0$ because if $A = 0$ we could choose $U = V = I$ and $\Sigma = 0$.
+        We will prove by induction over $n$. For $n = 1$, consider the matrix $A = (a) \neq 0$ with $a \in \mathbb{K}^m$, i.e
+        $A$ is a $m \times 1$ matrix. If we define $\sigma = \|a\|_2$ then there exists an ortogonal matrix $Q \in \mathbb{K}^{m \times m}$ such
+        that $Q^* a = (\sigma, 0, \dots, 0)^T$, therefore
+        $$ A = Q \begin{pmatrix} \sigma \\ 0 \end{pmatrix}$$
+        Therefore we can define the SVD of $A$ as $U = Q$, $V = (1, \dots, 1)$ and $\Sigma = \begin{pmatrix} \sigma \\ 0 \end{pmatrix}$.
+        Now, suppose that we can do the SVD factorization for any matrix of $n - 1$ rows. Let $A \in \mathbb{K}^{m \times n}$, $x \in \mathbb{R}^n$ and $y \in \mathbb{R}^m$ be
+        two unitary vectors such that $Ax = \sigma y$ with $\sigma = \|A\|_2$. We know that there exists some matrices
+        $V_2 \in \mathbb{K}^{n \times (n - 1)}$ and $U_2 \in \mathbb{K}^{m \times (m - 1)}$ such that $V = (x V_2) \in \mathbb{K}^{n \times n}$ and
+        $U = (y U_2) \in \mathbb{K}^{m \times m}$ are ortogonals. Then,
+        $$U^* AV = \begin{pmatrix} y^* \\ U_2^* \end{pmatrix} A \begin{pmatrix} x & V_2 \end{pmatrix} =
+        \begin{pmatrix}
+            y^* Ax & y^* A V_2 \\
+            U_2^* Ax & U_2^* AV_2
+        \end{pmatrix}$$
+        Therefore if we call $B = U_2^* A V_2$ and $w^* = y^* A V_2$ then
+        \begin{equation}
+        U^T A V = \begin{pmatrix} \sigma & w^* \\ 0 & B \end{pmatrix} = A_1
+        \label{eq:svd-proof}
+        \end{equation}
+        And since
+        $$\left \|A_1 \begin{pmatrix}
+            \sigma \\ w
+        \end{pmatrix}
+        \right \|_2^2 \geqslant (\sigma^2 + w^* w)^2$$
+        Then we have that $\|A_1\|_2^2 \geqslant \sigma^2 + w^T w$ and since $\|A\|_2^2 = \|A_1\|_2^2 = \simga^2$ we get that $w = 0$ and
+        replacing $w$ in \eqref{eq:svd-proof} we can find an SVD representation for the matrix $A_1$.
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[Moore-Penrose pseudoinverse] Let $A \in \mathbb{K}^{n \times m}$. The pseudoinverse of $A$ is a matrix
+    $A^+ \in \mathbb{K}^{m \times n}$ such that satisfies the following four criteria, known as the Moore-Penrose conditions \cite{penroseGeneralizedInverseMatrices1955}:
+    \begin{enumerate}
+        \item $AA^+ A = A$
+        \item $A^+ AA^+ = A$
+        \item $(AA^+)^* = AA^+$
+        \item $(A^+A)^* = A^+A$
+    \end{enumerate}
+    Where $A^*$ denotes the conjugate transposition of $A$.
+\end{definition}
+Now we make the claim that $\Sigma^+ = \Diag{\left( \frac{1}{\sigma_1}, \dots, \frac{1}{\sigma_r}, 0, \dots, 0\right)} \in \mathbb{K}^{n \times m}$
+\vspace{0.75cm}
+$$
+\Sigma = \left.\begin{pNiceMatrix}
+    \sigma_1 & 0 & \dots & 0 \\
+    0 & \sigma_2 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots\\
+    0&0&\dots& \sigma_r \\
+    0 & 0 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & 0
+    \CodeAfter
+    \OverBrace[yshift=1.5mm,shorten]{1-1}{1-last}{ m }
+\end{pNiceMatrix} \right\} n\qquad
+\Sigma^+ = \left.\begin{pNiceMatrix}
+        \frac{1}{\sigma_1} & 0 & \dots& 0& 0 & \dots & 0\\
+        0 & \frac{1}{\sigma_2} & \dots & 0& 0 & \dots & 0\\
+        \vdots & \vdots & \ddots & \vdots & \vdots & \ddots & \vdots\\
+        0 & 0 & \dots & \frac{1}{\sigma_r} & 0 & \dots & 0
+    \CodeAfter
+    \OverBrace[yshift=1.5mm, shorten]{1-1}{1-last}{ n }
+\end{pNiceMatrix} \right\} m
+$$
+By plugging each matrix to each Moore-Penrose condition we can see that, in fact, $\Sigma^+$ is the pseudoinverse of $\Sigma$. The
+following Lemma will give us a way to compute the Pseudoinverse if we have an SVD factorization:
+\begin{lemma}
+    If $A = U\Sigma V^T$, then $A^+ = V\Sigma^+ U^T$
+    \begin{proof}
+        It is sufficient to check if the Moore-Penrose conditions are satisfied. By the properties of transpositions
+        and using that $VV^T = V^TV = I_n$ and $U^TU = UU^T = I_m$:
+        \begin{enumerate}
+            \item  $AA^+A = (U\Sigma V^T)(V\Sigma^+ U^T)(U\Sigma V^T) = U\Sigma (V^T V)\Sigma^+ (UU^T)\Sigma V^T = U\Sigma I_m \Sigma^+I_n \Sigma V^T  = U\Sigma\Sigma^+ \Sigma V^T = U \Sigma V^T = A$
+            \item $A^+AA^+ = (V\Sigma^+ U^T)(U \Sigma V^T)(V\Sigma^+ U^T) = V\Sigma^+(U^TU)\Sigma (V^TV) \Sigma^+ U^T = V\Sigma^+ \Sigma \Sigma^+ U^T = V\Sigma^+ U^T = A^+$
+            \item $(AA^+)^T = (U\Sigma V^T V\Sigma^+ U^T)^T = (U \Sigma \Sigma^+ U^T)^T = U \Sigma \Sigma^+ U^T = AA^+$
+            \item $(A^+ A)^T = (V\Sigma^+ U^T U \Sigma V^T)^T= (V \Sigma^+ \Sigma V^T)^T = V\Sigma^+ \Sigma V^T = A^+ A$
+        \end{enumerate}
+    \end{proof}
+\end{lemma}
+Now, for solving \eqref{eq:als} we can use the pseudoinverse of the SVD decomposition of the matrix $A$:
+\begin{proposition}
+    $x = V\Sigma^+ U^* b$ minimizes $\|Ax - b\|_2$
+    \begin{proof}
+        By applying the SVD factorization of the matrix $A$ we get:
+        $$\|Ax - b\|_2^2 = \|U\Sigma V^* x - b\|_2^2 = \|U^* (U\Sigma V^* x - b)\|_2^2 = \|\Sigma(V^* x) - U^* b\|_2^2$$
+        In the last equality we used that $U$ is an unitary matrix and $\|Ux\|_2 = \|x\|_2$.
+        Let $y = V^* x$ and $c = U^* b$. Then the problem of minimizing $\|Ax - b\|_2$ reduces to solving
+        $$\min_y \|\Sigma y - c\|_2^2$$.
+        Since $\Sigma$ is a diagonal matrix, if we pick an $y$ with each component $y_i$ of the form
+        $$ y_i = \begin{cases}
+            \dfrac{c_i}{\sigma_i} & \text{if } \sigma_i \neq 0\\
+            \lambda_i & \text{if } \sigma_i = 0
+        \end{cases}$$
+        With $\lambda_i \in \mathbb{K}$ being any value, then $\|\Sigma y - c\|_2^2 = 0$. We will pick $\lambda_i = 0$ for all $i$, since
+        this will give us the vector $y$ that minimizes $\|Ax-b\|_2$ with the least norm, thus we have that $y = \Sigma^+ c$. By reversing our change
+        of variables, we get that $$x = Vy = V\Sigma^+ c = V\Sigma^+ U^* b$$
+    \end{proof}
+\end{proposition}
+
+Once we have solved \eqref{eq:als} with any of these two described methods, we can reshape back $G_m$ to $\mathcal{G}_m$.
+We can iteratively change the varying core tensor $\mathcal{G}_i$ until the algorithm converges.
 
 \begin{algorithm}[H]
     \caption{Tensor Network ALS}
@@ -2450,43 +2629,176 @@ is $T$ with some fixed error $\epsilon$. The Tensor Network ALS algorithm does t
 
 \end{algorithm}
 
+We will not enter in more detail about the explicit order of the modes when folding or unfolding the tensors. On the source code
+attached to this thesis, there is the complete implementation of this algorithm, detailing all the foldings and unfoldings.
+
+As we can see, the ALS algorithm converges to a certain set of cores $\mathcal{G}_1^*, \dots, \mathcal{G}_n^*$. If we denote
+$\Theta_k = \{\mathcal{G}_1^k, \dots, \mathcal{G}_n^k\}$ as the set of cores $\mathcal{G}_i$ at the $k$-th iteration of the the algorithm,
+and if we denote $\mathcal{L}(\Theta_k) = \|G^{\neq k} G_k - T^{(k)}\|$ with $G^{\neq k}$, $G_k$ and $T^{(k)}$ depending on $\Theta_k$. 
+Then, at each step we are minimizing $\mathcal{L}(\Theta_k)$, and so at the next iteration of the algorithm the loss function
+only can decrease, since by not varying the other core tensors we would at least stay at the same value of $\mathcal{L}(\Theta_k)$, therefore
+$$\mathcal{L}(\Theta_{k+1}) \leqslant \mathcal{L}(\Theta_k)$$
+Since the sequence $\{\mathcal{L}(\Theta_{(k)})\}_{k=0}^\infty$ is bounded by $0 \leqslant \mathcal{L}(\Theta_{(k)})$, therefore
+the algorithm converges to a fixed point $\Theta^*$
+
+Note that as we have previously said we can not guarantee the convergence of the algorithm if we use the Tikhonov regularization since it doesn't give
+the exact solution to the system in \refeq{eq:normal_eq}, and therefore the solution might not
+solve the least squares problem. Nontheless, the Tikhonov regularization speeds up the 
+computation, as we can see in the following figure:
+
+\begin{figure}[H]
+    \centering
+    
+   \begin{minipage}{0.6\textwidth}
+    \includegraphics[width=\linewidth]{media/tikhonov-chart.png}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+    \centering
+\begin{tabular}{l|l}
+           & Time  \\ \hline
+lsq        & 4.47s \\
+tikhonov-1 & 0.56s \\
+tikhonov-2 & 0.58s \\
+tikhonov-3 & 0.60s
+\end{tabular}
+\end{minipage}
+
+    \caption{Comparation between the ALS algorithm when the Tikhonov regularization is used and when not. The dashed lines
+    represent different executions of the algorithm and the continuous line represents an iteration of the
+    algorithm when using the least squares method for solving \ref{eq:als_lsq}. The TN used
+    is a TT with an objective tensor of shape $(8,8,16,8,8)$ and ranks $R = (8,8,8,8)$.
+    We can see that
+    since in some cases when the linear system is near to zero, the Tikhonov regularization makes the relative
+    error skyrocket. With enough iterations the Tikhonov regularization achieves the same
+    relative error as the LSQ method. Source: own elaboration.
+    Source: own elaboration.}
+    \label{fig:als-convergence-tiknov}
+\end{figure}
+
 % TODO: Potser caldria jugar una mica amb l'algoritme i motivar la següent secció!
+
+\subsection{Backpropagation} \label{backpropagation}
+
+Since our problem of finding tensor cores is defined by minimizing a loss function, a valid idea would be
+to apply backpropagation.
+
+In this subsection we will give another way of finding the tensor cores $\mathcal{G}_1, \dots, \mathcal{G}_n$, but with 
+backpropagation. The backpropagation algorithm is one of the core algorithms of deep learning. It consists on
+trying to find the variation that each parameter does to the loss function by exploiting the chain rule and
+then do some optimization with the gradient, such as gradient descent. We will now explain briefly the backpropagation
+algorithm in the context of tensor networks.
+
+% (TODO: Citar).
+
+Suppose that we have a set $D$ (a dataset), and a loss function ${\pi: D \times \mathbb{R}^{N_1 \times N_2 \times \cdots \times N_n} \rightarrow \mathbb{R}_+}$
+The core idea behind backpropagation is to tune the parameters in a way that
+we minimize $\pi_D$. We do this by computing the gradient of all of the parameters of each $\mathcal{G}_i$ and moving 
+the parameters in the same direction as the gradient.
+
+In the case that $D = \{T_0\}$ the backpropagation problem is the same as finding the best TNS that represents $T_0$, and if
+for example, dataset has more tensors, it can be applied for example as a deep learning problem, as we will see later in chapter 5.
+
+Let $d = T_0$. We want to compute the gradient of
+\begin{equation}
+\pi(T_0, \mathcal{C}_G(\mathcal{G}_1, \dots, \mathcal{G}_n))
+\label{eq:simple-grad}
+\end{equation}
+Suppose that we reorder $\mathcal{G}_1, \dots, \mathcal{G}_n$ in a sense that the contractions for evaluating the tensor
+network become first contracting $\mathcal{G}_n$ and $\mathcal{G}_{n-1}$, then the resulting tensor with $\mathcal{G}_{n-2}$
+and so on. The function in $\ref{eq:simple-grad}$ becomes
+\begin{equation}
+    \pi(T_0, \matchal{C}(\mathcal{G}_1, \mathcal{C}( \mathcal{G}_2, \mathcal{C}(\dots, \mathcal{C}(\mathcal{G}_{n-1}, \mathcal{G}_n))))
+    \label{eq:extended-grad}
+\end{equation}
+
+Let $X_n = \mathcal{C}(\mathcal{G}_{n-1}, \mathcal{G}_n)$ and let $X_{k} = \mathcal{C}(\mathcal{G}_k, X_{k+1})$ for all $1 \leqslant k \leqslant n - 1$.
+We can rewrite \ref{eq:extended-grad} as $\pi(T_0, X_1)$.
+
+We would want to find the derivative of $\mathcal{G}_k$ respect of the loss function $\pi$. Consider the intermidiate
+contraction $$X_k = \mathcal{C}(\mathcal{G}_k, X_{k+1})$$
+Applying the chain rule we get
+
+\begin{equation}
+    \frac{\partial \pi}{\partial \mathcal{G}_k} = \frac{\partial \pi}{\partial X_1} \cdot \frac{\partial X_1}{\partial X_2} \cdots
+    \frac{\partial X_{k-1}}{\partial \mathcal{G}_{k}}
+\end{equation}
+
+The partial derivative of the core tensor $\mathcal{G}_k$ respect to the loss function tells us in which 
+
+If we want to compute the derivative of the loss function respect to an individual element $\mathcal{G}_k^{i_1, \dots, i_d}$
+of the core tensor, using again the chain rule as before we get:
+
+\begin{equation}
+    \frac{\partial \pi}{\partial \mathcal{G}_k^{i_1, \dots, i_d}} = \sum_{b_1, \dots, b_m} \frac{\partial \pi}{\partial X_k^{b_1, \dots, b_m}} \cdot 
+    \frac{\partial X_k^{b_1, \dots, b_m}}{\partial \mathcal{G}_i^{i_1, \dots, i_d}}
+\end{equation}
+
+So, we just have seen that by computing the partials of each intermidiate contraction we can obtain the partial derivative of the loss function
+respect to each individual parameter of the core tensor.
+
+After knowing each derivative, we can compute the gradient of $\pi$ in respect to all entries of the core tensors
+\begin{equation}
+    \nabla \pi = \left( \frac{\partial \pi}{\partial \mathcal{G}_1}, \frac{\partial \pi}{\parital \mathcal{G}_2}, \dots, \frac{\partial \pi}{\partial \mathcal{G}_n} \right)
+\end{equation}
+With each entry $\displaymath\frac{\partial \pi}{\partial \mathcal{G}_i}$ being a tensor as the same shape of $\mathcal{G}_i$. We can reshape $\nabla \pi$
+as a vector of the form
+\begin{equation}
+    \nabla \pi = \left(\frac{\partial \pi}{\partial \mathcal{G}_1^{a_1, \dots, a_p}}, \dots, \frac{\partial \pi}{\partial \mathcal{G}_n^{b_1, \dots, b_m}} \right)
+\end{equation}
+Once we computed $\nabla \pi$, now we have an idea that in a local environment, how adjusting each entry of each core tensor affects
+on the change of the loss function $\pi$. Let ${w = (\vectorize{\mathcal{G}_1}, \dots, \vectorize{\mathcal{G}_n})}$ be a vector
+containing all the entries of the core tensors arrenged in order. Then, we can update each core tensor by "descending" by the
+gradient $\nabla \pi$ i.e updating $w$ by a tiny amount on the direction that minimizes the value of the loss function
+\begin{equation}
+w^* = w - \eta \cdot \nabla \pi(w)
+\label{eq:grad-descent}
+\end{equation}
+Where $\eta$ is a small positive number called the learning rate. If we keep iterating as in \ref{eq:grad-descent}, eventually
+$w$ will reach a local minima of the loss function.
+
+We implemented this algorithm using the PyTorch python library, since it has a built-in auto differentiation engine called \verb/torch.autograd/. For 
+for every operation that we apply to any PyTorch parameter, it remembers the operations that has been applied to the tensor and then it is able
+to compute the gradient of all of our computations \cite{AutomaticDifferentiationTorchautograd}.
+
+% TODO
+On (CITE APPENDIX) we can find a comparison between the ALS and the backpropagation algorithms between some tensor network
+structures.
 
 \section{Structure search}
 
 % TODO: Connectar això com deu mana. 
+On the last section we supposed that we had found some optimal $G$ and $R$ for representing $T$, and then we 
+described some algorithms for finding the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$. In this section,
+we will try to find these optimal $(G, R)$.
 
-Tensor network structure search prioblem aims to generally find the most compressed tensor network
-models for computational purposes while maintaining the expressivity of the network. That means, that our
-tensor network is capable of giving good representations of the set of tensors that we want to represent with it.
+This problem is known as the \textit{tensor network structure search problem} and its objective 
+is to find the most optimal tensor network that 
+compresses our objective $T$ while maintaining the expressivity of the network, i.e that the network
+is capable to represent a closer result to the actual objective. 
 
-By now, we know that for any tensor $T$, if we choose a graph $G = (V, E)$ we can choose 
-$R_1, \dots, R_c \leqslant \rank{T} \leqslant \left\lfloor \frac{\prod_{i=1}^n N_i}{\sum_{i=1}^n N_i} \right\rfloor$
-such that $T \in \TNS(G, R)$. We can also find thanks to the ALS algorithm the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ of 
-$\TNS(G, R)$. The only thing that remains is how we pick an optimal $G$ for compressing $T$ with a fixed error $\epsilon$, since we know that
-the optimal graph for a tensor network state of a given tensor $T$ depends on the underlying data of $T$ itself.
-
-% We will aim to search the tensor network that gives the best compression ratio for $T$, for that, we will define the size 
-% of a tensor network:
-
-Suppose that we have defined a loss function $\pi_D : \mathbb{R}^{N_1 \times N_2 \times \cdots \times N_n} \rightarrow \mathbb{R}_+$
-involving $D$, with $D$ being a dataset.
-For example, if our objective is compressing an objective tensor $T_o \in \mathbb{R}^{N_1 \times N_2 \times \cdots \times N_n}$,
-we could define our loss function as the relative error of our evaluated tensor respect to the objective tensor:
-$$\pi_D(T) = \frac{\| T - T_o \|_F}{\| T_o \|_F} $$
-The tensor network structure search problem is defined as solving the following discrete optimization problem:
+We will define the \textbf{loss function} $\mathcal{L}: \mathbb{G} \times \mathbb{F}_G \rightarrow \mathbb{R}_+$ as
+$$\mathcal{L}(G,R) = \phi(G, R) + \lambda \cdot O(G, R) $$
+Where $\mathbb{G}$ is the space of all simple connected graphs of $n$ nodes, ${R = (r_1, \dots, r_K) \in \mathbb{F}_G \subseteq
+\mathbb{Z}_+^K}$ are the ranks of the tensor network, $\phi(G, R)$ represents a function that determines the complexity of the
+tensor network, $\lambda > 0$ is a tuning parameter and $O: \mathbb{G} \times \mathbb{F}_G \rightarrow \mathbb{R}_+$ is the 
+\textbf{evaluation function} defined as:
 \begin{equation}
-\min_{(G, R) \in \mathbb{G} \times \mathbb{F}_G} \left(  \phi(G, R) + \lambda \cdot \min_{\mathcal{Z} \in TNS(G,R)} \pi_D(\mathcal{Z}) \right)
+    O(G, R) = \min_{\mathcal{Z} \in TNS(G,R)} \pi_D (\mathcal{Z})
+    \label{eq:tnale-min-obj}
+\end{equation}
+
+We will define the tensor network structure search problem as solving the following discrete optimization problem:
+\begin{equation}
+    \min_{(G, R) \in \mathbb{G} \times \mathbb{F}_G} \mathcal{L}(G, R)
 \label{eq:tnss}
 \end{equation}
-where $\mathbb{G}$ is the space of all graphs, $G \in \mathbb{G}$ is a graph of $N$ vertices and $K$ edges, ${R = (r_1, \dots, r_K) \in \mathbb{F}_G \subseteq
-\mathbb{Z}_+^K}$ are the ranks of the tensor network, $\phi(G, R)$ represents a function that determines the complexity of the
-tensor network, and $\lambda > 0$ is a tuning parameter.
 
-The intuition behind presenting this optimization problem is that the inner minimization that depends on the tuning parameter $\lambda$
-serves to evaluate the expressivity of the tensor network.
+The intuition behind presenting this optimization problem this way is that since the evaluation function depends on the tuning parameter $\lambda$
+we can adjust a balance between giving priority to how expressive is the network or on 
+simplifying its complexity. We will pich $\phi$ as the \textbf{complexity function} as a function $\phi : \mathbb{G} \times \mathbb{F}_G \rightarrow \mathbb{R}_+$
+In our case, we will pick the inverse of the compression rate. I.e,
 
-% TODO: Link works
+$$\phi(G, R) = \frac{\size(\mathcal{G}_1) \cdot \size(\mathcal{G}_2) \cdots \size(\mathcal{G}_n)}{\size(T)}$$
 
 We call the problem \ref{eq:tnss} as Tensor Network Structure Selection (TN-SS). TN-SS is a very generalized problem.
 There has been a lot of research on solving it under certain conditions:
@@ -2499,15 +2811,499 @@ of all the simple graphs that are isomorphic to $G$.
         the tensor ranks $R$ are fixed
 \end{itemize}
 
-In this chapter we will present the tensor network structure search algorithm using alternating local enumeration (TnALE), which is based
-on \cite{liAlternatingLocalEnumeration2023a}
+In this chapter we will present the tensor network structure search algorithm using alternating local enumeration (TnALE)
+introduced by Li et. al. on \cite{liAlternatingLocalEnumeration2023a}.
 
-The purpose of the TnALE algorithm is to solve \ref{eq:tnss}, but for each evaluation that it does, it needs another algorithm for evaluating
-the inner minimum inside the equation. It requires that we already know how to compute $\min_{\mathcal{Z} \in TNS(G,R)} \pi_D (\mathcal{Z})$
+\subsection{The TnALE algorithm}
+
+The purpose of the TnALE algorithm is to solve \ref{eq:tnss} by locally alternating the discrete parameters that define $(G, R)$.
+
+
+We will start by describing the algorithm itself, and then we will present all the theory for proving its convergence.
+
+The idea behind the TnALE algorithm is very simple: pick a random graph and random ranks $G$ and $R$ and then, for each iteration modifiy
+the rank $R_1$ a certain value and then pick the one that minimizes the loss function. Then do the same
+for $R_2$ and so on until $R_c$. Then, update $G$ by adding or removing some edges and stay with the structure that is minimizes the loss function.
+Then modify $R_c, R_{c_1}, \dots R_2$ as before.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{media/tnale-schema.png}
+    \caption{A representation of the TnALE algorithm and the difference of its sampling respect to TNLS \cite{liPermutationSearchTensor2022}. $r$ and $G$
+    denote the structure related variables and each square represents a neighborhood of a given point in the iteration of TnALE. Source: \cite{liAlternatingLocalEnumeration2023}}
+\end{figure}
+
+Once this first pass is finished, the graph $G$ is modified and each "local neighborhood" of the graph $G$ is evaluated.
+Once again we save the best evaluation overwritting $G$ and $R$.
+
+Lastly, we do the first pass of varying the ranks $R_1, \dots, R_c$ but in the reverse order $R_c, \dots, R_1$.
+Doing this "round-trip" over the search of the ranks empirically results in a faster convergence rate to the
+optimal $\TNS$ structure.
+
+\begin{figure}[H]
+    \centering
+\begin{tikzcd}
+R_1 \arrow[r] & R_2 \arrow[r]   & \dots \arrow[r] & R_n \arrow[d] \\
+R_2 \arrow[u] & \dots \arrow[l] & R_n \arrow[l]   & G \arrow[l]  
+\end{tikzcd}
+\caption{The "round-trip" of updating the optimal structure. Source: own elaboration}
+\end{figure}
+
+
+\begin{algorithm}[h]
+    \caption{Tensor Network Alternating Local Enumeration (Tn-ALE)}
+
+    \hspace*{\algorithmicindent} \textbf{Input}: A starting point $(G^{(0)}, R^{(0)})$ with $R^{(0)} = (R_1^{(0)}, \dots, R_K^{(0)})^T \in \mathbb{Z}_+^K$ 
+    and a rank-related radius $r \in \mathbb{Z}_+$ and the number of "round-trips" $D$ \\ 
+    \hspace*{\algorithmicindent} \textbf{Output}: The optimal $(G, R)$ that minimizes \refeq{eq:tnss}
+
+    \begin{algorithmic}[1]
+        \State Initialize $(G, R) = (G^{(0)}. R^{(0)})$ with $R = (R_1, \dots, R_K)^T$
+        \For {$d = 1, \dots D$}
+            \For {$k = 1, \dots K$}
+                \For {$i = -r, \dots, 0, \dots r$}
+                    \State Copy $(\bar{G}, \bar{R}) \leftarrow (G, R)$
+                    \State Update $(\bar{G}, \bar{R})$ by $\bar{R_k} = R_k + r$
+                    \State $h(i) \leftarrow O(G, R)$ \qquad \verb/# We can apply linear interpolation/
+                \EndFor
+                \State Update $(G, R)$ by $R_k = \argmin_i h(i)$
+            \EndFor
+            \State Take the neighborhood of $G$ as $N(G)$
+            \ForAll {$G' \in N(G)$}
+                \State Update $(G, R)$ by $G = G'$
+                \State $h(G') \leftarrow O(G, R)$
+            \EndFor
+            \State Update $(G, R)$ by $G = \argmin_{G'} h(G')$
+            \For {$k = K, K-1, \dots 2$}
+                \For {$i = -r, \dots, 0, \dots r$}
+                    \State Copy $(\bar{G}, \bar{R}) \leftarrow (G, R)$
+                    \State Update $(\bar{G}, \bar{R})$ by $\bar{R_k} = R_k + r$
+                    \State $h(i) \leftarrow O(G, R)$ \qquad  \verb/# We can apply linear interpolation/
+
+                \EndFor
+                \State Update $(G, R)$ by $R_k = \argmin_i h(i)$
+            \EndFor
+        \EndFor
+        \State \Return $(G, R)$
+
+    \end{algorithmic}
+
+    \label{alg:tn-ale}
+\end{algorithm}
+
+In Alg. \ref{alg:tn-ale} the pseudocode of TnALE is given. During the next subsection, we will need to introducte some theory of
+gradient-less optimization for proving the convergence of the Tn-ALE algorithm.
+
+Keep in mind that for each time we try to vary some rank $R_k$ or the graph $G$ we will need to evaluate \eqref{eq:tnale-min-obj}, and it 
+can be computationally very expensive. In the case that we are varying a rank (See steps 7 and 21 of Alg. \ref{alg:tn-ale}), we can 
+approximate $O(G, R)$ by doing a linear interpolation between evaluating at the points
+$R_k - r, R_k, R_k + r$. Since by increasing ranks empirically yields 
+to a better representation of the objective tensor \cite{liAlternatingLocalEnumeration2023} and therefore we get less relative error
+(and the other way around is generally also true).
+
+We will now formally prove that the ALS algorithm converges. For that, we will need to introduce the gradientless descent.
+
+\subsection{Gradientless optimization}
+
+What we want to see in this subsection is to extend the notion of the gradient onto 
+discrete functions to then be able to apply a discrete gradient descent over our loss function.
+
+We will start by rewriting the loss function \eqref{eq:tnss} in a more general form. We define $\mathbb{P}$ as the
+set of all functions of the form $p : \mathbb{Z}_+^K \rightarrow \mathbb{K}_+^L$
+\begin{equation}
+\min_{x \in \mathbb{Z}_+^K, p \in \mathbb{P}} f_p(x) := f \circ p(x)
+\label{eq:min_grad}
+\end{equation}
+Where $f_p : \mathbb{Z}_+^L \rightarrow \mathbb{R}_+$ is a generalization of the loss function, and $p : \mathbb{Z}_+^K \rightarrow \mathbb{Z}_+^L \in \mathbb{P}$
+correspond to the topology-related variable $(G, R)$.
+
+We can show that our tensor network structure search problem corresponds to a concrete case of this general form: since $G$ is completly defined by its adjacency matrix $A$ which is defined as
+$$A_{ij} := \begin{cases}
+    1 & \text{if }\;(i, j) \in E \\
+    0 & \text{otherwise}
+\end{cases}$$
+We can encode the ranks $R$ on the adjacency matrix by setting on each edge its corresponding rank:
+$$A_{ij} := \begin{cases}
+    R_{(i,j)} & \text{if}\;(i, j) \in E \\
+    0 & \text{otherwise}
+\end{cases}$$
+Where $R_{(i,j)}$ denotes the rank of the edge $(i.j)$. We will denote this matrix as $A_R$
+
+\begin{example}
+    Let $G = P_4$ and $R = (1,2,3)$. We associate the edges of $G$ with the ranks $R$ as
+    $R_{(1, 2)} = r_1 = 1$, $R_{(2, 3)} = r_2 = 2$ and $R_{(3, 4)} = r_3 = 3$. We consider $\TNS(G; R)$.
+    The adjacency matrix of $G$ and the encoded rank matrix of $\TNS(G;R)$ is, respectively:
+    $$A = \begin{pmatrix}
+        0 & 1 & 0 & 0 \\
+        1 & 0 & 1 & 0 \\
+        0 & 1 & 0 & 1 \\
+        0 & 0 & 1 & 0 \\
+    \end{pmatrix} \qquad
+    A_R = \begin{pmatrix}
+        0 & 1 & 0 & 0 \\
+        1 & 0 & 2 & 0 \\
+        0 & 2 & 0 & 3 \\
+        0 & 0 & 3 & 0 \\
+    \end{pmatrix}$$
+\end{example}
+
+Given $G$ and $R$, we can encode $x \in \mathbb{R}_+^K$ as a vector with the rank of each edge of the graph and
+$p \in \mathbb{P}$ as a permutation matrix. By varying only $p$ we get all the permutations of the graph $G$, 
+and by $x$ we get vary the ranks of the edges.
+
+
+\begin{example}
+$$A^1_R = \begin{pmatrix}
+    0 & {\color{teal} 1} & {\color{teal} 0} & {\color{teal} 0} \\
+    1 & 0 & {\color{teal}2} & {\color{teal} 0} \\
+0 & 2 & 0 & {\color{teal}3} \\
+        0 & 0 & 3 & 0 \\
+    \end{pmatrix} \Leftrightarrow p_1(x) = \begin{pmatrix}
+        1 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 1 \\
+        \end{pmatrix} \begin{pmatrix}
+        1 \\ 0 \\ 0 \\ 2 \\ 0 \\ 3
+        \end{pmatrix} = \begin{pmatrix}
+        1 \\ 0 \\ 0 \\ 2 \\ 0 \\ 3
+    \end{pmatrix}$$
+
+$$A^2_R = \begin{pmatrix}
+    0 & {\color{teal}0} & {\color{teal}0} & {\color{teal}3} \\
+    0 & 0 & {\color{teal}1} & {\color{teal}0} \\
+    0 & 1 & 0 & {\color{teal}2} \\
+        3 & 0 & 2 & 0 \\
+    \end{pmatrix} \Leftrightarrow p_1(x) = \begin{pmatrix}
+        0 & 0 & 0 & 1 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 1 \\
+        1 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 \\
+        \end{pmatrix} \begin{pmatrix}
+        1 \\ 0 \\ 0 \\ 2 \\ 0 \\ 3
+        \end{pmatrix} = \begin{pmatrix}
+        0 \\ 0 \\ 3 \\ 1 \\ 0 \\ 2
+    \end{pmatrix}$$
+    \label{ex:graph-k-correspondance}
+\end{example}
+
+So, our problem is now a particular case of \eqref{eq:min_grad}. We can now apply theory of gradientless
+optimizations in the real domain.
+
+
+% TODO: moure
+
+The goal of this section is to try to extend the gradient and its properties into discrete valued functions $f: \mathbb{Z}_+^L \rightarrow \mathbb{R}$.
+It is based on the theory that Golovin et. al. present on \cite{golovinGradientlessDescentHighDimensional2019}, and also on the discussion
+of the TnALE algorithm itself in the appendix of \cite{liAlternatingLocalEnumeration2023}.
+We will end this chapter by proving that if we take some assumptions of $f$ like 
+being convex and also smooth we can prove that the TnALE algorithm can converge. For that, we will define what
+is a discrete gradient, what is $\alpha$-strong convergence and $(\beta_1, \beta_2)$-smoothness, we will prove some properties
+about strong convergence and smoothness.
+
+% TODO: Omplir amb que faràs més endavant en aquesta secció.
+Before we begin, since we will be working with vectors of $\mathbb{Z}_+^L$, we will introduce a norm for them:
+\begin{definition}
+    The $l^2$ norm of a vector $x = (x_1, \dots, x_n)^T$ is defined as
+    $$ \|x\|_2 = \sqrt{\sum_{i=1}^n |x_i|^2}$$
+\end{definition}
+
+From now on, if $x$ is a vector we will represent $\|x\|$ as $\|x\|_2$. We can now start by defining the concept of finite gradient:
+
+\begin{definition}
+    For any function $f: \mathbb{Z}_+^L \rightarrow \mathbb{R}$ its finite gradient $\nabla f : \mathbb{Z}_+^L \rightarrow \mathbb{R}$ at a point
+    $x \in \mathbb{L}_+^L$ is defined as
+    $$\Delta f(x) = [ f(x + e_1) - f(x), \dots, f(x + e_L) - f(x) ]^T$$
+\end{definition}
+
+With $e_i$ being the unit vector of $\mathbb{Z}_+^L$ defined with the $i$-th entry being $1$ and the rest of entries zeros.
+
+% TODO: Afegir drawing del que es un finite gradient
+
+\begin{lemma}
+    Let $x \in \mathbb{Z}_+^L$. Then $\Delta \|x\|_2^2 = 2x + \textbf{1}$ where $\textbf{1}$ denotes the unit vector of $\mathbb{Z}_+^L$ that all of its entries are $1$.
+    \begin{proof}
+        $$\Delta \|x\|_2^2 = \Delta \left( \sum_{i=1}^L |x_i|^2 \right) = \sum_{i=1}^L \Delta |x_i|^2 = \sum_{i=1}^L 2 x_i + e_i = 2 x + \textbf{1}$$
+        Where in the penultimate equality we used that
+        $$\Delta |x_i|^2 = |x_i + e_i|^2 - |x_i|^2 = |x_i|^2 + 2 \langle x_i, e_i \rangle + |e_i|^2 - |x_i|^2 = 2 \langle x_i, e_i \rangle + e_i = 2x_i + e_i$$
+    \end{proof}
+\end{lemma}
+
+Now we will extend the strong convexity using the finite gradient. Recalling, a differentiable function $f: X \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ is 
+convex if and only if for all $x, y \in X$
+$$f(y) \geqslant f(x) - \langle \Delta f(x), y - x \rangle$$
+Where $\Delta f(x)$ denotes the gradient of $f$. If $f$ also satisfies that
+\begin{equation}
+f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2} \|y - x\|^2_2
+\label{eq:strong-convex}
+\end{equation}
+For some $\alpha \geqslant 0$ e say that $f$ is $\alpha$-strongly convex.
+\begin{definition}
+    We say that $f: \mathbb{Z}_+^L \rightarrow \mathbb{R}$ is $\alpha$-strongly convex with $\alpha \geqslant 0$ if it
+    satisfies \refeq{eq:strong-convex} with $\Delta f(x)$ being the finite gradient for all $x, y \in \mathbb{Z}_+^L$ if the
+    inequality holds for $\alpha = 0$, we will say that $f$ is convex.
+\end{definition}
+We will prove now some properties of $\alpha$-strongly convex functions. The following lemma
+gives us the equivalence between $\alpha$-stronglt convex functions and convex functions:
+\begin{lemma}
+    $f : \mathbb{Z}_+^L$ is an $\alpha$-strongly convex function iff $g(x) = f(x) - \displaymath\frac{\alpha}{2} \|x\|^2_2$ is convex $\forall x \in \mathbb{Z}_+^L$
+    \begin{proof}
+        $(\Rightarrow)$ The first statement is equivalent to proving
+        \begin{equation}
+            g(y) \geqslant g(x) + \langle \Delta g(x), y - x \rangle \quad \forall x, y \in \mathbb{Z}_+^L
+            \label{eq:g-lemma-sconv}
+        \end{equation}
+        Applying that $f(x)$ is $\alpha$-strongly convex we get that
+        \begin{align*}
+            g(y) - g(x) - & \langle \Delta g(x), y - x \rangle = f(y) - \frac{\alpha}{2}\|y\|^2_2 - f(x) + \frac{\alpha}{2}\|x\|^2_2 - \langle \Delta g(x), y - x \rangle \\
+                          & = f(y) - \frac{\alpha}{2}\|y\|^2_2 - f(x) + \frac{\alpha}{2}\|x\|^2_2 - \langle \Delta f(x) - \alpha (2x + \textbf{1}), y - x \rangle \\
+                          & = f(y) - f(x) - \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2}\|y\|_2^2 + \frac{\alpha}{2}\|x\|_2^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+                          & \geqslant \frac{\alpha}{2} \|y-x\|_2^2 - \frac{\alpha}{2} \|y\|_2^2 + \frac{\alpha}{2} \|x\|_2^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+                          & = \frac{\alpha}{2} \left( \|y-x\|^2_2 - \|y\|_2^2 - \|x\|_2^2 + 2\langle x, y \rangle \right) = 0
+        \end{align*} 
+
+        $(\Leftarrow)$ From \refeq{eq:g-lemma-sconv} we get
+        \begin{align*}
+            & f(y) - \frac{\alpha}{2} \|y\|_2^2 \geqslant f(x) - \frac{\alpha}{2} \|x\|_2^2 + \langle \Delta f(x) - \frac{\alpha}{2} (2x + \textbf{1}) , y - x \rangle \\
+            \Leftrightarrow \; & f(y) \geqslant f(x) - \frac{\alpha}{2} (\|x\|_2^2 + \|y\|_2^2) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+            \Leftrightarrow \; & f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2}\|y - x\|^2_2
+        \end{align*}
+        The last inequality gives us that $f$ is $\alpha$-strongly convex.
+    \end{proof}
+    \label{lem:g-convex}
+\end{lemma}
+
+
+The following lemma tells us that $\alpha$-strongly convex functions have a more strict inequality of the
+monotone gradient property (a function is convex iff its gradient is monotone) than convex functions. The second inequality is a result of applying the Cauchy-Swartz
+inequality to the first one:
+\begin{lemma}
+    Given $f$ an $\alpha$-strongly convex function in $\mathbb{Z}_+^L$, then:
+    \begin{enumerate}
+        \item $\langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x - y\|^2_2 \quad \forall x, y \in \mathbb{Z}_+^L$
+        \item $\|\Delta f(x) - \Delta f(y)\|_2 \geqslant \alpha \|x - y\|_2 \quad \forall x, y \in \mathbb{Z}_+^L$
+    \end{enumerate}
+    \begin{proof}
+        Let $g(x)$ be the same as in \lemref{lem:g-convex}. To prove $(1)$, we know that 
+        $$\langle \Delta g(x) - \Delta g(y), x - y \rangle \geqslant 0, \forall x, y \in \mathbb{Z}^L_+$$ by the monotone gradient property
+        of the convexity, which is true in both continuous and discrete scenarios. By substituting $\Delta g(x)$ we get that
+        $$ \langle \Delta f(x) - \frac{\alpha}{2} (2x + \textbf{1}) - \Delta f(y) + \frac{\alpha}{2}(2y + \textbf{1}), x - y \rangle \geqslant 0$$
+        Simplifying we obtain that for all $x, y \in \mathbb{Z}_+^L$
+        \begin{equation}
+            \langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x- y\|^2_2
+            \label{eq:grad-monotony}
+        \end{equation}
+        For proving (2) Consider the following inequality:
+        $$\|\Delta f(x) - \Delta f(y)\|_2 \|x - y\|_2 \geqslant \langle \Delta f(x) - \Delta f(y) , x - y \rangle \geqslant \alpha \|x- y\|^2_2$$
+        Where in the first inequality we used the Cauchy-Swartz inequality and the last inequality follows from \eqref{eq:grad-monotony}
+    \end{proof}
+\end{lemma}
 
 
 
+The following lemma tells us that if we have a $\beta$-Lipschitz discrete function, the gradient is bounded. This
+will be one of the main assumptions that we will make about our loss function.
+\begin{lemma}
+    If $\|f(x) - f(y)\|_2 \leqslant \beta \|x - y\|$ for all $x, y \in \mathbb{Z}_+^L$ then the norm of the finite gradient
+    is bounded by $\beta$ i.e $\|\Delta f(x)\|_\infty = \max(|\Delta f(x)_1|, \dots, |\Delta f(x)_L|) \leqslant \beta$
+    \begin{proof}
+        Denote $\Delta f(x)_i$ the $i$-th entry of $\Delta f(x)$. Then for all $1 \leqslant i \leqslant L$,
+        $$|\Delta f(x)_i| = |f(x + e_i) - f(x)| \leqslant \beta \|x + e_i - x \| = \beta$$
+    \end{proof}
+\end{lemma}
 
+\begin{definition}
+    We say $f$ is $(\beta_1, \beta_2)$-smooth for $\beta_1, \beta_2 > 0$ if
+    \begin{enumerate}
+    \item $|f(x) - f(y)| \leqslant \beta \|x - y\|_2$ for all $x, y \in \mathbb{Z}_+^L$
+    \item The function $l(x) := \frac{\beta_2}{2} \|x\|^2_2 - f(x)$ is convex
+    \end{enumerate}
+\end{definition}
+
+The first item makes $f$ to a $\beta_1$-Lipschitz function implying the "continuity" of the function, while the second
+item ensures an upper bound to the change of the gradient, because of the following lemma:
+\begin{lemma}
+    If $l(x) = \frac{\beta_2}{2} \|x\|^2_2 - f(x)$ is convex, then $\forall x, y \in \mathbb{Z}_+^L$ the following
+    inequality satisfies:
+    $$ \langle \Delta f(x) - \Delta f(y), x - y \rangle \leqslant \beta \| x - y \|^2_2 $$
+    \begin{proof}
+        By the convexity of $l(x)$ we get that
+        $$l(y) \geqslant l(x) + \langle \Delta l(x), y - x \rangle$$
+        Similarly we get
+        $$l(x) \leqslant l(y) + \langle \Delta l(y), x - y \rangle$$
+        Summing the two inequalities, we get that
+        $$l(y) + l(x) \geqslant l(x) + l(y) + \langle \Delta l(y) - \Delta l(x), x - y \rangle$$
+        And therefore
+        $$\langle \Delta l(x) - \Delta l(y), x - y \rangle \geqslant 0$$
+        Applying $l(x)$ we get that
+        $$ \langle \beta(2x + \textbf{1}) - \Delta f(x) - \beta(2y + \textbf{1}) + \Delta f(y), x - y \rangle \geqslant 0$$
+        And by simplifying the inequality we have that
+        $$\langle \Delta f(x) - \Delta f(y), x - y \rangle \leqslant \beta \|x - y\|_2^2$$
+    \end{proof}
+\end{lemma}
+\subsection{Proof of the convergence of TnALE}
+
+After presenting $\alpha$-strongly convex functions and $(\beta_1, \beta_2)$-smooth functions, in this
+subsection we will now prove that by setting the assumptions that our original problem from \ref{eq:min_grad}
+the function $f_p$ is $\alpha$-strongly convex and $(\beta_1, \beta_2)$-smooth with $0 \leqslant \alpha \leqslant \beta_1 \leqslant \beta_2 \leqslant 1$ and
+that the minimum point of the discrete gradient which will be a fixed point of the TnALE algorithm does in fact exists and
+that its gradient is bounded by a very small factor.
+
+We will start by defining the sub-level set of a function at a point. This definition will be useful for
+later proving that the TnALE algorithm can descend:
+
+\begin{definition}[Sub-level set] The level set of $f$ at a point $x \in \mathbb{Z}_+^L$ is defined as
+    the set $\mathbb{L}_x(f) = \{y \in \mathbb{Z}_+^L : f(y) = f(x)\}$ The sub-level set of $f$ at a point
+    $x$ is defined as the set $\mathbb{L}_x^{\downarrow} = \{y \in \mathbb{Z}_+^L : f(y) \leqslant f(x) \}$
+\end{definition}
+
+
+Now, with the following lemma we will see that we can always find a neighbourhood that is contained
+inside $\mathbb{L}_x^\downarrow$, this will mean that we would be able to find a succession of points $(x_n)_{n=1}^\infty$ such
+that each $f(x_i) \leqslant f(x_j)$ if $i > j$
+
+\begin{lemma}
+    Let $f : \mathbb{Z}_+^L \rightarrow \mathbb{R}$ be a $\alpha$-strongly convex, $(\beta_1, \beta_2)$-smooth and
+    that its minimum value $f(x^*)$ satisfies that $\|\frac{\beta_2}{2} \textbf{1} - \Delta f(x^*)\| \leqslant \gamma$ where
+    $\gamma$ is a constant and $0 \leqslant \gamma \leqslant \alpha$. Then $\forall x \in \mathbb{Z}_+^L$ there exists
+    a $L$-dimensional cube which is of edge length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$, tangent at
+    $x$ and inside the sub-level set $\mathbb{L}_x^\downarrow (f)$
+    \label{lem:cube}
+\end{lemma}
+The proof of this lemma can be found at lemma B.8 from the appendix of \cite{liAlternatingLocalEnumeration2023}
+\begin{lemma}[Convex combination in the discrete domain]
+    Suppose that $q = \theta x + (1 - \theta) y$ for all $x, y \in \mathbb{Z}_+^L$ and $\theta \in [0,1]$ and that
+    there is a $\hat q \in \mathbb{Z}^L_+$ such that if $\Lambda = q - \hat q$ and we suppose that $f$ is $\alpha$-strongly convex then
+    $$\theta f(x) + (1 - \theta)f(y) \geqslant f(\hat q) + \langle \Delta f(\hat q) - \frac{\alpha}{2}\textbf{1}, \Lambda \rangle + \frac{\alpha}{2} \|\Lambda\|^2_2$$
+    \label{lem:convex-combi}
+\end{lemma}
+
+% TODO: ?
+Note that this lemma justifies that we can use the linear interpolation trick when evaluating tensor networks, since
+by picking $\hat q$ as the local minimum when varying one parameter of the rank $R_i$, since we are moving across one line
+all of our real evaluations that we are skipping will be bounded below our linear interpolation.
+    \begin{proof}
+        By the definition of the $\alpha$-strong convexity we get
+        $$f(x) \geqslant f(\hat q) + \left\langle \Delta f(\hat q) - \frac{\alpha}{2}\textbf{1}, x - \hat q \right\rangle + \frac{\alpha}{2} \| x - \hat q \|^2_2$$
+        $$f(y) \geqslant f(\hat q) + \left\langle \Delta f(\hat q) - \frac{\alpha}{2}\textbf{1}, y - \hat q \right\rangle + \frac{\alpha}{2} \| y - \hat q \|^2_2$$
+        And therefore,
+        \begin{align*}
+            \theta f(x) + (1 - \theta) f(y) &\geqslant f(\hat q) + \left\langle \Delta f(\hat q) - \frac{\alpha}{2} \textbf{1}, \Lambda  \right\rangle +
+        \frac{\alpha}{2} (\theta \|x\|^2 + (1- \theta) \|y\|^2 + \|\hat q\|^2 - 2 \langle q, \hat q \rangle ) \\
+                                            &\geqslant f(\hat q) + \left\langle \Delta f(\hat q) - \frac{\alpha}{2} \textbf{1}, \Lambda \right\rangle
+                                            + \frac{\alpha}{2} (\|q\|^2 + \|\hat q\|^2 - 2\langle q, \hat q \rangle) \\
+                                            &= f(\hat q) + \left\langle \Delta f(\hat q) - \frac{\alpha}{2} \textbf{1}, \Lambda \right\rangle + \frac{\alpha}{2} \|\Lambda\|^2
+        \end{align*}
+    \end{proof}
+
+\begin{theorem}
+    Let $f: \mathbb{Z}_+^K \rightarrow \mathbb{R}_+$ is $\alpha$-strongly convex, $(\beta_1, \beta_2)$-smooth
+    and let the minimum of \refeq{eq:min_grad} be $(p^*, x^*)$. Assume that $f$ satisifies $\| \Delta f_{p^*} (x^*) - \frac{\beta_2}{2} \textbf{1} \|_2 \leqslant \gamma$
+    where $0 \leqslant \gamma < \alpha \leqslant \beta_1 \leqslant \beta_2 \leqslant 1$.
+
+    Then, if we let $p$ fixed as $p^*$, and $0 \leqslant \theta \leqslant 1$ and for any $x$ with $\|x - x^*\|$_\infty \leqslant c$
+    we can find a neighborhood $B_\infty (x, r_X)$ where $r_X \geqslant \theta c + \frac{1}{2}$ such that there exists an element
+    $y \in B_\infty (x, r_X)$ satisfying
+    $$f_{p^*}(y) - f_{p^*}(x^*) \leqslant (1 - \theta) (f_{p^*}(x) - f_{p^*}(x^*)) + \frac{7}{8}K$$
+    \label{thm:ale-convergence}
+\end{theorem}
+\begin{proof}
+    Since we are letting $p$ to be fixed as $p^*$, the general problem
+$\displaymath\min_{x \in \mathbb{Z}_+^K, p \in \mathbb{P}} f_p(x)$ can be simplified and equivalently rewritten as $\displaymath\min_{x \in \mathbb{Z}_+^K} f(x)$
+Where $f: \mathbb{Z}^K_+ \rightarrow \mathbb{R}_+$ represents the objective function.
+By \lemref{lem:convex-combi} we have
+$$f(\hat q) - f(x^*) \leqslant (1 - \theta) (f(x) - f(x^*)) + \left\langle \frac{\alpha}{2} \textbf{1} - \Delta f(\hat q), \Delta \right\rangle - \frac{\alpha}{2} \|\Delta \|^2
+$$
+Now we will see that there exists an element $y$ inside a neighborhood $B(x, r_x)$ with $r_x \in \mathbb{R}_+$ such that $y$
+also belongs to the sub-level cube tangent at $\hat q$ from \lemref{lem:cube} so that the inequality $f(y) \leqslant f(\hat q)$ holds.
+We will prove the existance of this point $y$ by showing that the intersection
+between the sub-level cube tangent at $\hat q$ and $B(x, r_x)$ is not empty. For that
+we will find the distance between $\hat q$ and $x$ satisfies that
+$$\|x - \hat q\|_\infty = \|x - q + \Lambda\|_\infty \leqslant \| x - q \|_\infty + \| \Lambda \|_\infty = 
+\theta \|x - x^*\|_\infty + \|\Lambda \|_\infty \leqslant \theta c + \frac{1}{2}
+$$
+The last inequality follows from $\|\Lambda \| \leqslant \frac{1}{2}$ which holds because we can always find $\hat q \in \mathbb{Z}_+^K$ by
+rounding the entries of $q$ to its closest integers. Therefore we have proven that if $r_x \geqslant \theta c + \frac{1}{2}$ the intersection of the 
+sub-level cube tangent at $\hat q$ and $B(x, r_x)$ is not empty, proving the existance of the point $y$.
+
+Lastly, if we take an element $y$ from the intersection we get that
+\begin{align*}
+    f(y) - f(x^*) &\leqslant f(\hat q) - f(x^*) \leqslant (1 - \theta) (f(x) - f(x^*)) + \left\langle \frac{\alpha}{2} \textbf{1} - \Delta f(\hat q), \Lambda \right\rangle - \frac{\alpha}{2} \| \Lambda \|^2 \\
+                  &\leqslant (1 - \theta) (f(x) - f(x^*)) + \left| \left\langle \frac{\alpha}{2} \textbf{1}, \Lambda \right\rangle \right| + |\langle \Delta f(\hat q), \Lambda \rangle| + \frac{\alpha}{2} \| \Lambda \|^2 \\
+                  &\leqslant (1 - \theta) (f(x) - f(x^*)) + \frac{\alpha}{4} K + \| \Delta f(\hat q) \|_\infty \| \Lambda \|_1 + \frac{\alpha}{2} \|\Lambda \|^2 \\
+                  &\leqslant (1 - \theta) (f(x) - f(x^*)) + \frac{\alpha}{4}K + \frac{\beta_1}{2}K + \frac{\alpha}{8} K \\
+                  &\leqslant (1-\theta) (f(x) - f(x^*)) + \frac{3\alpha + 4\beta_1}{8}K \\
+                  &\leqslant (1-\theta) (f(x) - f(x^*)) + \frac{7}{8} K
+\end{align*}
+The inequality of the fourth line follows from $\|\Delta f(x)\|_\infty \leqslant \beta_1$ and from $\|\Lambda \|_\infty \leqslant \frac{1}{2}$
+and the last line comes from that $\alpha \leqslant \beta_1 \leqslant 1$
+\end{proof}
+
+The assumption of the satisfaction of the 
+inequality $\|\Delta f_{p^*}(x^*) - \frac{\beta_2}{2} \textbf{1}\|_2 \leqslant \gamma$ implies that
+$\Delta f_{p^*}(x^*)$ should be sufficiently smaller than the constant vector $\frac{\beta_2}{2} \textbf{1}$, which
+can be understood as a discrete version of the zero-gradient stationary points of the continuous domain.
+
+The constant $K$ that appears on the proof is due to the fact that $\|\Lambda \|_1 \leqslant K\|\Lambda \|_\infty \leqslant K/2$ and that
+$\|\Lambda\|_2 \leqslant K\|\Lambda \|_\infty \leqslant \sqrt{K}/2$. This gives us that the norms $\|\Lambda \|_1$ and $\|\Lambda \|_2$ can become
+larger as the dimension $K$ grows, which it is inevitable except if $\|\Lambda \|_\infty=0$, which implies as we defined $\Lambda$ the conventional
+convex optimizitation over the continuous domain.
+
+Keeping all of the assumption of $f$, we can prove that local sampling methods, in concrete, TnALE converges:
+\begin{corollary}
+    Let $(x_n)_{n=0}^\infty$ be a succession of $\mathbb{Z}_+^K$ with $x_0$ randomly chosen. Suppose that $p^*$ is known and
+    that $x_n$ is equal to the $y$ of \thmref{thm:ale-convergence} for all $n> 0$. Then, if $\Omega(1/K) \leqslant \theta \leqslant 1$, i.e
+    $\theta$ scales at least as $1/K$, we have that
+    $$\lim_{n \to \infty} (f_{p^*} (x_n) - f_{p^*}(x^*)) = O(1)$$
+    \begin{proof}
+        Let $C_K = (7/8)K$. By \thmref{thm:ale-convergence},
+        \begin{align*}
+            f_{p^*}(x_n) - f_{p^*}(x^*) &\leqslant (1- \theta) (f_{p^*} (x_{n-1}) - f_{p^*}(x^*)) + C_K \\
+                                        &\leqslant (1 - \theta)^2 (f_{p^*}(x_{n-2}) - f_{p^*}(x^*)) + C_K + C_K(1 - \theta) \\
+                                        &\leqslant (1 - \theta)^3 (f_{p^*}(x_{n-3}) - f_{p^*}(x^*)) + C_K + C_K(1 - \theta) + C_K(1- \theta)^2 \\
+                                        &\leqslant \dots \\
+                                        &\leqslant (1-\theta)^n (f_{p^*}(x_{0}) - f_{p^*}(x^*)) + C_K \sum_{m=1}^n (1 - \theta)^{m - 1}
+        \end{align*}
+        Using that $\Omega(1/K) \leqslant \theta \leqslant 1$ we get that
+        $$\lim_{n \to \infty} (f_{p^*}(x_n) - f_{p^*}(x^*)) \leqslant \lim_{n \to \infty} (1 - \theta)^n (f_{p^*}(x_0) - f_{p^*}(x^*))+ C_K \sum_{m=1}^n (1 - \theta)^{m-1}$$
+        $$ = 0 + C_K \frac{1}{\theta} = K \frac{7}{8 \theta} \leqslant O(1)$$
+        Since in the last equality the term $\theta$ scales at least as $1/K$, therefore everything does not scale
+        depending in $K$ or $\theta$, making the limit converge to some constant.
+    \end{proof}
+\end{corollary}
+
+And with this corollary we have proven that the TnALE algorithm converges. On the last corollary we have taken in account that $K$ could also grow during
+the limit. In our case $K$ would be the fixed value of our dimension that depends on the number of nodes from the graph space $\mathbb{G}$ that we are
+considering (See \exref{ex:graph-k-correspondance}).
+
+In this chapter we have seen how to search optimal structures of tensor networks that guarantee that
+when we search the optimal cores these minimize a loss function $\pi_D$. For achieving this we have
+seen first that if we fix the tensor network structure to some graph and ranks $(G, R)$ we can 
+apply the TN-ALS algorithm or we can use backpropagation for obtaining the cores
+$\mathcal{G}_1, \dots, \mathcal{G}_n$ that minimize the loss function fixed $(G, R)$.
+
+Then, we have presented the TnALE algorithm, which objective is to give a general solution to the
+TN-RS, TN-PS and TN-TS problems, giving us an optimal tensor network structure $(G, R)$ and saving
+some evaluations when testing for tensor network structure candidates.
+
+Finally, we have proved that under certain assumptions about the loss function, the TnALE algorithm
+does converge to a certain structure. We have presented gradientless optimization theory to prove this fact.
+
+On the following chapter we will see some applications of all of these algorithms combined. We will use them
+to compress some images and we will also use them for compressing the weights of fully connected neural network layers.
+
+\iffalse
+\section{Evaluation function}
+
+The last piece on our algorithm is now how to evaluate our loss function from \refeq{eq:loss_function}.
+In this section we will try to give a good approximation of
+$$\min_{\mathcal{Z} \in \TNS(G,R)} \pi_D (\mathcal{Z})$$
+fixed some $G \in \mathbb{G}$ and $R \in \mathbb{F}_G$.
+\fi
 
 
 % TODO:
@@ -2525,17 +3321,109 @@ the inner minimum inside the equation. It requires that we already know how to c
 % \item Fixar la mathematical subject classification
 % \end{itemize}
 
+\chapter{Applications of TN low rank approximations}
+
+\section{Image compression}
+
+An RGB image is a set of $n \times m$ pixels. Each pixel contains
+three channels (red, green and blue) in which a color is represented. Therefore, we can encode an image
+as three tensors $T_R,T_G,R_B \in \mathbb{R}^{n \times m}$ with each of its indexes
+being on the interval $[0,1] \subset \mathbb{R}$.
+
+First, we could make the order of the tensor $T$ higher by reshaping accordingly the divisors of $n$ or $m$. For example,
+if we have a $256 \times 256$ image, we could reshape $T_R, T_G$ and $T_B$ as tensors of $\mathbb{R}^{4 \times 8 \times 8 \times 4 \times 8 \times 8 }$
+
+Then after doing this reshaping, for each channel we could pick a graph $G^{(0)}$ with the number of nodes being equal as the order of the tensors. Following our example,
+$G$ should have $6$ nodes. We can also pick some initial ranks $R^{(0)} = (R_1, \dots, R_c)$. Then we can apply the ALS algorithm for
+finding some cores $\mathcal{G}_1, \dots, \mathcal{G}_6$ that once contracted following $G^{(0)}$ will yield to a good approximation
+of each tensor $\mathcal{T}_R, \mathcal{T}_G, \mathcal{T}_B$
+
+We could also before applying the ALS algorithm, apply the TnALE algorithm for finding if there is a more optimal structure than $(G^{(0)}, R^{(0)})$ and
+then do again the ALS algorithm.
+
+Following our example, for recovering the image format we reshape back the tensors $\mathcal{T}_R, \mathcal{T}_G, \mathcal{T}_B \in \mathbb{R}^{4 \times 8 \times 8 \times 4 \times 8 \times 8}$
+into matrices of $\mathbb{R}^{256 \times 256}$.
+
+\section{Neural networks}
+
+A fully connected neural network is composed on 3 different parts: an input layer, a central part with some layers 
+called hidden layers and an output layer. The idea of neural networks is that they recieve an encoded input through
+the input layer and this input will be successively processed by the hidden layers and then it will return a certain result
+through the output layer. (See \figref{fig:fcnn})
+
+Let $n_1, \dots, n_L$ be the number of neurons on each layer. Each layer first does a pre-activation stage when it takes into account
+the activation of the previous layer, it adds some weights to each connection and it adds some bias to some of them. 
+
+The preactivation of the entire layer is computed by:
+$$z^{(l)} = W^{(l)} a^{(l - 1)} + b^{(l)}$$
+Where $z^{(l)} \in \mathbb{R}^{n_l}$ is the pre-activation of the layer, $W^{(l)} \in \mathbb{R}^{n_l \times n_{l-1}}$ is the weight matrix,
+$a^{(l - 1)} \in \mathbb{R}^{l - 1}$ is the activation of the previous layer and
+and $b^{(l)} \in \mathbb{R}^{n_l}$ is the bias of the layer $l$. Note that each element of the vector $z^{(l)}$ denotes the preactivation of
+one neuron of the layer $l$. Then, once the preactivation is computed, the activation of a neuron is defined by composing the preactivation
+with some non-linear activation function $\sigma : \mathbb{R} \rightarrow \mathbb{R}$:
+$$a^{(l)} = \sigma(z^{(l)})$$
+Where in $\sigma(z^{(l)})$ is the vector resulting of applying $\sigma$ to each element of $z^{(l)}$. Some examples of common activation functions are
+the Sigmoid $S(x)$, the ReLU $R(x)$ and $T(x)$.
+$$S(x) = \frac{1}{1 + e^{-x}} \qquad R(x) = \max(x, 0) \qquad T(x) = \frac{1-e^{-2x}}{1+e^{-2x}}$$
+
+So, a neural network can be described as a composite function
+$$N(x; \Theta) = \sigma^{(L)}(W^{(L)} \cdot \sigma^{(L - 1)}( W^{(L-1)} \dots \sigma^{(1)}(W^{(1)} x + b^{(1)}) + b^{(2)} \dots ) + b^{(L)})$$
+Where $\Theta = \{W^{(l)}, b^{(l)}\}_{l=1}^L$ denotes the set of all adjustable parameters of the network.
+By varying $\Theta$ we can change the outputs that $N(x; \Theta)$. The
+parameters start at some given values and then they are adjusted usually using the backpropagation algorithm, the idea behind the backpropagation
+algorithm is very similar as we have  
+described in the Subsection \ref{backpropagation}: we will have a dataset $D$ with a series of pairs of inputs and outputs $(x_i, y_i)$ and we
+will define some loss function $\pi_D : \mathbb{R}^{n_l} \rightarrow \mathbb{R}_+$ that measures the error of the output of the neural network $N(x)$ respect of the desired output $y_i$.
+
+Then, exploiting the chain rule we can compute the contribution of each parameter to the total loss function $\dfrac{\delta \pi}{\delta W^{(l)}_{i, j}}$
+and $\dfrac{\delta \pi}{\delta b^{(l)}_i}$. While computing these derivatives, we start by the layer $l-1$ and then
+compute the layer $l-2$ until we get to the input layer of neurons, while we can reuse the partial derivatives of the previous
+computed parameters.
+
+Once we have all the partial derivatives computed, we can get the gradient of all the parameters and then do gradient descent onto the direction of
+the gradients, i.e, we update the parameters as
+$$W^{(l)} \leftarrow W^{(l)} - \eta \frac{\partial \pi_D}{\partial W^{(l)}}$$
+$$b^{(l)} \leftarrow b^{(l)} - \eta \frac{\partial \pi_D}{\partial b^{(l)}}$$
+Where $\eta$ is the learning rate. The compression that we will do is that we will reshape the matrices $W^{(l)}$ as tensors
+of higher order (say for example of order $d_l$) and then represent these reshaped matrices as the element of a tensor network state
+$\TNS(G; R)$. Since obtaining the representation consists of evaluating the core tensors through the contraction
+mapping $\mathcal{C}(\mathcal{G}_1, \dots, \mathcal{G}_n)$, we can apply the chain rule and compute the partial derivative of the
+loss function respect to each parameter of each core. In this way we can find the cores of the tensor network while training the neural network.
+
+Another approach on compressing the neural network is to compress the weight matrices $W^{(l)}$ once the neural network is already trained using the
+TN-ALS algorithm. On (TODO: Citar apendíce) we see the results of these two different methods.
+
 
 
 \chapter{Conclusions}
 
-TODO
+In this bachelor's thesis we have formally constructed the tensor product space, we reviewed
+the basics of tensor algebra, we have presented tensor networks and tensor network states and we have seen
+that it is posible for some tensor networks to express a tensor with less rank than its usual tensor rank.
+Then, we have given some algorithms for computing the cores of the tensor networks and we have also presented
+algorithms that search over the space of possible tensor networks for a optimal structure. Finally, we have
+applied these algorithms for compressing images and neural networks.
 
+Further research on this topic would include implementing other algorithms that improve
+the tensor network structure search, such as finding the tensor structures using program synthesis which
+Zhang et. al. in \cite{guoTensorNetworkStructure2025} claim that is superior to TnALE. Finding how the structure
+found by this algorithm improves compression on neural networks would be a good experiment.
+
+Another interesting topic that could be also researched is about representing big tensors by splitting its parameters
+into multiple low-dimension tensors and then applying the tensor network low-rank approximation with these, since
+we have found that computing the core tensors for big tensors is very computationally expensive.
+
+Finally, I would like to add some words about how hard it has been 
+as a total non initiated to write this thesis since all of it is based
+on recent research papers, and they are quite often not very explanatory and
+are very summarized. However, I liked researching on the topic of tensor networks, and I would like
+to do some more research on the topic of this thesis.
+
+\iffalse
 Fent servir un s\'{\i}mil geom\`etrico-cartogr\`afic, aquesta mem\`oria constitueix un mapa a escala planet\`aria de la demostraci\'o de la conjectura feble de Goldbach presentada per Helfgott i un mapa a escala continental de la verificaci\'o num\`erica d'aquesta. Estudis posteriors i m\'es profunds haurien de permetre elaborar mapes de menor escala.
-
 La naturalesa dels nombres primers ens ha portat per molts racons diferents de les Matem\`atiques; en no imposar-nos restriccions en la forma de pensar, hem pogut gaudir del viatge i assolir els objectius que ens vam plantejar a l'inici del projecte i anar m\'es enll\`a, sobretot en el camp de la computaci\'o i la manipulaci\'o de grans volums de dades num\`eriques.
-
 Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat treballats en les assignatures de M\`etodes anal\'{\i}tics en teoria de nombres i d'An\`alisi harm\`onica i teoria del senyal, que s\'on optatives de quart curs del Grau de Ma\-te\-m\`a\-ti\-ques. Altres els hem hagut d'aprendre durant el desenvolupant del projecte. S'ha realitzat una tasca de recerca bibliogr\`afica important, consultant recursos antics i moderns, tant en format digital com en format paper.
+\fi
 
 \normalfont
 
@@ -2546,7 +3434,40 @@ Una gran part dels coneixements b\`asics que hem hagut de fer servir han estat t
 \printbibliography
 
 \appendix
-\chapter{Chapter 1}
+\chapter{Experiments and results}
+
+\section{Core finding algorithms}
+In this section we will compare the TN-ALS algorithm and the backpropagation algorithm in finding the cores that
+best represent a pseudorandom tensor $T$ across different tensor network structures. To make the experiment reproducible,
+we will sample high oscilatory functions to form the objective tensors
+
+\begin{figure}[H]
+\begin{adjustwidth}{-30pt}{-30pt}
+    \centering
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/f.png}
+        \caption*{$f(x) = x\sin(200 (x+1)^2)$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/g.png}
+        \caption*{$g(x)=250x^3 \cos(150x)$}
+    \end{minipage}
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/h.png}
+        \caption*{$h(x)=\sin(1000x^3)$}
+    \end{minipage}
+\end{adjustwidth}
+    \caption{Three h}
+\end{figure}
+
+\section{Structure search}
+
+\section{Image compression}
+
+\section{Neural Netowork compression}
 
 %\section{Tensor contractions}
 
