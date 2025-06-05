@@ -6,6 +6,6 @@ Ranks: [9, 9, 12, 9, 9, 12, 8]
 Original: 65536
 Tensor Network: 37800
 CR: 1.7337566137566138
-Rel Error: 0.0580895275780855
-Iters: 20
-Time: 9.21s
+Rel Error: 0.06403315011056553
+Iters: 10
+Time: 4.63s

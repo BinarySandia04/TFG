@@ -1,0 +1,11 @@
+Arbitrary structure
+Shape: (8, 8, 16, 8, 8)
+Edges: [(1, 2), (2, 3), (3, 4), (4, 5)]
+Ranks: [12, 12, 12, 12]
+
+Original: 65536
+Tensor Network: 4800
+CR: 13.653333333333334
+Rel Error: 0.14050644136040988
+Iters: 100
+Time: 0.59s

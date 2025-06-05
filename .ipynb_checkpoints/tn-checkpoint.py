@@ -14,6 +14,14 @@ from itertools import combinations
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+# min_from -> x_0, max_from -> x_1
+# min_to -> y_0, max_to -> y_1
+# x_0, x_1, y_0, y_1
+def lerp(min_from, max_from, min_to, max_to, value):
+    if max_from == min_from:
+        return min_to
+    return min_to + (value - min_from) * (max_to - min_to) / (max_from - min_from)
+
 def als_solve(A, B):
     return torch.linalg.lstsq(A, B).solution
 def unfold(tensor, mode):
@@ -230,11 +238,12 @@ class TN(torch.nn.Module):
     @staticmethod
     def tn_ale(G0, R0, radius, iters, objective, print_iters=False, max_rank=20, tuning_param=0.5):
         G, R = (G0, R0)
-        h = float('inf')
+        h = TN.evaluate_structure(G, R, objective, tuning_param=tuning_param)
         p = (G, R)
         for d in range(iters):
             # First rank update
             for k in range(len(R)):
+                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=tuning_param, max_rank=max_rank) 
                 for i in range(-radius, radius):
                     Rp = copy.deepcopy(R)
                     Rp[k] += i
@@ -242,7 +251,12 @@ class TN(torch.nn.Module):
                         Rp[k] = 0
                     elif Rp[k] > max_rank:
                         Rp[k] = max_rank
-                    evaluation = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+                        
+                    if Rp[k] < R[k]:
+                        evaluation = lerp(max(0, R[k] - radius), R[k], minimum, h, Rp[k])
+                    else:
+                        evaluation = lerp(R[k], min(R[k] + radius, max_rank), h, maximum, Rp[k])
+                    
                     if h > evaluation:
                         p = (G, Rp)
                         h = evaluation
@@ -255,7 +269,8 @@ class TN(torch.nn.Module):
                     h = evaluation
             G, R = p
             # Second rank update
-            for k in range(len(R) - 1, -1, -1):
+            for k in range(len(R) - 1, 0, -1):
+                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=tuning_param, max_rank=max_rank)
                 for i in range(-radius, radius):
                     Rp = copy.deepcopy(R)
                     Rp[k] += i
@@ -263,7 +278,12 @@ class TN(torch.nn.Module):
                         Rp[k] = 0
                     elif Rp[k] > max_rank:
                         Rp[k] = max_rank
-                    evaluation = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+                        
+                    if Rp[k] < R[k]:
+                        evaluation = lerp(max(0, R[k] - radius), R[k], minimum, h, Rp[k])
+                    else:
+                        evaluation = lerp(R[k], min(R[k] + radius, max_rank), h, maximum, Rp[k])
+                        
                     if h > evaluation:
                         p = (G, Rp)
                         h = evaluation
@@ -273,6 +293,20 @@ class TN(torch.nn.Module):
                 print("R: " + str(R))
         return (G, R)
 
+    
+    @staticmethod
+    def evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=2, max_rank=25):
+        Rp = copy.deepcopy(R)
+        Rp[k] -= radius
+        if Rp[k] < 0:
+            Rp[k] = 0
+        minimum = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+        Rp[k] = R[k] + radius
+        if Rp[k] > max_rank:
+            Rp[k] = max_rank
+        maximum = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+        return (minimum, maximum)
+    
     # Higher tuning_param leads to less relative error at the cost of less compression
     @staticmethod
     def evaluate_structure(G, R, objective, tuning_param=2):
@@ -334,7 +368,8 @@ class TN(torch.nn.Module):
         return (t_data[p-1], t_data[core], n_data[p-1], n_data[core])
     
     @staticmethod
-    def als(tn, t, err, iter_num=float('inf'), print_iters=False):
+    def als(tn, t, err, iter_num=float('inf'), print_iters=False, tikhonov=False):
+        lambda_reg = 1e-5
         iters = 1
         rel_err = torch.norm(TN.eval(tn) - t).item() / torch.norm(t).item()
 
@@ -398,13 +433,16 @@ class TN(torch.nn.Module):
                 
                 # core = torch.linalg.lstsq(cont_mat, obj_mat)[0]
                 
-                #lambda_reg = 1e-5
+                
                 #ATA = cont_mat.T @ cont_mat + lambda_reg * torch.eye(cont_mat.shape[1], device=cont_mat.device, dtype=cont_mat.dtype)
                 #ATb = cont_mat.T @ obj_mat
                 #core = torch.linalg.solve(ATA, ATb)
-                
-                
-                core = torch.linalg.pinv(cont_mat) @ obj_mat
+                if tikhonov:
+                    ATA = cont_mat.T @ cont_mat + lambda_reg * torch.eye(cont_mat.shape[1], device=cont_mat.device, dtype=cont_mat.dtype)
+                    ATb = cont_mat.T @ obj_mat
+                    core = torch.linalg.solve(ATA, ATb)
+                else:
+                    core = torch.linalg.pinv(cont_mat) @ obj_mat
                 
                 end_time = time.time()
 
@@ -424,7 +462,41 @@ class TN(torch.nn.Module):
         
         return (rel_err, (x, y))
 
+        
+    @staticmethod
+    def als_grad(tn, t, iter_num=10000, epoch=100, lr=0.1, print_iters=False):
+        rel_err = torch.norm(TN.eval(tn) - t).item() / torch.norm(t).item()
 
+        time_resh = 0
+        x = []
+        y = []
+
+        optimizer = torch.optim.Adam(tn.params.values(), lr=lr)
+        
+        for iters in range(iter_num):
+            if print_iters and (iters % 10 == 0 or iter_num < 30):
+                if iter_num < 300 or iters % 100 == 0:
+                    print("epoch " + str(iters) + "/" + str(iter_num) + " err: " + str(rel_err))
+            for i in range(epoch):
+                # print(torch.norm(TN.eval(tn) - t))
+                
+                
+                optimizer.zero_grad()
+                loss = torch.norm(TN.eval_params(tn) - t)
+    
+                loss.backward()
+                optimizer.step()
+            rel_err = torch.norm(TN.eval_params(tn) - t).item() / torch.norm(t).item()
+            
+            x.append(iters)
+            y.append(rel_err)
+            
+            iters += 1
+            #return
+        if print_iters:
+            print("time_resh: " + str(time_resh))
+        
+        return (rel_err, (x, y))
 
 
 

@@ -1,0 +1,11 @@
+TnALE found structure:
+Shape: (8, 8, 16, 8, 8)
+Edges: [(1, 2), (2, 3), (3, 4), (4, 5)]
+Ranks: [8, 12, 9, 3]
+
+Original: 65536
+Tensor Network: 2800
+CR: 23.405714285714286
+Rel Error: 0.1475442138907709
+Iters: 10
+Time: 0.20s
