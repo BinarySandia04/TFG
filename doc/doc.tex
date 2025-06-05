@@ -76,6 +76,8 @@
 \DeclareMathOperator{\vectorize}{vec}
 \DeclareMathOperator{\rank}{rank}
 \DeclareMathOperator{\unfolding}{unfold}
+\DeclareMathOperator{\folding}{fold}
+\DeclareMathOperator{\reshape}{reshape}
 \DeclareMathOperator{\IN}{IN}
 \DeclareMathOperator{\OUT}{OUT}
 \DeclareMathOperator{\TNS}{TNS}
@@ -3442,8 +3444,8 @@ best represent a pseudorandom tensor $T$ across different tensor network structu
 we will sample high oscilatory functions to form the objective tensors
 
 \begin{figure}[H]
+
 \begin{adjustwidth}{-30pt}{-30pt}
-    \centering
     \begin{minipage}[t]{0.32\linewidth}
         \centering
         \includegraphics[width=\linewidth]{media/f.png}
@@ -3460,8 +3462,19 @@ we will sample high oscilatory functions to form the objective tensors
         \caption*{$h(x)=\sin(1000x^3)$}
     \end{minipage}
 \end{adjustwidth}
-    \caption{Three h}
+    \caption{The three high oscilatory functions that we will use to represent objective tensors}
 \end{figure}
+
+We will pick each function and we will evaluate it over the interval $[0,1]$ by uniformly picking $N$ samples. We will construct the
+vectors 
+$$v_F = \left( f\left(\frac{i}{N}\right) \right)_{i=1}^N \qquad
+v_G = \left( g\left(\frac{i}{N}\right) \right)_{i=1}^N \qquad
+v_H = \left( h\left(\frac{i}{N}\right) \right)_{i=1}^N \qquad$$
+And we will reshape this tensors onto a shape $N_1 \times \cdots \times N_n$ such that $\prod_{i=1}^n N_i = N$
+$$
+T_F = \reshape(v_F, (1), (N_1, \dots, N_n)) \qquad
+T_G = \reshape(v_G, (1), (N_1, \dots, N_n))$$
+$$T_H = \reshape(v_H, (1), (N_1, \dots, N_n))$$
 
 \section{Structure search}
 
