@@ -9,6 +9,8 @@
 \usepackage{subcaption}
 \usepackage{nicematrix}
 \usepackage{changepage}
+\usepackage[toc]{glossaries}
+\usepackage{array}
 
 \addbibresource{refs.bib}
 \addbibresource{man-refs.bib}
@@ -32,8 +34,7 @@
 \usepackage{color}
 \hypersetup{
     linktoc=all,
-    colorlinks=true,
-    linkcolor=blue,  %choose some color if you want links to stand out
+    % linkcolor=blue,  %choose some color if you want links to stand out
 }
 
 \setcounter{page}{0}
@@ -97,6 +98,89 @@
 \cfoot{}
 \rfoot{\thepage}
 
+\makeglossaries
+% Glossary
+\newglossaryentry{TN}
+{
+    name=TN,
+    description={Tensor Network}
+}
+
+\newglossaryentry{TnALE}
+{
+    name=TnALE,
+    description={Tensor network Alternating Local Enumeration algorithm}
+}
+
+\newglossaryentry{TnALS}
+{
+    name=TnALS,
+    description={Tensor network Alternating Least Squares algorithm}
+}
+
+\newglossaryentry{TNS}
+{
+    name=TNS,
+    description={Tensor Network States}
+}
+
+\newglossaryentry{LSQ}
+{
+    name=LSQ,
+    description={Least Squares problem}
+}
+
+\newglossaryentry{SVD}
+{
+    name=SVD,
+    description={Singular Value Decomposition}
+}
+\newglossaryentry{TN-RS}
+{
+    name=TN-RS,
+    description={Tensor Network Rank Selection problem}
+}
+\newglossaryentry{TN-PS}
+{
+    name=TN-PS,
+    description={Tensor Network Permutation Selection problem}
+}
+\newglossaryentry{TN-TS}
+{
+    name=TN-TS,
+    description={Tensor Network Topology Selection problem}
+}
+\newglossaryentry{FCNN}
+{
+    name=FCNN,
+    description={Fully Connected Neural Network}
+}
+\newglossaryentry{TR}
+{
+    name=TR,
+    description={Tensor Ring}
+}
+\newglossaryentry{TT}
+{
+    name=TT,
+    description={Tensor Train}
+}
+\newglossaryentry{MPS}
+{
+    name=MPS,
+    description={Matrix Product State}
+}
+\newglossaryentry{FCTN}
+{
+    name=FCTN,
+    description={Fully Connected Tensor Network}
+}
+\newglossaryentry{CR}
+{
+    name=CR,
+    description={Compression Rate}
+}
+
 \begin{document}
 
 \bibstyle{plain}
@@ -134,7 +218,7 @@
 
 \renewcommand{\arraystretch}{1.5}
 \begin{tabular}{ll}
-\textbf{\Large Director:} & \textbf{\Large Dr. Nahuel Statuto} \\
+\textbf{\Large Director:} & \textbf{\Large Dr. Nahuel Norberto Statuto Perez} \\
 \textbf{\Large Realitzat a:} & \textbf{\Large  Departament de Matemàtiques   } \\
  & \textbf{\Large i Informàtica} \\
 \\
@@ -157,8 +241,8 @@
 
 Tensor network structure search has been interesting research topic since the raise on
 complexity of deep learning models and quantum mechanics. This Bachelor Thesis main goal is to give an 
-automated search of an optimal tensor network structure for representing a given
-tensor with some fixed error.
+automated search of an optimal tensor network structure that gives the best low-rank approximation of a given 
+tensor.
 
 For these purpose we first give an introduction to some basic tensor algebra, we present tensor networks and tensor
 network states. Then we present algorithms that find the cores of a tensor network that better represent an objective tensor.
@@ -173,7 +257,7 @@ without significant losses on performance and accuracy.
 
 La recerca de l'estructura òptima de xarxes de tensors ha estat un tema d'interès des de l'augment en la complexitat dels models d'aprenentatge profund i de la mecànica quàntica. 
 Aquest treball de final de grau té com a objectiu principal oferir una cerca automatitzada 
-d’una estructura òptima de xarxa de tensors per representar un tensor donat amb un error fixat.
+d’una estructura òptima d'una xarxa de tensors que representi millor un tensor amb una aproximació de baix rank.
 
 Per aconseguir aquest propòsit, primer oferim una introducció als tensors, a les xarxes tensorials. 
 Aleshores presentem algoritmes que troben els nuclis de la xarxa tensorial que millor representen un tensor objectiu.
@@ -202,128 +286,53 @@ Vull agrair a ...
 }
 
 \newpage
-
+\printglossary[title=Glossary]
+\newpage
 \pagenumbering{arabic} 
 \setcounter{page}{1}
 \chapter{Introduction}
 
+
 % TODO: Fer mes intro a les nn, com afecten al món, i tal.
+Over the last years, high-dimensional data has become ubiquitous in modern science and engineering,
+arising in areas such as quantum many-body physics and machine learning. However, as the dimensionality of the
+data increases, so does the burden of the increase of computational and storage cost often referred
+as the curse of dimensionality. To address this challenge, low-rank approximation techniques have emerged as powerful tools,
+enabling the efficient representation, compression, and manipulation of large-scale tensors. Recent research 
+has proven promising results in the capabilities of compression of
+tensor networks. Qing et. al. for example see empirically that tensor networks can be very useful
+for neural network parameter compression \cite{qingCompressingNeuralNetworks2025} or even image
+recovering \cite{lyuMultiDimensionalImageRecovery2022}
 
-On the last decades, neural networks have emerged as one of the most influential topics inside the fields of
-artificial inteligence and machine learning. Neural networks are inspired on how the human brain works, they are 
-made as a simplification about how our networks interact and in some way they try to emulate the way we think.
+Sometimes, the low-rank approximation of a given tensor is not guaranteed to be represented from
+a fixed tensor network structure. There has been a lot of recent research on solving
+the problem on finding the optimal structures. On \cite{liPermutationSearchTensor2022} Li et. al. 
+present an algorithm that aims to find an optimal tensor network permutation.
+We will see in more detail the Tensor network Alternating Local Enumeration (\gls{TnALE}) algorithm presented
+by Li. et. al on \cite{liAlternatingLocalEnumeration2023}. The presented algorithm aims to
+solve the rank search of the core tensors and the optimal permutation. We will extend this algorithm
+for also solving the structure search of tensor networks.
 
-In the last years, neural networks have gained a lot of importance, positioning themselves at the center of
-impactful technological advances. Some models that use neural networks at its core are
-for example large language models (LLMs) which serve as advanced virtual agents, diffusers which
-generate images and other media. Other models based on neural networks have been used to make important
-advances in a lot of different fields such as in medicine \cite{mengApplicationLargeLanguage2024},
-transportation \cite{nieExploringRolesLarge2025}, 
-education \cite{abd-alrazaqLargeLanguageModels2023}, and others.
+The concept of tensor networks appeared from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
+and recently has attracted significant interest on machine learning. 
+Foundamental research on tensor networks started
+in $1971$ by the paper "Applications of negative dimensional tensors". In which
+he introduced the Penrose Notation for representing contractions of various tensors, and how this
+diagrammatic approach could be used in various applications in physics \cite{biamonteLecturesQuantumTensor2020}. Forwarding
+to recent years, on 2014, Román Orus \cite{181204011TensorNetworks} and later in 2019 presented the first
+idea of applying them in machine learning \cite{orusTensorNetworksComplex2019}.
 
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture} 
+The main goal of this thesis will be to compress tensors by getting a low-rank approximation of them by
+finding an approximate representation of a given tensor network state. We will present two different algorithms
+for achieving this goal: the Tensor network Alternating Least Squares (\gls{TnALS}) algorithm and backpropagation. We will compare these two algorithm and we will
+discuss their use cases. Then, we will present the \gld{TnALE} algorihtm and we will prove its convergence
+presenting beforehand zero gradient theory.
 
-    \node(i2)[draw, shape=circle, minimum size=0.5cm] at (0,-1) {};
-    \node(i3)[draw, shape=circle, minimum size=0.5cm] at (0,0) {};
-    \node(i4)[draw, shape=circle, minimum size=0.5cm] at (0,1) {};
-    \node(i5)[draw, shape=circle, minimum size=0.5cm] at (0,2) {};
-    \node(i6)[draw, shape=circle, minimum size=0.5cm] at (0,3) {};
-    \node(i7)[draw, shape=circle, minimum size=0.5cm] at (0,4) {};
-
-    \node(l2)[draw, shape=circle, minimum size=0.5cm] at (2,3) {};
-    \node(l3)[draw, shape=circle, minimum size=0.5cm] at (2,2) {};
-    \node(l4)[draw, shape=circle, minimum size=0.5cm] at (2,1) {};
-    \node(l5)[draw, shape=circle, minimum size=0.5cm] at (2,0) {};
-
-    \node(p2)[draw, shape=circle, minimum size=0.5cm] at (4,3) {};
-    \node(p3)[draw, shape=circle, minimum size=0.5cm] at (4,2) {};
-    \node(p4)[draw, shape=circle, minimum size=0.5cm] at (4,1) {};
-    \node(p5)[draw, shape=circle, minimum size=0.5cm] at (4,0) {};
-
-    \node(o2)[draw, shape=circle, minimum size=0.5cm] at (6,-1) {};
-    \node(o3)[draw, shape=circle, minimum size=0.5cm] at (6,0) {};
-    \node(o4)[draw, shape=circle, minimum size=0.5cm] at (6,1) {};
-    \node(o5)[draw, shape=circle, minimum size=0.5cm] at (6,2) {};
-    \node(o6)[draw, shape=circle, minimum size=0.5cm] at (6,3) {};
-    \node(o7)[draw, shape=circle, minimum size=0.5cm] at (6,4) {};
-
-
-    \foreach \x in {i2, i3, i4, i5, i6, i7}
-        \foreach \y in {l2, l3, l4, l5}
-        {
-            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
-        }
-
-    \foreach \x in {p2, p3, p4, p5}
-        \foreach \y in {l2, l3, l4, l5}
-        {
-            \draw[-{Stealth[scale=1]}] (\y) -- (\x);
-        }
-
-    \foreach \x in {p2, p3, p4, p5}
-        \foreach \y in {o2, o3, o4, o5, o6, o7}
-        {
-            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
-        }
-
-    \node(t1) at (0, 5) {Input};
-    \node(t2) at (6, 5) {Output};
-    \node(t3) at (3, 4) {Hidden};
-    \end{tikzpicture}
-
-    \caption{A representation of a fully connected neural network. Each dot is a neuron and each edge represents a connection. Source: own elaboration}
-    \label{fig:fcnn}
-\end{figure}
-
-Neural networks are modeled after how real neurons work, but in a simplified manner: each neural network contains a set of neurons which are split in
-different layers. In a fully connected neural network, each neuron has an output that is connected to each neuron of the next layer, and all neurons of a layer
-have as inputs the outputs of all the neurons of the previous layer. The first layer is called the input layer and the last layer is called the output layer.
-All the layers in between are called hidden layers.
-
-As real neurons work, each connection will have a distinct role on when one neuron should fire or not. So, the outputs of each neuron will depend on its inputs. The output of each neuron in
-a neural network is modeled using usually a non-linear function $f : \mathbb{K}^N \rightarrow \mathbb{K}$,
-with $N$ being the number of neurons on the previous layer.
-
-Each neuron of the neural network also has assigned some weights $w_{ji}$ to each input connection, with the idea that
-some connections will influence the firing of the network more than others. The key to making a neural network "learn" is
-to properly adjust these weights $w_{ji}$ that are also called the \textit{parameters} of the neural network.
-
-So, more formally, the output of a neuron $j$ in some layer will be given by the formula:
-
-$$ y_j(x) = f\left(\sum_{i=1}^N w_{ji} x_i + b_{j}\right) $$ 
-
-Where $x_{i}$ is the output of the neuron $i$ of the previous layer, and $b_j$ is some bias that is also a parameter of the neural network.
-
-We can represent the weights of a fully connected neural network as a matrix, that we call the \textbf{weight matrix}.
-Since neural networks have been incresing in complexity during the recent years, these weight matrices can be very large
-and can contain a lot of parameters. So naturally there has been a rising interest on compressing weight matrices without sacrificing accuracy or performance.
-
-The main goal of this thesis will be to compress the parameters of neural networks using tensor networks, a concept 
-that originates from the study of many-body quantum systems \cite{orusTensorNetworksComplex2019}
-and recently has attracted significant interest on machine learning. We will also give another application
-by compressing images.
-
-Tensor networks are a structure that is aimed to represent and efficiently manipulate large tensors by breaking them into
-smaller ones, called core tensors, which are connected into a specific pattern. Through the thesis we will explain how
-these smaller tensors are connected between them, but the general idea is that after contracting these connections,
-we get a representation of the original tensor.
-
-So, what we aim to do is that given some tensor $T \in \mathbb{K}^{N_1 \times N_2 \times \cdots \times N_n}$ that
-will be our weight matrix reshaped onto a tensor, we will find a tensor network structure (TNS) that
-represents a good aproximation of $T$. This structure will minimize the relative error of the representation of $T$,
-the size of the TNS, since we are
-interested in compressing $T$ to fewer parameters, and we will also care about the computational complexity of recovering
-$T$. We will also present the alternating least square method adapted on finding the cores of the best tensor network state. 
-We will also find the cores of the tensor network using backpropagation, and we will compare both algorithms.
-
-We will see that finding the best structure is an integer programming problem and
-we will describe the TnALE algorithm that finds a locally best structure using gradient-less optimization.
+Finally, we will do some experiments with these algorithms: we will perform lossy compression on images and
+also we will compress the parameters of a simple neural network.
 
 %\section{Objectives}
 
-\newpage % Perque quedi bé
 \section{Thesis structure}
 
 % TODO: Cambiar això una mica
@@ -335,11 +344,11 @@ some operations between tensors.
 
 After that, we will also describe some reshaping operations that can be applied to tensors to transform its
 orders i.e their number of dimensions. These reshaping operations will be useful on the following chapters
-since we will need them for applying the TN-ALS algorithm and also for the last chapter of applications, when
-we transform matrices into tensors and then apply our low-rank approximation that will use tensor networks.
+since we will need them for presenting the TnALS algorithm and also for the last chapter of applications, when
+we transform matrices into tensors and then apply all the theory that we have presented.
 
 On the third chapter we will present the basics of the Penrose Notation and we will give a formal
-definition to tensor networks (TNs) and tensor network states (TNS). We will give some
+definition to tensor networks and tensor network states (\gls{TNS}). We will give some
 common examples of tensor networks and after that we will define the notion
 of the rank of a tensor related to a TNS, called $G$-rank. We will see that the $G$-rank can be a lot smaller
 than the traditional tensor rank as it is discussed in \cite{yeTensorNetworkRanks2019},
@@ -347,18 +356,19 @@ proving that there exists better compression methods than the canonical
 polyadic decomposition, which we will see on the same chapter.
 
 On the fourth chapter we will describe the main algorithms of this thesis. First, we will give two algorithms
-that fixed a TN, finds a low-rank decomposition of smaller tensors that can represent our original tensor
-with a certain error. These algorithms are the tensor network alternating least squares (TN-ALE) and
-we will also solve this problem using backpropagation.
+that fixed a tensor network (\gls{TN}), finds a low-rank decomposition of smaller tensors that can represent our original tensor
+with a certain error. These algorithms are the \gls{TnALS} and the backpropagation algorithm.
+We will also solve this problem using backpropagation.
 
-Then, we will unfix the tensor structure and we will present the TnALE algorithm which finds the most optimal
-tensor network structure for representing a tensor T by evaluating a loss function that depends on the
-structure itself. TnALE also saves doing the evaluation of some tensor network structures and lastly we will prove
-that TnALE converges to a certain structure and that we can save these structure evaluations, under some assumptions.
+Then, we will unfix the tensor structure and we will present the \gls{TnALE} algorithm which finds the most optimal
+tensor network structure for representing a tensor $T$ by evaluating a loss function that depends on the
+structure itself. The advantage of TnALE respect other algorithms
+is that it also saves some evaluations of some tensor network structure candidates. Lastly we will prove
+that \gls{TnALE} converges to an optimal structure, and also we will prove the fact of
+skipping certain evaluations, all of this under some given assumptions.
 
-Finally on the fifth chapter we will apply all of these algorithms for practical cases such as compressing images and
-the most important, compressing the weight matrices of fully connected neural networks.
-
+Finally on the fifth chapter we will apply all of these algorithms for practical cases such as compressing images,
+compressing the weight matrices of fully connected neural networks.
 
 \chapter{Tensors}
 
@@ -440,26 +450,35 @@ $$\mathcal{Z}(i_{p_{d+1}}, \cdots, i_{p_n}, j_{q_{d+1}}, \cdots, j_{q_m}) = $$$$
 In this chapter we will construct tensors in a formal way and we will lay down the basics of tensor algebra. We will
 define the notion of rank of a tensor and then,
 we will describe some basic tensor reshaping operations.
-All of this will be crucial for then presenting tensor contractions and tensor networks on the following chapter.
+All of this will be crucial for then presenting tensor contractions and \gls{TN}s on the following chapter.
 
 \section{The tensor product space}
 
-We will denote $\mathbb{V}_1, \dots, \mathbb{V}_n$ as finite vector spaces over a field $\mathbb{K}$ ($\mathbb{R}$ if unspecified) of dimension $\dim{\mathbb{V}_i} = N_i \; \forall i = 1, \dots, n$.
+From now on, we will denote $\mathbb{V}_1, \dots, \mathbb{V}_n$ as finite vector spaces over a field $\mathbb{K}$ ($\mathbb{R}$ if unspecified) of dimension $\dim{\mathbb{V}_i} = N_i \; \forall i = 1, \dots, n$.
 
-We will present the notion of a tensor. From a mathematical standpoint, it can be defined as a multilinear map:
+We will now present the definition of a tensor. One of the most simple definitions for presenting a tensor
+are multilinear maps:
 
 \begin{definition}
-    A \textbf{multilinear map} or a tensor is an application ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$ which satisfies:
+    A \textbf{multilinear map} is a mapping ${T: \mathbb{V}_1 \times \dots \times \mathbb{V}_n \rightarrow \mathbb{K}}$ which satisfies:
     \begin{enumerate}
         \item $T(v_1, \dots, \lambda v_i, \dots, v_n) = \lambda \cdot T(v_1, \dots, v_i, \dots, v_n)$
         \item $T(v_1, \dots, v_i + u, \dots, v_n) = T(v_1, \dots, v_i, \dots, v_n) + T(v_1, \dots, u, \dots, v_n) \\ {\forall i = 1, \dots, n, \; u \in \mathbb{V}_i, \lambda \in \mathbb{K}}$
     \end{enumerate}
+    \label{def:multilinear-maps}
 \end{definition}
 
-Linear maps and bilinear maps are specific cases of multilinear maps with $n=1$ and $n=2$ respectively.
 
-Now we will present formally the tensor space and its elements by defining a relation between all the vectors in the free vector space over the cartesian product
-$\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$. First of all, we will need to define what the free vector space of a set is:
+We will call multilinear maps tensors. The order of a tensor will be defined as the value of $n$.
+For example, kinear maps and bilinear maps are specific cases of tensors with $n=1$ and $n=2$ respectively.
+
+This definition gives a clear intuition about what is a tensor, but it doesn't extract all of the properties that tensor have.
+For example, following this definition it is not obvious that all multilinear maps $T: \mathbb{V}_1 \times \cdots \mathbb{V}_n \rightarrow \mathbb{K}$
+form a vector space. The next thing that we are going is transform this definition so that we can define tensors
+as an element of a given vector space. We will achieve this define by defining a relation between all the vectors in the free vector space
+over the cartesian product of $\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$ that capture the properties of multilinear maps.
+
+The first ingredient that we will need is defining what are the free vector spaces over a set:
 
 \begin{definition} Let $S$ be a set and $\mathbb{K}$ a field. We denote the free vector space over $S$ as $\mathbb{K}[S]$, which
     is the vector space containing all linear combinations of elements from $S$ with coefficients of $\mathbb{K}$, i.e:
@@ -467,33 +486,39 @@ $\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$. First of all, we will need to 
 \end{definition}
 
 \begin{example} If we take $\mathbb{K} = \mathbb{R}$ and $S = (x,y)$, then the elements of $\mathbb{R}[S]$ have the form $ax + by$ with $a, b \in \mathbb{R}$.
-% TODO: Allargar
-We can see that $\mathbb{R}[S]$ is the vector space $\mathbb{R}^2$ with some fixed basis $(x, y)$.
+We can clearly see  that $\mathbb{R}[S]$ is a vector space of dimension $2$ over the field $\mathbb{R}$ and therefore
+isomorphic to $\mathbb{R}^2$
 \end{example}
 
+Now we will present the relation of each element of the free vector space of $\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$ and
+multilinear maps.
+
 Let $\mathbb{L} = \mathbb{K}[\mathbb{V}_1 \times \dots \times \mathbb{V}_n]$.
-    We define relation $R$ as the smallest equivalence relation that satisfies: 
-    $$(v_1, \dots, \alpha v_i, \dots, v_n) \sim \alpha(v_1, \dots, v_n) \; \forall i = 1, \dots, n, \forall \alpha \in \mathbb{K}$$
-    $$(v_1, \dots, v_i + u_i, \dots, v_n) \sim (v_1, \dots, v_i \dots, v_n) + (v_1, \dots, u_i, \dots, v_n) \; \forall i = 1, \dots, n$$
+    We define relation $\sim_R$ as the smallest equivalence relation that satisfies: 
+    $$(v_1, \dots, \alpha v_i, \dots, v_n) \sim_R \alpha(v_1, \dots, v_n) \; \forall i = 1, \dots, n, \forall \alpha \in \mathbb{K}$$
+    $$(v_1, \dots, v_i + u_i, \dots, v_n) \sim_R (v_1, \dots, v_i \dots, v_n) + (v_1, \dots, u_i, \dots, v_n) \; \forall i = 1, \dots, n$$
 
 \begin{proposition}
     $[0]_R$ is a subspace of $\mathbb{K} \left[ \mathbb{V}_1 \times \cdots \mathbb{V}_n \right]$
 
     \begin{proof}
         $0 \in [0]_R$. It is sufficient to see that for all $\lambda \in \mathbb{K}$ and $u, v \in [0]_R$ then $u + \lambda v \in [0]_R$.
-        We can write $u + \lambda v \sim_R (u_1 + v_1, \dots, u_i + \lamba v_i, \dots, u_n + v_n) \sim_R 0 + (v_1, \dots, \lambda v_i, \dots, v_n) \sim_R 0 + \lambda 0 \sim_R 0$ and therefore
+        We can write $u + \lambda v \sim_R (u_1 + v_1, \dots, u_i + \lambda v_i, \dots, u_n + v_n) \sim_R 
+        (u_1, \dots, u_n) + (v_1, \dots, \lambda v_i, \dots, v_n) \sim_R 0 + \lambda 0 \sim_R 0$ and therefore
         $u + \lambda v \sim_R 0$ since $R$ is an equivalence relation.
     \end{proof}
 \end{proposition}
 
-\begin{definition} 
-    The \textbf{tensor product space} $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$ is defined as the quotient $\mathbb{L} / R_0$. 
-    We denote the equivalence class of $(v_1, \dots, v_n)$ as $v_1 \otimes \dots \otimes v_n$. 
-\end{definition}
-    We will see with the universal property of the tensor product that since the 
-    elements of $\mathbb{L}/R$ satisfy the properties that define a multilineal map, each vector of $\mathbb{L} / R$ is a \textbf{tensor}.
+Because of this proposition, the quotient space $\mathbb{L} / [0]_R$ is well defined.
 
-Before, we present now an example of a tensor product space:
+\begin{definition} 
+    The \textbf{tensor product space} $\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n$ is defined as the quotient $\mathbb{L} / [0]_R$. 
+    Each element of the tensor product space is the image of the quotient mapping ${\varphi: \mathbb{L} \rightarrow \mathbb{L} / [0]_R}$
+    defined by sending each element $(v_1, \dots, v_n) \in \mathbb{L}$ to its equivalence class that we
+    will write as $v_1 \otimes \dots \otimes v_n$. 
+\end{definition}
+
+We will give an small example of a tensor product space:
 
 \begin{example}
     Given $\mathbb{R}^2$ and $\mathbb{R}^3$ with its canoncial vector space
@@ -506,7 +531,10 @@ Before, we present now an example of a tensor product space:
 \end{example}
 % \begin{definition}[Order of a tensor] Given a tensor $T \in \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow \mathbb{K}$ We define the \textbf{order} of the tensor $T$ as $n$.
 % \end{definition}
+
+
 We will now state and prove the universal property of the tensor product:
+
 \begin{theorem}[Universal property of the tensor product]
     Let $\varphi$ be the quotient mapping from $\mathbb{V}_1 \times \cdots \times \mathbb{V}_n$ to $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$. 
     For every multilinear map $h: \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow X$ where $X$ is any vector space there exists an unique linear map 
@@ -522,7 +550,6 @@ We will now state and prove the universal property of the tensor product:
 	\arrow["{\tilde h}", from=1-2, to=2-2]
 \end{tikzcd}
 
-\end{theorem}
 
 \begin{proof}
     Let $\varphi(v_1, \dots, v_n) := [(v_1, \dots, v_n)] \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$. Let $h : \mathbb{V}_1 \times \cdots \mathbb{V}_n \rightarrow X$ be a
@@ -537,6 +564,15 @@ We will now state and prove the universal property of the tensor product:
     $$f \left( \sum_{i=1}^p a_i v_i^1 \otimes \cdots \otimes v_i^n \right) = \sum_{i=1}^p a_i h(v_i^1, \dots, v_i^n) = \tilde h \left( \sum_{i=1}^n a_i v_i^1 \otimes \cdots \otimes v_i^n \right)$$
     therefore, the linear mapping $\tilde h$ is unique
 \end{proof}
+\end{theorem}
+
+An interesting observation of the universal property of tensor products is that if we take any multilinear map ${T: \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow X}$
+and we fix $X$ to be the field $\mathbb{K}$, then there exists an unique linear map $\tilde T: \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \rightarrow \mathbb{K}$
+which is an element of the dual space $(\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n)^*$ which is isomorphic to $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$, proving
+that the multilinear maps that we have defined at \defref{def:multilinear-maps} are isomorphic to the elements of the tensor product space
+$\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
+
+
 
 % TODO: Posar on es demostra això o demostrar-ho
 \iffalse
@@ -546,7 +582,8 @@ multilinear map $h : \mathbb{V}_1 \times \cdots \times \mathbb{V}_n \rightarrow 
 $\tilde h : \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \rightarrow X$ with $h = \varphi \circ \tilde h$
 \fi
 
-We can now construct explicitly the corresponding vector space (and a basis) of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$.
+Also, thanks to this theorem we explicitly construct the vector space ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$ and a
+basis of it:
 
 \begin{proposition} Let $\{e_1^i, e_2^i, \dots, e_{N_i}^i\}$ be basis for each $\mathbb{V}_i$ and $N_i = \dim \mathbb{V}_i$. Then the set
 $$\mathcal{B}_{\otimes} = \{e_{i_1}^1 \otimes \cdots \otimes e_{i_n}^n = [(e_{i_1}^1, \dots, e_{i_n}^n)]_R : 1 \leqslant i_j \leqslant N_j, 1 \leqslant j \leqslant n\}$$
@@ -582,26 +619,32 @@ $1 \leqslant k_i \leqslant N_i$. Therefore, the elements of $\mathcal{B}_\otimes
 \end{proposition}
 
 
-So now, we can directly work with the tensor space since it is a vector space
-and we have a well defined basis. The dimension
+From now on we can directly work with the tensor space as if it was a regular vector space
+with a well defined basis. The dimension
     of ${\mathbb{V}_1 \otimes \dots \otimes \mathbb{V}_n}$ is ${N_1 \cdot N_2 \cdots N_n}$ and its elements can be expressed as
     \begin{equation} \label{eq:base-representation}
 T = \sum_{s_1, \dots, s_n}^{N_1, \dots, N_n} T_{s_1, \dots, s_n} \cdot  e_{s_1}^1 \otimes \cdots \otimes e_{s_n}^n
 \end{equation}
 
-If we wanted to store a tensor in a computer program, it would be enough to save all the $T_{s_1, \dots, s_n}$ entries.
+Using the basis that we defined in the last proposition. 
+If we wanted to store a tensor in a computer program (we will do it on the following chapters) it would be enough to save all the $T_{s_1, \dots, s_n}$ entries
+since it is an element of a vector space with a well defined basis.
 
 \begin{definition}
 We will define the \textbf{size} of the tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ as $\size(T) = N_1 N_2 \cdots N_n$. We will 
-also say that the \textbf{order} of $T$ is $n$.
+also say that the \textbf{order} of a tensor $T$ is $n$, which is the same as the order of its respective multilinear map $T: \mathbb{V}_1 \times \cdots
+\times \mathbb{V}_n \rightarrow \mathbb{K}$.
 \end{definition}
 
-Now, we want to be able to do the product between two tensors of different tensor product spaces since we will need this for contracting
-tensor networks. In other words, suppose that
+We can now start presenting basic tensor algebra. Adding and multiplying by an scalar is already defined by the underlying
+vector space. We will define the tensor product 
+between two tensors of different tensor product spaces. We will need this operation
+later because when we define \gls{TN}s, we will need to contract tensors of different orders.
+
+Suppose that
 $T \in \mathbb{V}_1 \otimes \cdots \mathbb{V}_n$ and $U \in \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$. We want 
-that a tensor product
+that the tensor product
 operation results in a tensor $T \otimes U \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$.
-We will define this operation in the following way:
 
 % (POSAR COSES DEL KROENKER PRODUCT, PRESENTARLO)
 \begin{definition}[Tensor product] With the above notation, let $\dim \mathbb{V}_i = N_i$, $\dim \mathbb{W}_j = M_j$
@@ -615,12 +658,11 @@ We will define this operation in the following way:
 \end{equation}
 \end{definition}
 
-% TODO: Aixo justificar? Maybe
-Which naturally is an element of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$.
-We call the tensor product for two tensors of order $2$ as the \textbf{outer product}, so we can say that 
-the tensor product is a generalization of it.
+Which naturally is an element of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n \otimes \mathbb{W}_1 \otimes \cdots \otimes \mathbb{W}_m$
+because we are creating a linear combination of elements of the basis of that space.
+If we do the tensor product for two tensors of order $1$ (which are isomorphic to vectors), this operation is called the \textbf{outer product},
+so we can state that the tensor product is a generalization of it.
 
-% TODO Fill example
 \begin{example}
     Let $\{a_1, a_2\} \subset \mathbb{V}_1$, $\{b_1, b_2\} \subset \mathbb{V}_2$ and $\{c_1, c_2\} \subset \mathbb{W}_1$, $\{d_1, d_2\} \subset \mathbb{W}_2$ be basis
     of their corresponding vector spaces. Let $T \in \mathbb{V}_1 \otimes \mathbb{V}_2$ and $U \in \mathbb{W}_1 \otimes \mathbb{W}_2$ defined as:
@@ -630,11 +672,9 @@ the tensor product is a generalization of it.
     3 (a_2 \otimes b_1 \otimes c_1 \otimes d_1) + 3 (a_2 \otimes b_1 \otimes c_2 \otimes d_2)$$
 \end{example}
 
-% TODO AAAAA LLARGAR
-Now, we already know how to add and subtract two tensors of the same tensor product space since its sum is already
-defined by its vector space. We will introduce a tensor norm since in the following chapters we will want to know if
+We will proceed to introduce a tensor norm since in the following chapters we will want to know if
 a tensor is "small" or "big", and also but not less important, we want to know if two tensors are near each other
-to test convergence for algorithms involving tensor networks. In our case we will stick to the Frobenius norm:
+to test convergence for algorithms involving \gls{TN}s. In our case we will stick to the Frobenius norm:
 
 
 \begin{definition}
@@ -646,14 +686,14 @@ to test convergence for algorithms involving tensor networks. In our case we wil
     \end{align}$$
 \end{definition}
 
-\section{Tensor ranks}
-
-In this section we will present the rank of a tensor. It will serve as the extension of the
-matrix rank, which is defined as the dimension of the vector space spanned by the vectors
-on its columns. For the matrix rank, we say that if it is spanned by a single vector, the rank is $1$, so
-we could somewhat say that a vector has rank $1$. We will do something similar, defining
-that a tensor $t$ is a rank-$1$ tensor if it can be written as $$t = v^1 \otimes \cdots \otimes v^n$$
-with $v^i \in \mathbb{V}_i$. Therefore, the rank of a tensor will be $r$ if it can be spanned from $r$ rank-$1$ tensors:
+Now, we will define another important operation of tensors that will be an important pillar on decomposing tensors with high
+dimensionality: the rank of a tensor or the traditional rank. It will serve as the extension of the
+matrix rank, which can be defined as the dimension of the vector space spanned by all the vectors
+on its columns. For the matrix rank, we say that if it is spanned by a single vector, the rank is $1$. We
+will extend this concept and we will say that a tensor has rank $1$ if it is spanned by a single
+element of a basis. In other words, a tensor $t$ is a rank-$1$ tensor if it can be written as $$t = \lambda v^1 \otimes \cdots \otimes v^n$$
+with $v^i \in \mathbb{V}_i$ and $\lambda \in \mathbb{K}$. Therefore, the rank of an tensor $T$ will be $r$ if it can be spanned from $r$ rank-$1$ tensors.
+This gives us the following definition:
 
 \begin{definition}
     We say that a tensor $T$ has rank $r$ as $\rank{T} = r$ with 
@@ -673,6 +713,7 @@ Unlike matrices, determining the rank of a tensor is an NP-hard problem (See Sec
 Finding the maximum rank, i.e determining $\displaystyle\max_{T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n} \rank{T}$ still remains an unresolved problem.
 \cite{christandlTensorRankNot2018}
 
+\iffalse
 By manipulating the vectors $v_p^1 \otimes \cdots \otimes v_p^n$ to represent each value of the tensor
 $T_{s_1, \dots, s_n}$, we can find an slightly better upper bound for the tensor rank:
 \begin{proposition} Let $\dim \mathbb{V}_i = N_i$, then
@@ -687,11 +728,12 @@ $T_{s_1, \dots, s_n}$, we can find an slightly better upper bound for the tensor
     determined by $\prod_{i=1}^n N_i$ parameters, we can impose $r \sum_{i=1}^n N_i \leqslant \prod_{i=1}^n N_i$ 
 \end{proof}
 \end{proposition}
+\fi
 
 Decomposing a tensor $T$ in rank-$1$ tensors as in \refeq{eq:rank} is known as \textbf{tensor rank decomposition}.
 One could ask if given a tensor $T$ and fixed $r$, can we construct a tensor $T'$ of rank $t$ such that
 $\| T - T' \|_F$ is minimum. The decomposition of $T'$ is called \textbf{canonical polyadic decomposition} and it is
-an special case of a tensor network that we will see on the following chapter.
+an special case of a tensor network that we will see on the following section.
 
 % TODO: Espera osigui podem intentar dir que si volem representar un tensor de rank noseque necessitem com a minim
 % tals ranks al fer productes? Aixo pot ser molt util
@@ -940,13 +982,11 @@ Now we will introduce the reverse operation of the tensor unfolding: tensor fold
     We will write $T = \folding(\mathcal{U}, (\sigma(1), \dots, \sigma(d)), (\sigma(d+1), \dots, \sigma(n)))$
 \end{definition}
 
-% TODO: Fer una outro millor?
-Now that we have defined tensors and all the basic operations of tensor algebra, in the following chapter we will
-construct tensor networks using the contraction operation that we have seen in this chapter. On chapter 4, the reshaping
-operations will reappear when we present the algorithms that find tensor network cores.
+Now that we have defined tensors and all the basic reshaping operations we will
+go towards constructing tensor networks. We will start by defining the contraction between two tensors:
 
-\chapter{Tensor networks}
-
+%TODO: Moure
+\iffalse
 In this chapter we will start by presenting tensor networks from a mathematically formal standpoint. Then, we will present the notion
 of the tensor $G$-rank that will be useful for determining if a tensor network can represent a tensor. We will present some common
 tensor network structures. After that, we will discuss over the ordering in which its the most optimal to contract a tensor network
@@ -957,6 +997,7 @@ The concept of tensor networks originated from a physics background. Roger Penro
 diagrammatic language could be used in various applications of physics \cite{rogerPenroseApplications}. Later, 
 in 1992, Steven R. White developed de Density Matrix Renormalization Group (DRMG) algorithm for
 quantum lattice systems. It was considered the first successfull tensor network application \cite{whiteDensityMatrixFormulation1992}.
+\fi
 
 
 
@@ -1568,49 +1609,45 @@ the tensors $\mathcal{X}$ and $\mathcal{Y}$, we can compute $\mathcal{C}_l^k(X \
 
 
 
-\section{Tensor Network States}
+\section{Tensor Networks}
 
-In this section we will present the formal definition of tensor network states and the definition of a tensor network. 
-We will use directed graphs to represent tensor networks. Before that we will need to also define what are
-input and output edges:
+In this section we will present tensor networks formally from a mathematically formal standpoint. Then, we will present the notion
+of the tensor $G$-rank that will be useful for determining if a tensor network can represent a tensor. We will present some common
+tensor network structures. After that, we will discuss over the ordering in which its the most optimal to contract a tensor network
+and we will give an algorithm that finds an optimal order of contraction, and finally, we will present the alternating least
+squares algorithm applied to generic tensor networks for explicitly finding the tensor cores of a tensor network.
 
-\iffalse
-\begin{definition}[Graph]
-    \normalfont{\cite{wilsonIntroductionGraphTheory2009}}
-    A \textbf{graph} $G$ is defined as a tuple $G = (V,E)$ where $V = V(G)$ is a set of elements called \textbf{vertices} and 
-    $E = E(G) \subset \{\{u, v\} : u, v \in V\}$ is a set of elements called \textbf{edges}.
-\end{definition}
+The concept of tensor networks originated from a physics background. Roger Penrose described how its
+diagrammatic language could be used in various applications of physics \cite{rogerPenroseApplications}. Later, 
+in 1992, Steven R. White developed de Density Matrix Renormalization Group (DRMG) algorithm for
+quantum lattice systems. It was considered the first successfull tensor network application \cite{whiteDensityMatrixFormulation1992}.
 
-\begin{definition}[Directed Graph]
-    A \textbf{directed graph} $D$ is a tuple $D = (V, \bar{E})$ where $V = V(D)$ are its vertices and
-    $\bar{E} = \bar{E}(D) \subset \{(u,v) : u,v \in V\}$
-\end{definition}
-\fi
+% TODO: Expandir això
+A tensor network is a directed graph $G$. With a vector space $\mathbb{V}_i$ encoded at each node and two spaces
+$\mathbb{E}_j$ and $\mathbb{E}_j^*$ encoded in each edge of the graph. Each node will represent a tensor that contains
+in a tensor product space that at least contains $\mathbb{V}_i$. Each other of the spaces that the tensor product space is spanned,
+are combinations of some $\mathbb{E}_j$ and $\mathbb{E}_k^*$.
+
+Since we have already seen that contractions give the same result, we will often write $G$ as an undirected graph. But
+we will not do that at the moment because with a directed graph the contraction order is unequivocally well defined.
 
 \begin{definition} Given a directed graph $G=(V,\bar{E})$ and a vertex $i \in V$ we define
     $$\IN(i) = \{j \in V : (j, i) \in \bar{E}\} \qquad \OUT(i) = \{j \in V : (i, j) \in \bar{E} \}$$
 \end{definition}
 
-
-
-The way tensor networks are constructed consists of picking a connected directed graph $G = (V, \bar{E})$, and for each vertex $i \in V$ we assign
-a vector space $\mathbb{V}_i$ and for each edge $(i,j) \in \bar{E}$ we assign a vector space $\mathbb{E}_i$ to the tail of the edge and its 
-dual covector space $\mathbb{E}_i^*$ to the head of the edge. In other words, tensor networks can be seen as a series of contractions between
-a set of tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$ which once all of them are contracted results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
-
-More formally, let $\mathbb{V}_1, \dots, \mathbb{V}_d$ be vector spaces with $\dim{\mathbb{V}_i} = N_i, i = 1, \dots, d$. Let
+Let $\mathbb{V}_1, \dots, \mathbb{V}_d$ be vector spaces with $\dim{\mathbb{V}_i} = N_i, i = 1, \dots, d$. Let
 $\mathbb{E}_1, \dots, \mathbb{E}_c$ be finite vector spaces with $\dim{\mathbb{E}_i} = R_i, i = 1, \dots, c$. For each vertex $i \in V$ 
 we will associate the tensor product space
 $$\xi_i := \left( \bigotimes\nolimits_{j \in \IN (i)} \mathbb{E}_j \right) \otimes \mathbb{V}_i \otimes 
 \left( \bigotimes\nolimits_{j \in \OUT (i)} \mathbb{E}_j^*  \right)$$
 
-A tensor network is completly defined by the graph $G$ and all the tensor product spaces $\xi_1, \dots, \xi_n$. We will also associate
+A \textbf{tensor network} or \textbf{tensor network structure} is completly defined by the graph $G$ and all the tensor product spaces $\xi_1, \dots, \xi_n$. We will also associate
 to the tensor network a contraction mapping $\mathcal{C}_G$ defined by contracting factors
 in $\mathbb{E}_j$ with factors of $\mathbb{E}^*_j$:
 $$\mathcal{C}_G : \bigotimes\nolimits_{i=1}^n \xi_i \longrightarrow \bigotimes\nolimits_{i=1}^d \mathbb{V}_i$$
 
-Note that we have given this shapes to the tensors that we fix onto each vertex
-$i \in V$ because when we contract the whole graph, we will get a tensor of ${\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n}$.
+Note that we have defined the tensor product spaces of the tensor network structure $\xi_i$ this way 
+because when we contract the whole graph, we will get a tensor of ${\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n}$.
 Since every directed edge $(i,j)$ must point out of a vertex $i$ and point into a vetex $j$, each copy of $\mathbb{E}_j$ is paired with one
 copy of $\mathbb{E}^*_$, so the contraction $\mathcal{C}_G$ is well defined and it results in a tensor of $\mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$
 (See \figref{fig:tn_graph})
@@ -1677,13 +1714,9 @@ copy of $\mathbb{E}^*_$, so the contraction $\mathcal{C}_G$ is well defined and 
 \end{figure}
 
 By picking some tensors $\mathcal{G}_i \in \xi_i$ and evaluating them through $\mathcal{C}_G$
-we get a tensor $T$ that we will call \textbf{tensor network state}. We will call the tensors $\mathcal{G}_i$
+we get a tensor $T$. We will call a \textbf{tensor network state} the set of all contracted tensors that
+are possible to obtain by varying $\mathcal{G}_1, \dots, \mathcal{G}_n$. We will also call the tensors $\mathcal{G}_i$
 \textbf{core tensors}. 
-
-\begin{definition}
-    A tensor $T \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n$ is a \textbf{tensor state of a tensor network} if it
-    can be written as $T = \mathcal{C}_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n)$ with $\mathcal{G}_i \in \xi_i$.
-\end{definition}
 
 \begin{definition}
     We will define the set of all possible tensor states 
@@ -1692,20 +1725,20 @@ $$
     \TNS(G; \mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n) := \Bigg\{ \kappa_G(\mathcal{G}_1 \otimes \cdots \otimes \mathcal{G}_n) \in \mathbb{V}_1 \otimes \cdots \otimes \mathbb{V}_n : \mathcal{G}_i \in \xi_i \Bigg\}
 $$
 \end{definition}
-The vector spaces $\mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n$ are not really important 
-on the Penrose representation of the tensor network, and we will usually not write them. Also, since all vector spaces are determined up to isomorphism by its dimension, 
-we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. 
+Is not very important to distinguish the vector spaces
+$\mathbb{E}_1, \dots, \mathbb{E}_c, \mathbb{V}_1, \dots, \mathbb{V}_n$ 
+on the Penrose representation of the tensor network so we will not write them. This is because for
+each dangling edge of each node is an space $\mathbb{V}_i$ and we already know that each edge encodes a contraction. That means
+that by looking only at the directed graph we can already know the shape of the core tensors.
+Also, since all vector spaces are determined up to isomorphism by its dimension, 
+we will write the tensor network as $\TNS(G; R_1, \dots, R_c, N_1, \dots, N_n)$. Where $R_i = \dim\mathbb{E}_i$ are called
+the \textbf{ranks of the tensor network state} and $N_i = \dim \mathbb{V}_i$ are called
+the \textbf{dimensions of the tensor network states}.
 
-And since $n$ is equal to the number of vertices of $G$ and $c$ is equal to the number
-of edges of $G$, we will write $\TNS(G; R)$ for a more compact notation.
+Sometimes we will also omit the dimensions of the tensor network states since $n$ is equal to the number of vertices of $G$ and $c$ is equal to the number
+of edges of $G$, we will write $\TNS(G; R, N)$ for a more compact notation, with $R$ and $N$ being tuples of size $c$ and $n$ respectively.
 
-\begin{definition}
-    Given a tensor network state $\TNS(G, R)$, from the graph given by its Penrose Notation,
-    we will call the edges with a dangling end \textit{free edges}, and the edges that connect two vertex \textit{contracted edges}
-\end{definition}
-For example, in \figref{fig:tn_graph}, the edges labeled as $\mathbb{V}_1, \mathbb{V}_2, \mathbb{V}_3, \mathbb{V}_4$ are 
-free edges and the rest are contracted edges.
-
+To give some examples of tensor network structures, we will now see some widely used structures and we will discuss some of their properties.
 
 \section{Common Tensor network structures}
 
@@ -1744,9 +1777,9 @@ free edges and the rest are contracted edges.
     \end{center}
 \end{example}
 
-\begin{example}
-    A tensor
-train decomposition or matrix product state of $T$ are a set of $3$th-order tensors $\mathcal{G}_1,\mathcal{G}_2,\dots,\mathcal{G}_n$ with
+\begin{example}[Tensor Train Decomposition]
+    A \textbf{tensor
+    train decomposition} (\gls{TT}) or \textbf{matrix product state} of $T$ are a set of $3$th-order tensors $\mathcal{G}_1,\mathcal{G}_2,\dots,\mathcal{G}_n$ with
     $\mathcal{G}_i \in \mathbb{K}^{R_{i-1} \times N_i \times R_i}$ and $R_0 = R_n = 1$ such that every element of $T$ is written in the
     form
     \begin{equation} \label{eq:tt-contraction}
@@ -1755,7 +1788,7 @@ train decomposition or matrix product state of $T$ are a set of $3$th-order tens
 We denote $R_0, R_1, \dots, R_n$ as the ranks of the tensor train decomposition, or TT-ranks.
 \end{example}
 
-We can easily see that the tensor train decomposition (or TT) is obtained by our definition of a tensor network when $G$ is a path, also
+We can easily see that the \gls{TT} decomposition is obtained by our definition of a tensor network when $G$ is a path, also
 the contraction of the whole network yields \refeq{eq:tt-contraction}
 
 \begin{figure}[h]
@@ -1809,11 +1842,11 @@ the contraction of the whole network yields \refeq{eq:tt-contraction}
     \label{tt:scheme}
 \end{figure}
 
-Tensor train decompositions are very well studied because they are a chain of products of matrices, there are a lot
-of mathematical theory that can be applied in this structure, for example, for finding the cores of the TT decomposition
+\gls{TT} networks are very well studied because they are a chain of products of matrices, there are a lot
+of mathematical theory that can be applied in this structure, for example, for finding the cores of the \gls{TT} decomposition
 one could fix a core, reshape and unfold onto a matrix the objective tensor $T$, apply then SVD and update the cores according to
 the decomposition. A more detailed algorithm can be found in \cite{rohrig-zollnerPerformanceLowrankTensortrain2022}. Since in this thesis
-is more general and not focused on tensor train decompositions we will skip this algorithm.
+is centered in genereal tensor structures will not give more details about this algorithm.
 
 \iffalse
 \begin{theorem}
@@ -1824,14 +1857,14 @@ is more general and not focused on tensor train decompositions we will skip this
 \fi
 
 
-\begin{example}
-    Tensor ring decomposition (or TR) or also known a matrix product state with periodic boundary conditions, is obtained when $G$ is a cycle.
+\begin{example}[Tensor Ring Decomposition]
+\textbf{Tensor ring decomposition} (or \gls{TR}) or also known a \textbf{MPS with periodic boundary conditions}, is obtained when $G$ is a cycle.
 \end{example}
-Tensor Ring decomposition is considered generalization of Tensor Train decomposition, it's contraction is the same as
-\refeq{eq:tt-contraction} but removing the condition $R_0 = R_1 = 1$. Zhao et. al. explain that Tensor Rings have also been widely studied
+Tensor Ring decomposition is considered generalization of \gls{TT} decomposition, it's contraction is the same as
+\refeq{eq:tt-contraction} but removing the condition $R_0 = R_1 = 1$. Zhao et. al. explain that \gls{TR}s have also been widely studied
 because of their circular invariance: shifting the cores on the tensor network results in an equivalent tensor network
 that once its evaluated results in the objective tensor with its dimensions fixed. Thanks to this fact, one can still
-apply SVD decomposition on Tensor Rings \cite{zhaoTensorRingDecomposition2016}.
+apply \gls{SVD} decomposition on \gls{TR}s \cite{zhaoTensorRingDecomposition2016}.
 
 \begin{figure}[h]
     \centering
@@ -1976,9 +2009,12 @@ The fully connected tensor network decomposition is obtenied when $G$ is a compl
 
 \begin{example}
     A tree tensor network decomposition is obtained when $G$ is a tree graph. We will see that tensor tree networks have the 
-    the nice property that if we can represent a tensor $T$ in some state of the network, the $G$-rank of $T$ is unique. We
-    will see this in more detail on the next section.
+    the nice property that if we can represent a tensor $T$ in some state of the network, the $G$-rank of $T$ is unique. 
 \end{example}
+
+Now that we have seen some examples we will define another type of tensor rank that depends on the tensor network
+structure itself. We will finish the section showing that there are tensor network decompositions that results over this rank i.e the decomposition
+a tensor that is inside a tensor network state can be of lower dimension than the one that results from the traditional rank.
 
 \begin{figure}[H]
     \centering
@@ -2030,12 +2066,14 @@ The fully connected tensor network decomposition is obtenied when $G$ is a compl
 \section{Tensor Network Ranks}
 
 In this section we will present the notion of $G$-rank of a tensor. The $G$-rank of a tensor is defined as the
-minimum ranks that a tensor $T$ can be represented by a tensor state. Knowing the $G$-rank of a tensor will
+minimum set of ranks $(R_1, \dots, R_c)$ that a tensor $T$ can be represented by a tensor state. Knowing the $G$-rank of a tensor will
 be useful because we could find cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ such that we could represent $T$, and surely
-enough, with a enough sotisficated algorithm, it could converge to these core tensors. Our main goal will be
+enough, with a enough sotisficated algorithm, it could converge to these core tensors.
+
+Our main goal will be
 to try to estimate the $G$-rank of a tensor, since finding the $G$-rank explicitly is a very
 hard task. Approximating the $G$-rank will be enough for us because in the next chapter
-we will slightly vary the approximated $G$-rank for finding a good representation.
+we will slightly vary the approximated $G$-rank for finding a good representation, thanks to the TnALE algorithm.
 
 As we defined the rank for a tensor $T$ as the minimum number
 of $1$-rank tensors that compose the tensor $T$, we will define the $G$-rank as the minimum ranks that a tensor network state
@@ -2097,10 +2135,10 @@ This theorem shows that the $G$-rank can offer a more compact representation of 
 the theorem is not proven for generic tensor product spaces, in which proving that the $G$-rank could be smaller
 than the classical tensor rank are more difficult.
 
-In this chapter we have presented tensor networks and tensor network states, and we have proved that sometimes this representations
+In this chapter we have presented tensors, tensor networks and tensor network states. We have proved that sometimes this representations
 of a tensor can be more compact than the traditional rank decomposition. What remains now is how 
-to find the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ of a given tensor network structure that give this compact decomposition. Which we will see
-in the following chapter.
+to find the cores $\mathcal{G}_1, \dots, \mathcal{G}_n$ of a given tensor network structure that give this compact decomposition. and also finding what
+tensor structure would be more optimal for finding these cores, and also what we mean by a more "optimal" structure.
 % TODO: Aixo pel capitol 4
 %And finally, we will present an algorithm that tries to compute an approximate of the real $G$-rank of a tensor,
 %if $G$ is a tree.
@@ -2111,114 +2149,32 @@ in the following chapter.
 
 
 
-\section{Contracting tensor networks}
-
-We will finish this chapter by giving an algorithm for contracting (or evaluating) a tensor network.
-
-Evaluating a tensor network is as easy as contracting each edge of $G$. The order in which we contract
-does not affect the resulting tensor, as we can see from Equation \eqref{eq:tensor_product}. But instead
-the order affects the computational cost, as we can see in the following example:
-
-\begin{example} Consider the following tensor train network:
-
-\begin{center}
-    \begin{tikzpicture}
-
-    \node(1)[draw, shape=circle, minimum size=0.8cm] at (0,0) {$X$};
-    \node(2)[draw, shape=circle, minimum size=0.8cm] at (3,0) {$Y$};
-    \node(3)[draw, shape=circle, minimum size=0.8cm] at (6,0) {$Z$};
-    \node(4)[draw, shape=circle, minimum size=0.8cm] at (9,0) {$T$};
-
-    \node(i1) at (0, 1) {$N_1$};
-    \node(i2) at (3, 1) {$N_2$};
-    \node(i3) at (6, 1) {$N_3$};
-    \node(i4) at (9, 1) {$N_4$};
-
-    \draw[--] (1) -- (i1);
-    \draw[--] (2) -- (i2);
-    \draw[--] (3) -- (i3);
-    \draw[--] (4) -- (i4);
-
-    \draw (1) -> (2)
-    node[above, pos=0.5] {$R_1$};
-    \draw (2) -> (3)
-    node[above, pos=0.5] {$R_2$};
-    \draw (3) -> (4)
-    node[above, pos=0.5] {$R_3$};
-    \end{tikzpicture}
-\end{center}
-
-The contraction of the whole network is given by
-
-$$T_{ijkl} = \sum_{p,q,r}^{R_1, R_2, R_3} X_{ip} Y_{pjq} Z_{qkr} T_{rl}$$
-
-We could contract first $R_1$, then $R_2$ and finally $R_3$. That means computing:
-$$A_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B_{ijkr} = \sum_{q}^{R_2} A_{ijq} Z_{qkr} \qquad T_{ijkl} = \sum_{r}^{R_3} B_{ijkr} T_{rl}$$
-
-For this computation, we would need $R_1 R_2 N_1 N_2 + R_2 R_3 N_1 N_2 N_3 + R_3 N_1 N_2 N_3 N_4$ products, and we would need to store
-first $A$, then $B$ and then $T$
-
-If we consider a different ordering for the contraction, for example first $R_1$, then $R_3$ and finally $R_2$ we get a different computation cost.
-We would need to compute the matrices
-
-$$A'_{ijq} = \sum_{p}^{R_1} X_{ip} Y_{pjq} \qquad B'_{qkl} = \sum_{r}^{R_3} Z_{qkr} T_{rl} \qquad T_{ijkl} = \sum_{q}^{R_2} A'_{ijq} B'_{qkl}$$
-
-The result of the contraction is indeed the same, but now instead the number of computations is
-$R_1 R_2 N_1 N_2 + R_3 N_1 N_3 N_4 + R_2 N_1 N_2 N_3 N_4$. 
-
-\end{example}
-
-In \cite{schindlerAlgorithmsTensorNetwork2020}, the authors discuss different algorithms for finding the optimal contraction order. 
-First, the exhaustive search of the order is considered. It consists in searching all the possible contraction orders and finding the
-one that has less computational cost. The authors show that the exhaustive search algorithm scales like $\mathcal{O}(e^E)$ where $E$ is the number
-of edges of the network.
-
-In our case, we will use a greedy search algorithm which consists on contracting over one edge at a time and for each
-contraction step we take the one with the lowest cost. We can see $k$ steps further
-and pick the one that has the less incremental cost. The computational complexity of the greedy algorithm scales lake
-$\mathcal{O}(E^k)$ where $k$ is the number of next steps that we consider when picking the next contraction.
-
-We will finish this section by providing a pseudocode of the greedy algorithm for contraction order selection:
-
-\begin{algorithm}[H]
-    \caption{Greedy contraction order selection}
-
-    \hspace*{\algorithmicindent} \textbf{Input}: A tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ and some fixed error $\epsilon$ \\
-    \hspace*{\algorithmicindent} \textbf{Output}: Core tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$ 
-
-    \begin{algorithmic}[1]
-        \State Initialize tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$
-        \While{$\|T - \kappa_G (\mathcal{G}_1, \dots, \mathcal{G}_n)\|_F > \epsilon$ }
-            \For {$k = 1, \dots, n$}
-            \State $\mathcal{G}_m \leftarrow \argmin_{G_m} \|G^{\neq m} G_m - T^{(m)}\|_2$
-            \EndFor
-        \EndWhile
-        \State \Return $\mathcal{G}_1, \dots, \mathcal{G}_n$
-
-    \end{algorithmic}
-
-\end{algorithm}
-
-% TODO: Posar algunes gràfiques per aqui?
-
 
 \chapter{Tensor network state search}
 
-In this chapter we will study methods for finding optimal $TNS$ such that $T \in \TNS(G; R)$ or at least
-$T + E \in \TNS(G; R)$ where $E$ is a tensor such that $\|E\|_F \simeq 0$ that describes the absolute error of the representation
-of the state.
+In this chapter we will give algorithms that aim to solve the following two problems:
+\begin{enumerate}
+    \item \label{item:problem-1} Given a fixed $\TNS(G; R)$ and an objective tensor $T$, find the best cores $\mathcal{G}_1, \dots, \mathcal{G}_c$ such that
+        $\mathcal{C}_G (\mathcal{G}_1, \dots, \mathcal{G}_c) \approx T$.
+    \item \label{item:problem-2} Given an objective tensor $T$ find the optimal $(G^*, R^*)$ such that guarantees that exists some core tensors
+        $\mathcal{G}_1, \dots, \mathcal{G}_{c^*}$ such that they minimize a loss function that depends on $R^*$ and the relative
+        error of $\mathcal{C}_G (\mathcal{G}_1, \dots, \mathcal{G}_c)$ and $T$.
+\end{enumerate}
 
-Suppose that we have already found some optimal $G$ and $R$ for representing $T$. We will 
-start the chapter by describing the \textbf{alternated least squares} or ALS
-algorithm. The goal of the ALS algorithm is finding cores $\mathcal{G}_1, \dots, \mathcal{G}_c$ of $\TNS(G; R)$ given $T, G$ and $R$.
+We will present two algorithms that solve (\ref{item:problem-1}): the TnALS algorithm and the backpropagation algorithm. We will
+see that each one has some pros and caveats. For solving (\ref{item:problem-2}) we will present the TnALE algorithm. We will also prove 
+the convergence of these algorithms under some assumptions.
 
+\section{Core finding algorithms}
 
-\section{The Alternating Least Squares algorithm}
+In this section we will present the algorithms that aim to solve problem (\ref{item:problem-1}).
+
+\subsection{The TnALS algorithm}
 
 In this subsection we will discuss the Alternating Least Squares algorithm that Malik et. al. present on section 5 of
 \cite{malikSamplingBasedDecompositionAlgorithms2022}
 
-We will denote $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ as our objective tensor. Let $G = (V, E)$, $c = \#E$ and $R = (r_1, \dots, r_c)$.
+We will denote $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ as our objective tensor. Let $G = (V, E)$, $c$ the number of edges $|E|$ and $R = (r_1, \dots, r_c)$.
 We would want to find some cores
 $\mathcal{G}_1, \dots, \mathcal{G}_c$ of $\TNS(G; R)$ such that minimize
 $$\|T - \mathcal{C}_G (\mathcal{G}_1, \dots, \mathcal{G}_c)\|_F$$
@@ -2454,10 +2410,11 @@ column of $T^{(m)}$. Solving \ref{eq:als} means solving for each $i$
 
 \subsubsection{Solving the least squares problem by using normal equations}
 
-Note that since we cannot guarantee that $(G^{\neq m})^{-1}$ is invertible, we cannot explicitly solve the linear system 
-$G^{\neq m} x^{(i)} = y^{(i)}$. Also, since computing the inverse of a matrix is expensive, we will use the following proposition
-for solving \eqref{eq:als_lsq}:
-
+Note that $G^{\neq m}$ does not have to be a square matrix, so for minimizing the \eqref{eq:als_lsq}
+we can not directly compute its inverse. Instead, we can solve the \textbf{normal equation} of the least square
+problem. 
+The normal equation is the linear system $$A^TAx = A^Tb$$
+$A^TA$ is an square matrix and now we can already solve this system by traditional means.
 \begin{proposition}
     If $x$ satisfies $A^T(Ax - b) = 0$ then $x$ is a solution to the least-squares problem, i.e, $x$ minimizes $\|Ax - b\|_2$
 
@@ -2492,7 +2449,7 @@ to a very close approximation $\hat x^{(i)}$. Therefore, the convergence of the 
 
 \subsubsection{Solving the least squares problem by the pseudoinverse of the SVD}
 
-Another approach on solving \eqref{eq:als} that does not depend about if $A$ is singular or not,
+Another approach on solving \eqref{eq:normal_eq} that does not depend about if $A$ is singular or not,
 is to apply the single value decomposition. The following method that we will describe is the same that uses the
 implementation of the function \verb/torch.linalg.lstsq/ of the PyTorch library that is used for solving the least squares problem
 \cite{PyTorchDocumentationPyTorch} as a fallback (if the matrix $A$ is well-conditioned, PyTorch uses more efficient methods such as QR factorization).
@@ -2646,26 +2603,25 @@ the algorithm converges to a fixed point $\Theta^*$
 Note that as we have previously said we can not guarantee the convergence of the algorithm if we use the Tikhonov regularization since it doesn't give
 the exact solution to the system in \refeq{eq:normal_eq}, and therefore the solution might not
 solve the least squares problem. Nontheless, the Tikhonov regularization speeds up the 
-computation, as we can see in the following figure:
+computation, as we can see in \figref{fig:als-convergence-tiknov}.
 
 \begin{figure}[H]
     \centering
     
-   \begin{minipage}{0.6\textwidth}
+   \begin{minipage}{0.7\textwidth}
     \includegraphics[width=\linewidth]{media/tikhonov-chart.png}
 \end{minipage}
-\begin{minipage}{0.3\textwidth}
+\begin{minipage}{0.25\textwidth}
     \centering
 \begin{tabular}{l|l}
            & Time  \\ \hline
-lsq        & 4.47s \\
-tikhonov-1 & 0.56s \\
-tikhonov-2 & 0.58s \\
-tikhonov-3 & 0.60s
+svd & 1.49s \\
+tikhonov-1 & 0.21s \\
+tikhonov-2 & 0.21s \\
+tikhonov-3 & 0.22s
 \end{tabular}
 \end{minipage}
-
-    \caption{Comparation between the ALS algorithm when the Tikhonov regularization is used and when not. The dashed lines
+    \caption{Comparison between the ALS algorithm when the Tikhonov regularization is used and when not. The dashed lines
     represent different executions of the algorithm and the continuous line represents an iteration of the
     algorithm when using the least squares method for solving \ref{eq:als_lsq}. The TN used
     is a TT with an objective tensor of shape $(8,8,16,8,8)$ and ranks $R = (8,8,8,8)$.
@@ -2676,6 +2632,15 @@ tikhonov-3 & 0.60s
     Source: own elaboration.}
     \label{fig:als-convergence-tiknov}
 \end{figure}
+It is also worth noting that from the graph of \figref{fig:als-convergence-tiknov} can't go below
+a certain relative error. In this case this value is approximately $0.140439$. This is because the SVD Factorization
+method approaches to the solution that minimizes the \gls{LSQ} problem for each core, and as we have seen
+it is guaranteed that it minimizes \ref{eq:als_lsq}. 
+
+In practice we will use the Tikhonov regularization for approximating this relative error barrier since it gives us what
+is the minimum relative error that we would get with the current \gls{TNS}. In practice, instead 5 iterations of the \gls{SVD} method
+we will do 5 iteratios of the Tikhonov regularization method and get the minimum of the relative error that we got during these iterations
+since it is way more faster.
 
 % TODO: Potser caldria jugar una mica amb l'algoritme i motivar la següent secció!
 
@@ -2763,10 +2728,14 @@ for every operation that we apply to any PyTorch parameter, it remembers the ope
 to compute the gradient of all of our computations \cite{AutomaticDifferentiationTorchautograd}.
 
 % TODO
-On (CITE APPENDIX) we can find a comparison between the ALS and the backpropagation algorithms between some tensor network
-structures.
+On \cref{core-finding-algorithms} we can find a comparison between the ALS and the backpropagation algorithms between some tensor network.
+As we can observe in
+\figref{fig:ap-table-backprop}, on most cases the TN-ALS surpasses the backpropagation
+algorithm for finding core tensors with less relative error.
 
 \section{Structure search}
+
+In this section we will describe the TnALE algorithm, that aims to solve problem (\ref{item:problem-2}).
 
 % TODO: Connectar això com deu mana. 
 On the last section we supposed that we had found some optimal $G$ and $R$ for representing $T$, and then we 
@@ -2795,31 +2764,38 @@ We will define the tensor network structure search problem as solving the follow
 \label{eq:tnss}
 \end{equation}
 
+We can see that minimizing the loss function involves solving a multi-objective minimization problem
+since ideally we would want to minimize $\phi$ and $O$. The $\lambda$ parameter applies linear scalarization
+for adjusting which solution of the set of the Pareto optimal solutions that our algorithms will want to converge to.
+
 The intuition behind presenting this optimization problem this way is that since the evaluation function depends on the tuning parameter $\lambda$
 we can adjust a balance between giving priority to how expressive is the network or on 
 simplifying its complexity. We will pich $\phi$ as the \textbf{complexity function} as a function $\phi : \mathbb{G} \times \mathbb{F}_G \rightarrow \mathbb{R}_+$
-In our case, we will pick the inverse of the compression rate. I.e,
+In our case, we will pick $\phi$ as:
 
-$$\phi(G, R) = \frac{\size(\mathcal{G}_1) \cdot \size(\mathcal{G}_2) \cdots \size(\mathcal{G}_n)}{\size(T)}$$
+$$\phi(G, R) = \left(\frac{\size(T)}{\size(\mathcal{G}_1) \cdot \size(\mathcal{G}_2) \cdots \size(\mathcal{G}_n)} - 1\right)^{-1}$$
 
-We call the problem \ref{eq:tnss} as Tensor Network Structure Selection (TN-SS). TN-SS is a very generalized problem.
+If a candidate structure satisfies that $0 < \size(T) < \size(\mathcal{G}_1) \cdot \size(\mathcal{G}_2) \cdots \size(\mathcal{G}_n)$
+then we will directly discard it, since $T$ itself is a better compression. For other values such that $\size(T) > \size(\mathcal{G}_1) \cdots \size(\mathcal{G}_n)$, $O$ is
+well defined.
+
+We call the problem \ref{eq:tnss} as Tensor Network Structure Selection (\gls{TN-SS}). TN-SS is a very generalized problem.
 There has been a lot of research on solving it under certain conditions:
 \begin{itemize}
-    \item Tensor Network Rank Selection (TN-RS), it restricts $G$ to be a fixed graph, and its objective is to find the
+    \item Tensor Network Rank Selection (\gls{TN-RS}), it restricts $G$ to be a fixed graph, and its objective is to find the
 tensor network ranks $R \in \mathbb{F}_G$.
-    \item Tensor Network Permutation Selection (TN-PS) fixes the ranks $R$ and search over the set
+\item Tensor Network Permutation Selection (\gls{TN-PS}) fixes the ranks $R$ and search over the set
 of all the simple graphs that are isomorphic to $G$.
-    \item Lastly, Tensor Network Topology Selection (TN-TS) searches over the set of all simple graphs of $N$ vertices and
+\item Lastly, Tensor Network Topology Selection (\gls{TN-TS}) searches over the set of all simple graphs of $N$ vertices and
         the tensor ranks $R$ are fixed
 \end{itemize}
 
-In this chapter we will present the tensor network structure search algorithm using alternating local enumeration (TnALE)
+In this chapter we will present the tensor network structure search algorithm \gls{TnALE}
 introduced by Li et. al. on \cite{liAlternatingLocalEnumeration2023a}.
 
 \subsection{The TnALE algorithm}
 
-The purpose of the TnALE algorithm is to solve \ref{eq:tnss} by locally alternating the discrete parameters that define $(G, R)$.
-
+The purpose of the \gls{TnALE} algorithm is to solve \ref{eq:tnss} by locally alternating the discrete parameters that define $(G, R)$.
 
 We will start by describing the algorithm itself, and then we will present all the theory for proving its convergence.
 
@@ -2831,8 +2807,8 @@ Then modify $R_c, R_{c_1}, \dots R_2$ as before.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{media/tnale-schema.png}
-    \caption{A representation of the TnALE algorithm and the difference of its sampling respect to TNLS \cite{liPermutationSearchTensor2022}. $r$ and $G$
-    denote the structure related variables and each square represents a neighborhood of a given point in the iteration of TnALE. Source: \cite{liAlternatingLocalEnumeration2023}}
+    \caption{A representation of the TnALE algorithm and the difference of its sampling respect to the \gls{TNLS} algorithm \cite{liPermutationSearchTensor2022}. $r$ and $G$
+    denote the structure related variables and each square represents a neighborhood of a given point in the iteration of \gls{TnALE}. Source: \cite{liAlternatingLocalEnumeration2023}}
 \end{figure}
 
 Once this first pass is finished, the graph $G$ is modified and each "local neighborhood" of the graph $G$ is evaluated.
@@ -2840,7 +2816,7 @@ Once again we save the best evaluation overwritting $G$ and $R$.
 
 Lastly, we do the first pass of varying the ranks $R_1, \dots, R_c$ but in the reverse order $R_c, \dots, R_1$.
 Doing this "round-trip" over the search of the ranks empirically results in a faster convergence rate to the
-optimal $\TNS$ structure.
+optimal \gls{TNS} structure.
 
 \begin{figure}[H]
     \centering
@@ -2872,7 +2848,8 @@ R_2 \arrow[u] & \dots \arrow[l] & R_n \arrow[l]   & G \arrow[l]
             \EndFor
             \State Take the neighborhood of $G$ as $N(G)$
             \ForAll {$G' \in N(G)$}
-                \State Update $(G, R)$ by $G = G'$
+            % TODO: Aran del futur posa el que has canviat del algoritme
+                \State Update $(G, R)$ by $G = G'$ (Insert or delete an element of $R$ if necessary)
                 \State $h(G') \leftarrow O(G, R)$
             \EndFor
             \State Update $(G, R)$ by $G = \argmin_{G'} h(G')$
@@ -2893,8 +2870,8 @@ R_2 \arrow[u] & \dots \arrow[l] & R_n \arrow[l]   & G \arrow[l]
     \label{alg:tn-ale}
 \end{algorithm}
 
-In Alg. \ref{alg:tn-ale} the pseudocode of TnALE is given. During the next subsection, we will need to introducte some theory of
-gradient-less optimization for proving the convergence of the Tn-ALE algorithm.
+In Alg. \ref{alg:tn-ale} the pseudocode of \gls{TnALE} is given. During the next subsection, we will need to introducte some theory of
+gradient-less optimization for proving the convergence of the \gls{TnALE} algorithm.
 
 Keep in mind that for each time we try to vary some rank $R_k$ or the graph $G$ we will need to evaluate \eqref{eq:tnale-min-obj}, and it 
 can be computationally very expensive. In the case that we are varying a rank (See steps 7 and 21 of Alg. \ref{alg:tn-ale}), we can 
@@ -2903,7 +2880,7 @@ $R_k - r, R_k, R_k + r$. Since by increasing ranks empirically yields
 to a better representation of the objective tensor \cite{liAlternatingLocalEnumeration2023} and therefore we get less relative error
 (and the other way around is generally also true).
 
-We will now formally prove that the ALS algorithm converges. For that, we will need to introduce the gradientless descent.
+We will now formally prove that the \gls{TnALE} algorithm converges. For that, we will need to introduce the gradientless descent.
 
 \subsection{Gradientless optimization}
 
@@ -2953,8 +2930,8 @@ Given $G$ and $R$, we can encode $x \in \mathbb{R}_+^K$ as a vector with the ran
 $p \in \mathbb{P}$ as a permutation matrix. By varying only $p$ we get all the permutations of the graph $G$, 
 and by $x$ we get vary the ranks of the edges.
 
-
 \begin{example}
+\iffalse
 $$A^1_R = \begin{pmatrix}
     0 & {\color{teal} 1} & {\color{teal} 0} & {\color{teal} 0} \\
     1 & 0 & {\color{teal}2} & {\color{teal} 0} \\
@@ -2991,6 +2968,27 @@ $$A^2_R = \begin{pmatrix}
         0 \\ 0 \\ 3 \\ 1 \\ 0 \\ 2
     \end{pmatrix}$$
     \label{ex:graph-k-correspondance}
+\fi
+
+$$A^1_R = \begin{pmatrix}
+    0 & {\color{teal} 1} & {\color{teal} 0} & {\color{teal} 0} \\
+    1 & 0 & {\color{teal}2} & {\color{teal} 0} \\
+0 & 2 & 0 & {\color{teal}3} \\
+        0 & 0 & 3 & 0 \\
+    \end{pmatrix} \Longleftrightarrow p_1(x) = \begin{pmatrix}
+        1 & 0 & 0 & 2 & 0 & 3
+    \end{pmatrix}^T$$
+
+$$A^2_R = \begin{pmatrix}
+    0 & {\color{teal}0} & {\color{teal}0} & {\color{teal}3} \\
+    0 & 0 & {\color{teal}1} & {\color{teal}0} \\
+    0 & 1 & 0 & {\color{teal}2} \\
+        3 & 0 & 2 & 0 \\
+    \end{pmatrix} \Longleftrightarrow p_1(x) =
+        = \begin{pmatrix}
+        0 & 0 & 3 & 1 & 0 & 2
+    \end{pmatrix}$$
+    \label{ex:graph-k-correspondance}
 \end{example}
 
 So, our problem is now a particular case of \eqref{eq:min_grad}. We can now apply theory of gradientless
@@ -3001,9 +2999,9 @@ optimizations in the real domain.
 
 The goal of this section is to try to extend the gradient and its properties into discrete valued functions $f: \mathbb{Z}_+^L \rightarrow \mathbb{R}$.
 It is based on the theory that Golovin et. al. present on \cite{golovinGradientlessDescentHighDimensional2019}, and also on the discussion
-of the TnALE algorithm itself in the appendix of \cite{liAlternatingLocalEnumeration2023}.
+of the \gls{TnALE} algorithm itself in the appendix of \cite{liAlternatingLocalEnumeration2023}.
 We will end this chapter by proving that if we take some assumptions of $f$ like 
-being convex and also smooth we can prove that the TnALE algorithm can converge. For that, we will define what
+being convex and also smooth we can prove that the \gls{TnALE} algorithm can converge. For that, we will define what
 is a discrete gradient, what is $\alpha$-strong convergence and $(\beta_1, \beta_2)$-smoothness, we will prove some properties
 about strong convergence and smoothness.
 
@@ -3081,8 +3079,7 @@ gives us the equivalence between $\alpha$-stronglt convex functions and convex f
 
 
 The following lemma tells us that $\alpha$-strongly convex functions have a more strict inequality of the
-monotone gradient property (a function is convex iff its gradient is monotone) than convex functions. The second inequality is a result of applying the Cauchy-Swartz
-inequality to the first one:
+monotone gradient property (a function is convex iff its gradient is monotone) than convex functions. 
 \begin{lemma}
     Given $f$ an $\alpha$-strongly convex function in $\mathbb{Z}_+^L$, then:
     \begin{enumerate}
@@ -3147,16 +3144,16 @@ item ensures an upper bound to the change of the gradient, because of the follow
         $$\langle \Delta f(x) - \Delta f(y), x - y \rangle \leqslant \beta \|x - y\|_2^2$$
     \end{proof}
 \end{lemma}
-\subsection{Proof of the convergence of TnALE}
+\subsection{Proof of the convergence of the TnALE algorithm}
 
 After presenting $\alpha$-strongly convex functions and $(\beta_1, \beta_2)$-smooth functions, in this
 subsection we will now prove that by setting the assumptions that our original problem from \ref{eq:min_grad}
 the function $f_p$ is $\alpha$-strongly convex and $(\beta_1, \beta_2)$-smooth with $0 \leqslant \alpha \leqslant \beta_1 \leqslant \beta_2 \leqslant 1$ and
-that the minimum point of the discrete gradient which will be a fixed point of the TnALE algorithm does in fact exists and
+that the minimum point of the discrete gradient which will be a fixed point of the \gls{TnALE} algorithm does in fact exists and
 that its gradient is bounded by a very small factor.
 
 We will start by defining the sub-level set of a function at a point. This definition will be useful for
-later proving that the TnALE algorithm can descend:
+later proving that the \gls{TnALE} algorithm can descend:
 
 \begin{definition}[Sub-level set] The level set of $f$ at a point $x \in \mathbb{Z}_+^L$ is defined as
     the set $\mathbb{L}_x(f) = \{y \in \mathbb{Z}_+^L : f(y) = f(x)\}$ The sub-level set of $f$ at a point
@@ -3255,7 +3252,7 @@ $\|\Lambda\|_2 \leqslant K\|\Lambda \|_\infty \leqslant \sqrt{K}/2$. This gives 
 larger as the dimension $K$ grows, which it is inevitable except if $\|\Lambda \|_\infty=0$, which implies as we defined $\Lambda$ the conventional
 convex optimizitation over the continuous domain.
 
-Keeping all of the assumption of $f$, we can prove that local sampling methods, in concrete, TnALE converges:
+Keeping all of the assumption of $f$, we can prove that local sampling methods, in concrete, \gls{TnALE} converges:
 \begin{corollary}
     Let $(x_n)_{n=0}^\infty$ be a succession of $\mathbb{Z}_+^K$ with $x_0$ randomly chosen. Suppose that $p^*$ is known and
     that $x_n$ is equal to the $y$ of \thmref{thm:ale-convergence} for all $n> 0$. Then, if $\Omega(1/K) \leqslant \theta \leqslant 1$, i.e
@@ -3278,7 +3275,7 @@ Keeping all of the assumption of $f$, we can prove that local sampling methods, 
     \end{proof}
 \end{corollary}
 
-And with this corollary we have proven that the TnALE algorithm converges. On the last corollary we have taken in account that $K$ could also grow during
+And with this corollary we have proven that the \gls{TnALE} algorithm converges. On the last corollary we have taken in account that $K$ could also grow during
 the limit. In our case $K$ would be the fixed value of our dimension that depends on the number of nodes from the graph space $\mathbb{G}$ that we are
 considering (See \exref{ex:graph-k-correspondance}).
 
@@ -3289,7 +3286,7 @@ apply the TN-ALS algorithm or we can use backpropagation for obtaining the cores
 $\mathcal{G}_1, \dots, \mathcal{G}_n$ that minimize the loss function fixed $(G, R)$.
 
 Then, we have presented the TnALE algorithm, which objective is to give a general solution to the
-TN-RS, TN-PS and TN-TS problems, giving us an optimal tensor network structure $(G, R)$ and saving
+\gls{TN-RS}, \gls{TN-PS} and \gls{TN-TS} problems, giving us an optimal tensor network structure $(G, R)$ and saving
 some evaluations when testing for tensor network structure candidates.
 
 Finally, we have proved that under certain assumptions about the loss function, the TnALE algorithm
@@ -3327,27 +3324,88 @@ fixed some $G \in \mathbb{G}$ and $R \in \mathbb{F}_G$.
 
 \section{Neural networks}
 
-A fully connected neural network is composed on 3 different parts: an input layer, a central part with some layers 
-called hidden layers and an output layer. The idea of neural networks is that they recieve an encoded input through
+
+Neural networks are modeled after how real neurons work, but in a simplified manner \cite{ExplainedNeuralNetworks2017}: each neural network contains a set of neurons which are split in
+different layers. A fully connected neural network is composed on 3 different parts: an \textbf{input layer}, a central part with some layers 
+called \textbf{hidden layers} and an \textbf{output layer}. The idea of neural networks is that they recieve an encoded input through
 the input layer and this input will be successively processed by the hidden layers and then it will return a certain result
 through the output layer. (See \figref{fig:fcnn})
 
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture} 
+
+    \node(i2)[draw, shape=circle, minimum size=0.5cm] at (0,-1) {};
+    \node(i3)[draw, shape=circle, minimum size=0.5cm] at (0,0) {};
+    \node(i4)[draw, shape=circle, minimum size=0.5cm] at (0,1) {};
+    \node(i5)[draw, shape=circle, minimum size=0.5cm] at (0,2) {};
+    \node(i6)[draw, shape=circle, minimum size=0.5cm] at (0,3) {};
+    \node(i7)[draw, shape=circle, minimum size=0.5cm] at (0,4) {};
+
+    \node(l2)[draw, shape=circle, minimum size=0.5cm] at (2,3) {};
+    \node(l3)[draw, shape=circle, minimum size=0.5cm] at (2,2) {};
+    \node(l4)[draw, shape=circle, minimum size=0.5cm] at (2,1) {};
+    \node(l5)[draw, shape=circle, minimum size=0.5cm] at (2,0) {};
+
+    \node(p2)[draw, shape=circle, minimum size=0.5cm] at (4,3) {};
+    \node(p3)[draw, shape=circle, minimum size=0.5cm] at (4,2) {};
+    \node(p4)[draw, shape=circle, minimum size=0.5cm] at (4,1) {};
+    \node(p5)[draw, shape=circle, minimum size=0.5cm] at (4,0) {};
+
+    \node(o2)[draw, shape=circle, minimum size=0.5cm] at (6,-1) {};
+    \node(o3)[draw, shape=circle, minimum size=0.5cm] at (6,0) {};
+    \node(o4)[draw, shape=circle, minimum size=0.5cm] at (6,1) {};
+    \node(o5)[draw, shape=circle, minimum size=0.5cm] at (6,2) {};
+    \node(o6)[draw, shape=circle, minimum size=0.5cm] at (6,3) {};
+    \node(o7)[draw, shape=circle, minimum size=0.5cm] at (6,4) {};
+
+
+    \foreach \x in {i2, i3, i4, i5, i6, i7}
+        \foreach \y in {l2, l3, l4, l5}
+        {
+            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
+        }
+
+    \foreach \x in {p2, p3, p4, p5}
+        \foreach \y in {l2, l3, l4, l5}
+        {
+            \draw[-{Stealth[scale=1]}] (\y) -- (\x);
+        }
+
+    \foreach \x in {p2, p3, p4, p5}
+        \foreach \y in {o2, o3, o4, o5, o6, o7}
+        {
+            \draw[-{Stealth[scale=1]}] (\x) -- (\y);
+        }
+
+    \node(t1) at (0, 5) {Input};
+    \node(t2) at (6, 5) {Output};
+    \node(t3) at (3, 4) {Hidden};
+    \end{tikzpicture}
+
+    \caption{A representation of a fully connected neural network. Each dot is a neuron and each edge represents a connection. Source: own elaboration}
+    \label{fig:fcnn}
+\end{figure}
+
 Let $n_1, \dots, n_L$ be the number of neurons on each layer. Each layer first does a pre-activation stage when it takes into account
-the activation of the previous layer, it adds some weights to each connection and it adds some bias to some of them. 
+the activation of the previous layer. If it is the input layer, this becomes the input itself. Then
+each neuron adds some weights to the output of each neuron of the previous layer and it adds a bias to all of them.
 
 The preactivation of the entire layer is computed by:
 $$z^{(l)} = W^{(l)} a^{(l - 1)} + b^{(l)}$$
-Where $z^{(l)} \in \mathbb{R}^{n_l}$ is the pre-activation of the layer, $W^{(l)} \in \mathbb{R}^{n_l \times n_{l-1}}$ is the weight matrix,
-$a^{(l - 1)} \in \mathbb{R}^{l - 1}$ is the activation of the previous layer and
-and $b^{(l)} \in \mathbb{R}^{n_l}$ is the bias of the layer $l$. Note that each element of the vector $z^{(l)}$ denotes the preactivation of
-one neuron of the layer $l$. Then, once the preactivation is computed, the activation of a neuron is defined by composing the preactivation
+Where $z^{(l)} \in \mathbb{R}^{n_l}$ is a vector with each element being
+the pre-activation of each neuron of the layer, $W^{(l)} \in \mathbb{R}^{n_l \times n_{l-1}}$ is a matrix encoding all the weights of each connection
+between the networks of the current layer with the previous one,
+$a^{(l - 1)} \in \mathbb{R}^{l - 1}$ is a vector containing in each element the activation of the neurons of the previous layer
+and $b^{(l)} \in \mathbb{R}^{n_l}$ is the bias of each neuron of the layer $l$. Once the preactivation is computed, the activation of a neuron is defined by composing the preactivation
 with some non-linear activation function $\sigma : \mathbb{R} \rightarrow \mathbb{R}$:
 $$a^{(l)} = \sigma(z^{(l)})$$
-Where in $\sigma(z^{(l)})$ is the vector resulting of applying $\sigma$ to each element of $z^{(l)}$. Some examples of common activation functions are
-the Sigmoid $S(x)$, the ReLU $R(x)$ and $T(x)$.
-$$S(x) = \frac{1}{1 + e^{-x}} \qquad R(x) = \max(x, 0) \qquad T(x) = \frac{1-e^{-2x}}{1+e^{-2x}}$$
+Where in $\sigma(z^{(l)})$ is the vector resulting of applying $\sigma$ to each element of $z^{(l)}$ and each element
+of the vector $a^{(l)}$ corresponds to the activation of each neuron. Some examples of common activation functions are
+the Sigmoid, ReLU $R(x)$, and the hiperbolic tangent functions defined as:
+$$\text{Sigmoid}(x) = \frac{1}{1 + e^{-x}} \qquad \text{ReLU}(x) = \max(x, 0) \qquad \tanh(x) = \frac{1-e^{-2x}}{1+e^{-2x}}$$
 
-So, a neural network can be described as a composite function
+So, one can explicitly write a \gls{FCNN} as a composite function
 $$N(x; \Theta) = \sigma^{(L)}(W^{(L)} \cdot \sigma^{(L - 1)}( W^{(L-1)} \dots \sigma^{(1)}(W^{(1)} x + b^{(1)}) + b^{(2)} \dots ) + b^{(L)})$$
 Where $\Theta = \{W^{(l)}, b^{(l)}\}_{l=1}^L$ denotes the set of all adjustable parameters of the network.
 By varying $\Theta$ we can change the outputs that $N(x; \Theta)$. The
@@ -3361,8 +3419,8 @@ and $\dfrac{\delta \pi}{\delta b^{(l)}_i}$. While computing these derivatives, w
 compute the layer $l-2$ until we get to the input layer of neurons, while we can reuse the partial derivatives of the previous
 computed parameters.
 
-Once we have all the partial derivatives computed, we can get the gradient of all the parameters and then do gradient descent onto the direction of
-the gradients, i.e, we update the parameters as
+Once we have all the partial derivatives computed, we can get the gradient of all the parameters and we "descent" onto the direction of
+the partial derivatives, i.e, we update the parameters of the network as
 $$W^{(l)} \leftarrow W^{(l)} - \eta \frac{\partial \pi_D}{\partial W^{(l)}}$$
 $$b^{(l)} \leftarrow b^{(l)} - \eta \frac{\partial \pi_D}{\partial b^{(l)}}$$
 Where $\eta$ is the learning rate. The compression that we will do is that we will reshape the matrices $W^{(l)}$ as tensors
@@ -3371,14 +3429,16 @@ $\TNS(G; R)$. Since obtaining the representation consists of evaluating the core
 mapping $\mathcal{C}(\mathcal{G}_1, \dots, \mathcal{G}_n)$, we can apply the chain rule and compute the partial derivative of the
 loss function respect to each parameter of each core. In this way we can find the cores of the tensor network while training the neural network.
 
+
+
 Another approach on compressing the neural network is to compress the weight matrices $W^{(l)}$ once the neural network is already trained using the
-TN-ALS algorithm. On (TODO: Citar apendíce) we see the results of these two different methods.
+TN-ALS algorithm. On (TODO: Citar resultado apendice) we see the results of these two different methods.
 
 
 
 \chapter{Conclusions}
 
-In this bachelor's thesis we have formally constructed the tensor product space, we reviewed
+In this thesis we have formally constructed the tensor product space, we reviewed
 the basics of tensor algebra, we have presented tensor networks and tensor network states and we have seen
 that it is posible for some tensor networks to express a tensor with less rank than its usual tensor rank.
 Then, we have given some algorithms for computing the cores of the tensor networks and we have also presented
@@ -3387,7 +3447,7 @@ applied these algorithms for compressing images and neural networks.
 
 Further research on this topic would include implementing other algorithms that improve
 the tensor network structure search, such as finding the tensor structures using program synthesis which
-Zhang et. al. in \cite{guoTensorNetworkStructure2025} claim that is superior to TnALE. Finding how the structure
+Zhang et. al. in \cite{guoTensorNetworkStructure2025} claim that is superior to \gls{TnALE}. Finding how the structure
 found by this algorithm improves compression on neural networks would be a good experiment.
 
 Another interesting topic that could be also researched is about representing big tensors by splitting its parameters
@@ -3421,7 +3481,7 @@ The following experiments were performed on PyTorch running on CUDA on a system
 equipped with a AMD Ryzen 7 3700X 3.6GHz CPU, an NVIDIA GeForce RTX 2080 Super with 8GB of VRAM and
 32GB of RAM.
 
-\section{Core finding algorithms}
+\section{Core finding algorithms} \label{core-finding-algorithms}
 In this section we will compare the TN-ALS algorithm and the backpropagation algorithm in finding the cores that
 best represent a pseudorandom tensor $T$ across different tensor network structures. To make the experiment reproducible,
 we will sample high oscilatory functions to form the objective tensors
@@ -3463,11 +3523,9 @@ We tested $6$ different tensor network structures. The graphs $G_1, \dots, G_6$ 
 the ranks of each graph are $R_1 = (5, 5, 5)$, $R_2 = (10, 10, 10)$, $R_3 = (7,7,7,7,7)$, $R_4 = (7,7,7,7,7,7)$,
 $R_5 = (12, 12, 12 ,12)$ and $R_6 = (3,3,3,3,3,3,3,3,3,3,3,3,3,3,3)$.
 
-As we can observe from \ref{fig:ap-table-backprop}, we can see that in the most cases the TN-ALS surpasses the backpropagation
-algorithm for finding core tensors with less relative error.
+The results of the experiment are shown in \figref{fig:ap-table-backprop}.
 
 \begin{figure}[H]
-\begin{adjustwidth}{-30pt}{-30pt}
     \begin{minipage}[t]{0.32\linewidth}
         \centering
         \includegraphics[width=\linewidth]{media/graph-backprop-1.png}
@@ -3499,7 +3557,6 @@ algorithm for finding core tensors with less relative error.
         \includegraphics[width=\linewidth]{media/graph-backprop-6.png}
         \caption*{$G_6$}
     \end{minipage}
-\end{adjustwidth}
     \caption{The graphs $G_1, \dots, G_6$ used for each test. Source: own elaboration.}
     \label{fig:ap-graphs}
 \end{figure}
@@ -3532,13 +3589,14 @@ In each test the result with less relative error is marked in bold test. Source:
 
 \section{Structure search and image compression}
 
-On the next experiment we evaluated the performance of the TnALE algorithm by compressing an image with peppers.
+On the next experiment we evaluated the performance of the \gls{TnALE} algorithm and the optimal structures that it finds. The objective tensor
+that we will approximate will be the intensity values of the pixels of an image.
 
 An RGB image is a set of $n \times m$ pixels. Each pixel contains
 three channels (red, green and blue) in which a color is represented. 
 For simplicity, in this experiment we will only encode grayscale images since grayscale images
-only need to store one channel. Therefore, we can encode a channel as
-as a tensors $T \in \mathbb{R}^{n \times m}$ with each of its indexes
+only need to store the intensity value of each pixel. Therefore, we can encode a channel as
+as a tensor $T \in \mathbb{R}^{n \times m}$ with each of its values
 being on the interval $[0,1] \subset \mathbb{R}$.
 
 First, we could make the order of the tensor $T$ higher by reshaping accordingly the divisors of $n$ or $m$. For example,
@@ -3549,31 +3607,49 @@ $G$ should have $6$ nodes. We can also pick some initial ranks $R^{(0)} = (R_1, 
 finding some cores $\mathcal{G}_1, \dots, \mathcal{G}_6$ that once contracted following $G^{(0)}$ will yield to a good approximation
 of $T$
 
-Now, we apply the TnALE algorithm for finding if there is a more optimal structure than $(G^{(0)}, R^{(0)})$. Once we found a good
+Now, we apply the \gls{TnALE} algorithm for finding if there is a more optimal structure than $(G^{(0)}, R^{(0)})$. Once we found a good
 structure candidate $(G^*, R^*)$ we then perform the TnALS algorithm using this structure.
 
 Then, to recover the channel back we contract all the core tensors and then undo the reshape operation to recover the matrix that
 encodes the image channel. Following our example, we would reshape the tensor $T \in \mathbb{R}^{ 8 \times 8 \times 4 \times 8 \times 8}$
 obtained by contracting the cores found by TnALS into a matrix of $\mathbb{R}^{128 \times 128}$.
 
-The main objective of this experiment is to demonstrate the compression capabilities of the optimal structure of the TnALE algorithm by
+The main objective of this experiment is to demonstrate the compression capabilities of the optimal structure of the \gls{TnALE} algorithm by
 doing image compression. For measuring the error we used the relative error of the objective tensor representing the grayscale channel
 of the original tensor respect to the tensor that the contraction of the cores yields.
 
-In this experiment we compressed the Peppers image grayscaled and resized as a $128 \times 128$. 
+In this experiment we compressed the image \verb|files/fruits.png| grayscaled and resized as a $128 \times 128$ image.
 We fixed $5$ initial pairs of initial structures $(G^{(1)}, R^{(1)}), \dots, (G^{(5)}, R^{(5)})$.
 For each structure we first computed the core tensors using the TnALS algorithms directly, and then
-we made the TnALE algorithm find a better structure by varying $\lambda \in \{0.25, 0.5, 1, 2, 4, 8, 12\}$. We use the
-TnALE algorithm two times: first, we make broad search by doing $3$ iterations of it with radius $5$ that are able to modify
+we made the \gls{TnALE} algorithm find a better structure by varying $\lambda \in \{0.25, 0.5, 1, 2, 4, 8, 12\}$. We use the
+\gls{TnALE} algorithm two times: first, we make broad search by doing $3$ iterations of it with radius $5$ that are able to modify
 the topology of the original graph $G_0$. We made that if the algorithm decided to add an edge, it will try doing so by putting initial
-ranks $\{1, 2, 5\}$. Then, we do again the TnALE algorithm with $3$ iterations with radius $2$ and we let $G$ fixed so that
-the structure can be relaxed to adjust its ranks. On both TnALE algorithms, for evaluating the structure we use the
-TnALS algorithm with $5$ iterations applying the Tikhonov factor for faster computation. Since we can't be sure if
-the Tikhonov factor has converged in $5$ iterations, we make an approximation of the real relative error that would
-yield the structure by picking the minimum value of the relative error in these $5$ iterations.
+ranks $\{1, 2, 5\}$. Then, we do again the \gls{TnALE} algorithm with $3$ iterations with radius $2$ and we let $G$ fixed so that
+the structure can be relaxed to adjust its ranks. On both \gls{TnALE} calls we use the
+\gls{TnALS} algorithm with $5$ iterations applying the Tikhonov factor for faster computation and
+for getting the minimum relative error by 
+picking the minimum value of the relative error in these $5$ iterations.
 After we have found an optimal structure, we finally perform the TnALS algorithm with $200$ iterations. 
 
-\begin{figure}
+The starting graphs $G^{(1)},\dots , G^{(5)}$ that we have picked can be seen in the first row of \figref{fig:ap-lots-of-graphs}.
+We will also describe explicitly the order of the starting edges $E^{(1)}, \dots, E^{(5)}$ and the starting ranks $R^{(1)}, \dots, R^{(5)}$: 
+
+\begin{itemize}
+    \item $E^{(1)} = ((1,2), (2, 3), (3, 4), (4, 5))$ \\ 
+        $R^{(1)} = (8,8,8,8)$
+    \item $E^{(2)} = ((1,2), (2, 3), (3, 4), (4, 5), (5, 1))$ \\
+        $R^{(2)} = (8,8,8,8,8)$
+    \item $E^{(3)} = ((1,2), (2, 3), (3, 4), (4, 5), (5, 1), (3, 5), (1, 4))$ \\
+        $R^{(3)} = (6,6,6,6,6,6,6)$
+    \item $E^{(4)} = ((1,2), (2, 3), (3, 4), (4, 5), (5, 1), (1, 4), (5, 2), (3, 5))$ \\
+        $R^{(4)} = (4,4,4,4, 4,4,4,4)$
+    \item $E^{(5)} = ((1,2), (2, 3), (3, 4), (4, 5), (5, 1), (5, 2), (5, 3), (4, 1), (4, 2), (3, 1))$ \\
+        $R^{(5)} = (3,3,4,3,3,4,3,3,4,3)$
+\end{itemize}
+
+The final ranks that produced each execution can be found inside the text files of the folder \verb|files/img-compression/|
+
+\begin{figure}[h]
 \begin{adjustwidth}{-30pt}{-30pt}
     \centering
 
@@ -3625,231 +3701,209 @@ $(G^{(5)}, R^{(5)})$ & Original         & 3.92   & 0.07800    & 6s     &        
 \end{adjustwidth}
 
 \caption{Table containing the results of the TnALE evaluation compressing the pepper.png image. Source: own elaboration}
+\label{fig:ap-lots-of-numbers}
 \end{figure}
 
-\begin{figure}
-\begin{adjustwidth}{-30pt}{-30pt}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 0.25
+% Figura molt gran
+\begin{figure}[h]
 
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 0.5
+\begin{adjustwidth}{-3cm}{-3cm}
 
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 1
-
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 2
-
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 4
-
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-    % l = 8
-
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
-
-    % l = 12
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(1)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(2)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(3)}$; Original}
-    \end{minipage}
-   \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(4)}$; Original}
-    \end{minipage}
-    \begin{minipage}[t]{0.19\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{media/}
-        \caption*{$G^{(5)}$; Original}
-    \end{minipage}
+    \centering
+    \def\arraystretch{1.15}
+\begin{tabular}{>{\centering\arraybackslash}m{1.5cm} m{2.5cm} m{2.5cm} m{2.5cm} m{2.5cm} m{2.5cm}}
+        & \centering $G^{(1)}$ & \centering $G^{(2)}$ & \centering $G^{(3)}$ & \centering $G^{(4)}$ & \centering $G^{(5)}$ & \\ \hline
+        Orig. &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1.png} \rule{0pt}{0.01cm} & 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2.png} \rule{0pt}{0.01cm} &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3.png} \rule{0pt}{0.01cm} & 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4.png} \rule{0pt}{0.01cm} &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5.png} \rule{0pt}{0.01cm} \\ \hline
+        $\lambda = 0.25$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-0.25.png} \rule{0pt}{0.01cm} &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-0.25.png} \rule{0pt}{0.01cm} &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-0.25.png} \rule{0pt}{0.01cm} & 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-0.25.png} \rule{0pt}{0.01cm} &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-0.25.png} \rule{0pt}{0.01cm} \\ \hline
+        $\lambda = 0.5$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-0.5.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-0.5.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-0.5.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-0.5.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-0.5.png} \rule{0pt}{0.01cm}\\ \hline
+        $\lambda = 1$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-1.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-1.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-1.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-1.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-1.png} \rule{0pt}{0.01cm}\\ \hline
+        $\lambda = 2$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-2.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-2.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-2.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-2.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-2.png} \rule{0pt}{0.01cm}\\ \hline
+        $\lambda = 4$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-4.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-4.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-4.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-4.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-4.png} \rule{0pt}{0.01cm}\\ \hline
+        $\lambda = 8$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-8.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-8.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-8.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-8.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-8.png} \rule{0pt}{0.01cm}\\ \hline
+        $\lambda = 12$ &
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-1-tnale-12.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-2-tnale-12.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-3-tnale-12.png} \rule{0pt}{0.01cm}& 
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-4-tnale-12.png} \rule{0pt}{0.01cm}&
+        \rule{0pt}{0.01cm} \includegraphics[width=\linewidth]{media/tnale/graph-5-tnale-12.png} \rule{0pt}{0.01cm}\\
+   \end{tabular}
 \end{adjustwidth}
-    
 
-    \caption{The structures found by the TnALE algorithm}
+    \caption{The structures $G^*$ found by the TnALE algorithm. Source: own elaboration.}
+    \label{fig:ap-lots-of-graphs}
 \end{figure}
 
-\section{Neural Netowork compression}
+
+
+
+\begin{figure}[h]
+
+\begin{adjustwidth}{-3cm}{-3cm}
+
+    \centering
+\begin{tabular}{>{\centering\arraybackslash}m{1.5cm} m{2.5cm} m{2.5cm} m{2.5cm} m{2.5cm} m{2.5cm}}
+        & \centering $G^{(1)}$ & \centering $G^{(2)}$ & \centering $G^{(3)}$ & \centering $G^{(4)}$ & \centering $G^{(5)}$ & \\
+        Orig. &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5.png} \\
+        
+        $\lambda = 0.25$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-0.25.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-0.25.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-0.25.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-0.25.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-0.25.png} \\
+
+        $\lambda = 0.5$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-0.5.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-0.5.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-0.5.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-0.5.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-0.5.png} \\
+
+        $\lambda = 1$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-1.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-1.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-1.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-1.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-1.png} \\
+        
+        $\lambda = 2$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-2.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-2.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-2.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-2.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-2.png} \\
+         
+        $\lambda = 4$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-4.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-4.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-4.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-4.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-4.png} \\
+        
+        $\lambda = 8$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-8.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-8.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-8.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-8.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-8.png} \\
+        
+        $\lambda = 12$ &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp1-ale-12.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp2-ale-12.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp3-ale-12.png} & 
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp4-ale-12.png} &
+        \includegraphics[width=\linewidth]{media/tnale/AAAfruits-comp5-ale-12.png} \\
+   \end{tabular}
+\end{adjustwidth}
+
+
+    \caption{The images produced by the contraction of the core tensors that the TnALS algorithm
+    produced from the optimal structure that TnALE found for each value of $\lambda$ for each structure on
+    \figref{fig:ap-lots-of-graphs}. Source: own elaboration.}
+    \label{fig:ap-lots-of-fruits}
+\end{figure}
+
+% TODO: Treure conclusions d'això, però posar-ho al chapter 5
+
+\section{Neural Network compression}
+
+For this experiment we trained a classifier over the MNIST dataset. Using fully connected neural networks.
+The MNIST dataset consists in total of two sets of images: one of 60,000 training images and another set of 10,000 testing images.
+Each image has  
+
+
+The architecture of the overall model can be seen in \ref{fig:neural-architecture}. Then, we compress each weight
+layer using a defined tensor network structure. The input layer contains 784 neurons, the first hidden layer
+contains 180 neurons, the second hidden layer 100 neurons and the output layer contains 10 neurons, which their output
+determine the guess of the network.
+
+For this experiment, we first trained the FCNN without compression. Then, we picked some arbitrary
+TNSs structures $(G_1, R_1), (G_2, R_2), (G_3, R_3)$ for compressing the weight layers $W^{(1)}, W^{(2)}$ and $W^{(3)}$
+respectively. We did the following reshapes for compressing these matrices:
+\begin{itemize}
+    \item $W^{(1)} \in \mathbb{R}^{784 \times 180} \rightarrow \mathcal{W}_1 = \reshape(W^{(1)}, (7,7,4,4,4,9,5))$
+    \item $W^{(2)} \in \mathbb{R}^{180 \times 100} \rightarrow \mathcal{W}_2 = \reshape(W^{(2)}, (4,9,5,10,10))$
+    \item $W^{(3)} \in \mathbb{R}^{100 \times 10} \rightarrow \mathcal{W}_3 = \reshape(W^{(3)}, (10,10,2,5))$
+\end{itemize}
+
+and levaing the biases intact. We picked $G_1, G_2, G_3$ as $C_7, C_5$ and $C_4$ respectively (all of them are \gls{TR} decompositions). The initial ranks
+are:
+
+\begin{itemize}
+    \item $R^{(1)} = (7,7,7,7,7,7,7)$
+    \item $R^{(2)} = (10,10,10,10,10)$
+    \item $R^{(3)} = (7,7,7,7)$
+\end{itemize}
+Giving an initial \gls{CR} of $22.61$.
+
+Then, we applied the \gls{TnALE} algorithm only for the first and second layers with a compression of lambda $\lambda$ being the same on each layer. For the
+\gls{TnALE} structure evaluation we used used the backpropagation algorithm with 1s of max execution time. 
+We trained the neural networks using the backpropagation algorithm. For the training itself,
+we applied the backpropagation algorithm iterating $15$ times
+over the training set. We used the cross entropy loss function for measuring the accuracy of the networks, and also
+we tested them over a validation set after the training is complete. The results can be seen in \figref{fig:ap-table-backprop}.
+
+\begin{figure}[H]
+    \centering
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{llllll}
+\hline
+            & CR & N. Params & Loss & Training Acc. & Validation Acc. \\ \hline
+    LeNeT       & 1 & 160400 & 0.0187 & 0.9959 & 0.9775  \\
+    LeNetTN     & 22.61 & 7510 & 0.1028 & 0.9606 & 0.9610 \\ \hline
+    LeNetTN+ALE $\lambda = 0.1$ & 107.39 & 1771 & 1.5858 & 0.4078 & 0.4067 \\
+    LeNetTN+ALE $\lambda = 0.25$ & 27.07 & 6193 &  0.7311 & 0.7850 & 0.7860 \\
+    LeNetTN+ALE $\lambda = 0.5$ & 11.06 & 14753 & 0.6031 & 0.8502 & 0.8558 \\
+    LeNetTN+ALE $\lambda = 0.75$ & 7.23 & 22416 & 0.0805 & 0.9742 & 0.9687 \\
+    LeNetTN+ALE $\lambda = 1$ & 3.82 & 42247 & 0.0493 & 0.9840 & 0.9748 \\
+    LeNetTN+ALE $\lambda = 2$ & 1.78 & 89761 & 0.0415 & 0.9856 & 0.9718 \\
+\end{tabular}
+
+\caption{Relative error obtained by running the TN-ALS algorithm and the backpropagation algorithm for approximating
+    the tensors $T_F, T_G$ and $T_H$ fot the same fixed amount of time. The CR column denotes the compression ratio of each structure.
+In each test the result with less relative error is marked in bold test. Source: own elaboration}
+\label{fig:ap-table-backprop}
+\end{figure}
 
 %\section{Tensor contractions}
 
@@ -3863,4 +3917,3 @@ $(G^{(5)}, R^{(5)})$ & Original         & 3.92   & 0.07800    & 6s     &        
  
 %\chapter{Experimental results}
 \end{document} 
-
