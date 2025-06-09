@@ -175,7 +175,7 @@ def graph_neighborhood(G):
 
 class TN(torch.nn.Module):
     def initTensor(self, shape):
-        return torch.randn(shape, device=device)
+        return torch.randn(shape, device=device) / 10
     def __init__(self, G, sizes, ranks):
         super().__init__()
         if len(G.edges) != len(ranks):
@@ -257,6 +257,8 @@ class TN(torch.nn.Module):
         del node_data[inode2]
         del tensor_data[node1]
         del tensor_data[node2]
+    def __del__(self):
+        torch.cuda.empty_cache()
 
     def forward(self, x):
         # TODO
@@ -278,69 +280,84 @@ class TN(torch.nn.Module):
         (G, R): The optimal G and R
     """
     @staticmethod
-    def tn_ale(G0, R0, radius, iters, objective, print_iters=False, max_rank=20, tuning_param=0.5, update_graph=False):
+    def tn_ale(G0, R0, radius, iters, objective, print_iters=False, max_rank=15, tuning_param=0.5, update_graph=False, shape=None):
+        if shape is None:
+            shape = objective.shape
         G, R = (G0, R0)
-        h = TN.evaluate_structure(G, R, objective, tuning_param=tuning_param)
+        h = TN.evaluate_structure(G, R, objective, shape, tuning_param=tuning_param)
         p = (G, R)
         for d in range(iters):
             # First rank update
             for k in range(len(R)):
-                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=tuning_param, max_rank=max_rank) 
+                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, shape, tuning_param=tuning_param, max_rank=max_rank) 
                 for i in range(-radius, radius):
                     Rp = copy.deepcopy(R)
                     Rp[k] += i
-                    if Rp[k] < 0:
-                        Rp[k] = 0
-                    elif Rp[k] > max_rank:
-                        Rp[k] = max_rank
-                        
+                    max_r = max_rank - sum(Rp) + Rp[k]
+                    if Rp[k] < 1:
+                        Rp[k] = 1
+                    elif Rp[k] > max_r:
+                        Rp[k] = max_r
+                    
                     if Rp[k] < R[k]:
-                        evaluation = lerp(max(0, R[k] - radius), R[k], minimum, h, Rp[k])
+                        evaluation = lerp(max(1, R[k] - radius), R[k], minimum, h, Rp[k])
                     else:
-                        evaluation = lerp(R[k], min(R[k] + radius, max_rank), h, maximum, Rp[k])
+                        evaluation = lerp(R[k], min(R[k] + radius, max_r), h, maximum, Rp[k])
                     
                     if h > evaluation:
                         p = (G, Rp)
                         h = evaluation
+                        
+                        print(h)
+                        print(str(Rp))
                 G, R = p
             # We now update G
+            if print_iters:
+                print(".", end="")
             if update_graph:
                 for nG, index, rem in graph_neighborhood(G):
                     if rem:
                         Rp = copy.deepcopy(R)
                         del Rp[index]
-                        evaluation = TN.evaluate_structure(nG, Rp, objective, tuning_param=tuning_param)
+                        evaluation = TN.evaluate_structure(nG, Rp, objective, shape, tuning_param=tuning_param)
                         if h > evaluation:
                             p = (nG, Rp)
                             h = evaluation
                     else:
-                        for x in [1, radius//2, radius]:
-                            Rp = copy.deepcopy(R)
-                            Rp.insert(index, x)
-                            evaluation = TN.evaluate_structure(nG, Rp, objective, tuning_param=tuning_param)
-                            if h > evaluation:
-                                p = (nG, Rp)
-                                h = evaluation
+                        Rp = copy.deepcopy(R)
+                        Rp.insert(index, 1)
+                        evaluation = TN.evaluate_structure(nG, Rp, objective, shape, tuning_param=tuning_param)
+                        if h > evaluation:
+                            p = (nG, Rp)
+                            h = evaluation
+                            print(h)
+                            print(str(Rp))
+                    print("G", end="")
                 G, R = p
             # Second rank update
+            if print_iters:
+                print(".")
             for k in range(len(R) - 1, 0, -1):
-                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=tuning_param, max_rank=max_rank)
+                minimum, maximum = TN.evaluate_structure_interpolated(G, R, k, radius, objective, shape, tuning_param=tuning_param, max_rank=max_rank)
                 for i in range(-radius, radius):
                     Rp = copy.deepcopy(R)
                     Rp[k] += i
-                    if Rp[k] < 0:
-                        Rp[k] = 0
-                    elif Rp[k] > max_rank:
-                        Rp[k] = max_rank
+                    max_r = max_rank - sum(Rp) + Rp[k]
+                    if Rp[k] < 1:
+                        Rp[k] = 1
+                    elif Rp[k] > max_r:
+                        Rp[k] = max_r
                         
                     if Rp[k] < R[k]:
-                        evaluation = lerp(max(0, R[k] - radius), R[k], minimum, h, Rp[k])
+                        evaluation = lerp(max(1, R[k] - radius), R[k], minimum, h, Rp[k])
                     else:
                         evaluation = lerp(R[k], min(R[k] + radius, max_rank), h, maximum, Rp[k])
                         
                     if h > evaluation:
                         p = (G, Rp)
                         h = evaluation
+                        print(h)
+                        print(str(Rp))
                 G, R = p
             if print_iters:
                 print("Iter " + str(d) + " done")
@@ -350,26 +367,32 @@ class TN(torch.nn.Module):
 
     
     @staticmethod
-    def evaluate_structure_interpolated(G, R, k, radius, objective, tuning_param=2, max_rank=25):
+    def evaluate_structure_interpolated(G, R, k, radius, objective, shape, tuning_param=2, max_rank=25):
         Rp = copy.deepcopy(R)
         Rp[k] -= radius
+        max_r = max_rank - sum(Rp) + Rp[k]
         if Rp[k] < 0:
             Rp[k] = 0
-        minimum = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+        minimum = TN.evaluate_structure(G, Rp, objective, shape, tuning_param=tuning_param)
         Rp[k] = R[k] + radius
-        if Rp[k] > max_rank:
-            Rp[k] = max_rank
-        maximum = TN.evaluate_structure(G, Rp, objective, tuning_param=tuning_param)
+        max_r = max_rank - sum(Rp) + Rp[k]
+        if Rp[k] > max_r:
+            Rp[k] = max_r
+        maximum = TN.evaluate_structure(G, Rp, objective, shape, tuning_param=tuning_param)
         return (minimum, maximum)
     
     # Higher tuning_param leads to less relative error at the cost of less compression
     @staticmethod
-    def evaluate_structure(G, R, objective, tuning_param=2):
+    def evaluate_structure(G, R, objective, shape, tuning_param=2):
         # We do one iteration of ALS):
-        tn = TN(G, objective.shape, R)
-        graph = TN.als(tn, objective, 0, iter_num=5)[1]
-        icr = tn.get_tn_size() / objective.numel()
-        return icr + min(graph[1]) * tuning_param
+        tn = TN(G, shape, R)
+        if callable(objective):
+            return objective(G, R)
+        else:
+            graph = TN.als_grad(tn, objective, max_time=1)[1]
+            icr = tn.get_tn_size() / objective.numel()
+            del tn
+            return icr + min(graph[1]) * tuning_param
     
     @staticmethod
     def eval(t):
@@ -529,6 +552,7 @@ class TN(torch.nn.Module):
         y = []
 
         optimizer = torch.optim.Adam(tn.params.values(), lr=lr)
+        min_rel_err=float('inf')
         
         start_time = time.time()
         for iters in range(iter_num):
@@ -544,7 +568,10 @@ class TN(torch.nn.Module):
     
                 loss.backward()
                 optimizer.step()
+            
             rel_err = torch.norm(TN.eval_params(tn) - t).item() / torch.norm(t).item()
+            if min_rel_err > rel_err:
+                min_rel_err = rel_err
             
             x.append(iters)
             y.append(rel_err)
@@ -556,22 +583,7 @@ class TN(torch.nn.Module):
         if print_iters:
             print("time_resh: " + str(time_resh))
         
-        return (rel_err, (x, y))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return (min_rel_err, (x, y))
 
 
 
