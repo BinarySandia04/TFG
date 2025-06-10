@@ -23,8 +23,10 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{tikz-cd}
+\usepackage{tikz-3dplot}
 
 \usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{calc,3d}
 
 \usepackage{parskip}
 \usepackage{algorithm}
@@ -278,7 +280,16 @@ sense que suposin una pèrdua significant en rendiment i precissió.
 
 \section*{Agra\"{\i}ments}
 
-Vull agrair a ... 
+Per començar m'agradaria agrair als meus pares per donarme tot el suport des de que vaig nèixer i creure
+en mi en tots els moments en quan jo dubtava, també
+al meu germà Ramon per sempre motivarme a seguir endavant i estar al meu costat i en especial a la meva àvia per tot el seu amor incondicional.
+
+També voldria agrair a tots els professors que gràcies a ells i a la seva magnífica tasca
+m'han permés arribar a on estic a dia d'avui. Especialment, voldria agrair al meu tutor, en Nahuel per orientar-me i haver tingut l'oportunitat de compartir amb ell xerrades molt enriquidores que m'han sigut 
+essencials per poder desenvolupar aquest treball.
+
+Finalment voldria també agrair a tots els meus amics i altres persones que m'han ajudat al llarg de la meva
+vida acadèmica de forma directa o indirecta. Moltes gràcies a tots.
 \newpage
 
 {\hypersetup{linkcolor=black}
@@ -858,6 +869,20 @@ vector of $\mathbb{K}^{N_1 \cdot N_2 \cdots N_n}$
     \label{fig:vectorization}
     \caption{Representation of tensor vectorization. Source: own elaboration}
 \end{figure}
+
+The inverse operation of a vectorization is that given a tuple of natural numbers ${(M_1, \dots, M_m) \in \mathbb{Z}_+^m}$ 
+that satisfies $\displaymath\prod_{i=1}^n N_i = \displaymath\prod_{j=1}^m M_j$, would result in a tensor $\mathcal{T}$ defined
+entrywise as:
+$$\mathcal{T}(i_1, i_2, \dots, i_n) = \mathcal{V}(\overline{i_1 i_2 \dots i_n})$$
+
+We will also define the reshaping operation. This operation allows us to rewrite the entries of a tensor with a given dimension
+onto another tensor that has different dimensions but the same number of entries as the original.
+\begin{definition}[Reshape]
+    With the same notation and assumptions as before, we define the \textbf{reshaping} of a tensor $T$ over a tuple $(M_1, \dots, M_m)$ as the tensor
+    $\mathcal{R}$ defined entrywise as the $\overline{j_1 j_2 \dots j_m}$-th entry of the vectorization of $T$, i.e
+    $$\mathcal{R}(j_1, j_2, \dots, j_m) = \vectorize{T} (\overline{j_1 j_2 \dots j_m})$$
+    We will write the reshaping of $T$ over $(M_1, \dots, M_m)$ as $\reshape{(T, (M_1, \dots, M_m))}$
+\end{definition}
 
 We will also define the permutation of two modes of a tensor. That means swapping arguments of the function $\mathcal{T}$
 following some permutation $\sigma \in S_n$.
@@ -2570,7 +2595,7 @@ Once we have solved \eqref{eq:als} with any of these two described methods, we c
 We can iteratively change the varying core tensor $\mathcal{G}_i$ until the algorithm converges.
 
 \begin{algorithm}[H]
-    \caption{Tensor Network ALS}
+    \caption{Tensor Network Alternated Least Squares (\gls{TnALS}) algorithm}
 
     \hspace*{\algorithmicindent} \textbf{Input}: A tensor $T \in \mathbb{K}^{N_1 \times \cdots \times N_n}$ and some fixed error $\epsilon$ \\
     \hspace*{\algorithmicindent} \textbf{Output}: Core tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$ 
@@ -2579,7 +2604,7 @@ We can iteratively change the varying core tensor $\mathcal{G}_i$ until the algo
         \State Initialize tensors $\mathcal{G}_1, \dots, \mathcal{G}_n$
         \While{$\|T - \kappa_G (\mathcal{G}_1, \dots, \mathcal{G}_n)\|_F > \epsilon$ }
             \For {$k = 1, \dots, n$}
-            \State $\mathcal{G}_m \leftarrow \argmin_{G_m} \|G^{\neq m} G_m - T^{(m)}\|_2$
+            \State $\mathcal{G}_m \leftarrow \argmin_{G_m} \|G^{\neq m} G_m - T^{(m)}\|_2$ \qquad \verb|# We can use the SVD or Tikhonov method|
             \EndFor
         \EndWhile
         \State \Return $\mathcal{G}_1, \dots, \mathcal{G}_n$
@@ -2628,7 +2653,7 @@ tikhonov-3 & 0.22s
     We can see that
     since in some cases when the linear system is near to zero, the Tikhonov regularization makes the relative
     error skyrocket. With enough iterations the Tikhonov regularization achieves the same
-    relative error as the LSQ method. Source: own elaboration.
+    relative error as the LSQ method.
     Source: own elaboration.}
     \label{fig:als-convergence-tiknov}
 \end{figure}
@@ -2849,7 +2874,7 @@ R_2 \arrow[u] & \dots \arrow[l] & R_n \arrow[l]   & G \arrow[l]
             \State Take the neighborhood of $G$ as $N(G)$
             \ForAll {$G' \in N(G)$}
             % TODO: Aran del futur posa el que has canviat del algoritme
-                \State Update $(G, R)$ by $G = G'$ (Insert or delete an element of $R$ if necessary)
+                \State Update $(G, R)$ by $G = G'$ \quad \verb|Insert or delete an element of R if necessary|
                 \State $h(G') \leftarrow O(G, R)$
             \EndFor
             \State Update $(G, R)$ by $G = \argmin_{G'} h(G')$
@@ -3012,7 +3037,7 @@ Before we begin, since we will be working with vectors of $\mathbb{Z}_+^L$, we w
     $$ \|x\|_2 = \sqrt{\sum_{i=1}^n |x_i|^2}$$
 \end{definition}
 
-From now on, if $x$ is a vector we will represent $\|x\|$ as $\|x\|_2$. We can now start by defining the concept of finite gradient:
+From now on, if $x$ is a vector from a discrete space $\mathbb{Z}_+^K$ we will represent $\|x\|$ as the norm $\|x\|_2$. We can now start by defining the concept of finite gradient:
 
 \begin{definition}
     For any function $f: \mathbb{Z}_+^L \rightarrow \mathbb{R}$ its finite gradient $\nabla f : \mathbb{Z}_+^L \rightarrow \mathbb{R}$ at a point
@@ -3038,7 +3063,7 @@ convex if and only if for all $x, y \in X$
 $$f(y) \geqslant f(x) - \langle \Delta f(x), y - x \rangle$$
 Where $\Delta f(x)$ denotes the gradient of $f$. If $f$ also satisfies that
 \begin{equation}
-f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2} \|y - x\|^2_2
+f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2} \|y - x\|^2
 \label{eq:strong-convex}
 \end{equation}
 For some $\alpha \geqslant 0$ e say that $f$ is $\alpha$-strongly convex.
@@ -3059,18 +3084,18 @@ gives us the equivalence between $\alpha$-stronglt convex functions and convex f
         \end{equation}
         Applying that $f(x)$ is $\alpha$-strongly convex we get that
         \begin{align*}
-            g(y) - g(x) - & \langle \Delta g(x), y - x \rangle = f(y) - \frac{\alpha}{2}\|y\|^2_2 - f(x) + \frac{\alpha}{2}\|x\|^2_2 - \langle \Delta g(x), y - x \rangle \\
-                          & = f(y) - \frac{\alpha}{2}\|y\|^2_2 - f(x) + \frac{\alpha}{2}\|x\|^2_2 - \langle \Delta f(x) - \alpha (2x + \textbf{1}), y - x \rangle \\
-                          & = f(y) - f(x) - \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2}\|y\|_2^2 + \frac{\alpha}{2}\|x\|_2^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
-                          & \geqslant \frac{\alpha}{2} \|y-x\|_2^2 - \frac{\alpha}{2} \|y\|_2^2 + \frac{\alpha}{2} \|x\|_2^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
-                          & = \frac{\alpha}{2} \left( \|y-x\|^2_2 - \|y\|_2^2 - \|x\|_2^2 + 2\langle x, y \rangle \right) = 0
+            g(y) - g(x) - & \langle \Delta g(x), y - x \rangle = f(y) - \frac{\alpha}{2}\|y\|^2 - f(x) + \frac{\alpha}{2}\|x\|^2 - \langle \Delta g(x), y - x \rangle \\
+                          & = f(y) - \frac{\alpha}{2}\|y\|^2_2 - f(x) + \frac{\alpha}{2}\|x\|^2 - \langle \Delta f(x) - \alpha (2x + \textbf{1}), y - x \rangle \\
+                          & = f(y) - f(x) - \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2}\|y\|^2 + \frac{\alpha}{2}\|x\|^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+                          & \geqslant \frac{\alpha}{2} \|y-x\|^2 - \frac{\alpha}{2} \|y\|^2 + \frac{\alpha}{2} \|x\|^2 + \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+                          & = \frac{\alpha}{2} \left( \|y-x\|^2 - \|y\|^2 - \|x\|^2 + 2\langle x, y \rangle \right) = 0
         \end{align*} 
 
         $(\Leftarrow)$ From \refeq{eq:g-lemma-sconv} we get
         \begin{align*}
-            & f(y) - \frac{\alpha}{2} \|y\|_2^2 \geqslant f(x) - \frac{\alpha}{2} \|x\|_2^2 + \langle \Delta f(x) - \frac{\alpha}{2} (2x + \textbf{1}) , y - x \rangle \\
-            \Leftrightarrow \; & f(y) \geqslant f(x) - \frac{\alpha}{2} (\|x\|_2^2 + \|y\|_2^2) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2} \langle 2x, y - x \rangle \\
-            \Leftrightarrow \; & f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2}\|y - x\|^2_2
+            & f(y) - \frac{\alpha}{2} \|y\|^2 \geqslant f(x) - \frac{\alpha}{2} \|x\|^2 + \langle \Delta f(x) - \frac{\alpha}{2} (2x + \textbf{1}) , y - x \rangle \\
+            \Leftrightarrow \; & f(y) \geqslant f(x) - \frac{\alpha}{2} (\|x\|^2 + \|y\|^2) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle - \frac{\alpha}{2} \langle 2x, y - x \rangle \\
+            \Leftrightarrow \; & f(y) \geqslant f(x) + \langle \Delta f(x) - \frac{\alpha}{2} \textbf{1}, y - x \rangle + \frac{\alpha}{2}\|y - x\|^2
         \end{align*}
         The last inequality gives us that $f$ is $\alpha$-strongly convex.
     \end{proof}
@@ -3083,8 +3108,8 @@ monotone gradient property (a function is convex iff its gradient is monotone) t
 \begin{lemma}
     Given $f$ an $\alpha$-strongly convex function in $\mathbb{Z}_+^L$, then:
     \begin{enumerate}
-        \item $\langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x - y\|^2_2 \quad \forall x, y \in \mathbb{Z}_+^L$
-        \item $\|\Delta f(x) - \Delta f(y)\|_2 \geqslant \alpha \|x - y\|_2 \quad \forall x, y \in \mathbb{Z}_+^L$
+        \item $\langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x - y\|^2 \quad \forall x, y \in \mathbb{Z}_+^L$
+        \item $\|\Delta f(x) - \Delta f(y)\| \geqslant \alpha \|x - y\| \quad \forall x, y \in \mathbb{Z}_+^L$
     \end{enumerate}
     \begin{proof}
         Let $g(x)$ be the same as in \lemref{lem:g-convex}. To prove $(1)$, we know that 
@@ -3093,13 +3118,14 @@ monotone gradient property (a function is convex iff its gradient is monotone) t
         $$ \langle \Delta f(x) - \frac{\alpha}{2} (2x + \textbf{1}) - \Delta f(y) + \frac{\alpha}{2}(2y + \textbf{1}), x - y \rangle \geqslant 0$$
         Simplifying we obtain that for all $x, y \in \mathbb{Z}_+^L$
         \begin{equation}
-            \langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x- y\|^2_2
+            \langle \Delta f(x) - \Delta f(y), x - y \rangle \geqslant \alpha \|x- y\|^2
             \label{eq:grad-monotony}
         \end{equation}
         For proving (2) Consider the following inequality:
-        $$\|\Delta f(x) - \Delta f(y)\|_2 \|x - y\|_2 \geqslant \langle \Delta f(x) - \Delta f(y) , x - y \rangle \geqslant \alpha \|x- y\|^2_2$$
+        $$\|\Delta f(x) - \Delta f(y)\| \cdot \|x - y\| \geqslant \langle \Delta f(x) - \Delta f(y) , x - y \rangle \geqslant \alpha \|x- y\|^2$$
         Where in the first inequality we used the Cauchy-Swartz inequality and the last inequality follows from \eqref{eq:grad-monotony}
     \end{proof}
+    \label{lem:strong-convex}
 \end{lemma}
 
 
@@ -3107,7 +3133,7 @@ monotone gradient property (a function is convex iff its gradient is monotone) t
 The following lemma tells us that if we have a $\beta$-Lipschitz discrete function, the gradient is bounded. This
 will be one of the main assumptions that we will make about our loss function.
 \begin{lemma}
-    If $\|f(x) - f(y)\|_2 \leqslant \beta \|x - y\|$ for all $x, y \in \mathbb{Z}_+^L$ then the norm of the finite gradient
+    If $\|f(x) - f(y)\| \leqslant \beta \|x - y\|$ for all $x, y \in \mathbb{Z}_+^L$ then the norm of the finite gradient
     is bounded by $\beta$ i.e $\|\Delta f(x)\|_\infty = \max(|\Delta f(x)_1|, \dots, |\Delta f(x)_L|) \leqslant \beta$
     \begin{proof}
         Denote $\Delta f(x)_i$ the $i$-th entry of $\Delta f(x)$. Then for all $1 \leqslant i \leqslant L$,
@@ -3118,15 +3144,15 @@ will be one of the main assumptions that we will make about our loss function.
 \begin{definition}
     We say $f$ is $(\beta_1, \beta_2)$-smooth for $\beta_1, \beta_2 > 0$ if
     \begin{enumerate}
-    \item $|f(x) - f(y)| \leqslant \beta \|x - y\|_2$ for all $x, y \in \mathbb{Z}_+^L$
-    \item The function $l(x) := \frac{\beta_2}{2} \|x\|^2_2 - f(x)$ is convex
+    \item $|f(x) - f(y)| \leqslant \beta \|x - y\|$ for all $x, y \in \mathbb{Z}_+^L$
+    \item The function $l(x) := \frac{\beta_2}{2} \|x\|^2 - f(x)$ is convex
     \end{enumerate}
 \end{definition}
 
 The first item makes $f$ to a $\beta_1$-Lipschitz function implying the "continuity" of the function, while the second
 item ensures an upper bound to the change of the gradient, because of the following lemma:
 \begin{lemma}
-    If $l(x) = \frac{\beta_2}{2} \|x\|^2_2 - f(x)$ is convex, then $\forall x, y \in \mathbb{Z}_+^L$ the following
+    If $l(x) = \frac{\beta_2}{2} \|x\|^2 - f(x)$ is convex, then $\forall x, y \in \mathbb{Z}_+^L$ the following
     inequality satisfies:
     $$ \langle \Delta f(x) - \Delta f(y), x - y \rangle \leqslant \beta \| x - y \|^2_2 $$
     \begin{proof}
@@ -3143,6 +3169,7 @@ item ensures an upper bound to the change of the gradient, because of the follow
         And by simplifying the inequality we have that
         $$\langle \Delta f(x) - \Delta f(y), x - y \rangle \leqslant \beta \|x - y\|_2^2$$
     \end{proof}
+    \label{lem:lemma-raro}
 \end{lemma}
 \subsection{Proof of the convergence of the TnALE algorithm}
 
@@ -3169,11 +3196,89 @@ that each $f(x_i) \leqslant f(x_j)$ if $i > j$
     Let $f : \mathbb{Z}_+^L \rightarrow \mathbb{R}$ be a $\alpha$-strongly convex, $(\beta_1, \beta_2)$-smooth and
     that its minimum value $f(x^*)$ satisfies that $\|\frac{\beta_2}{2} \textbf{1} - \Delta f(x^*)\| \leqslant \gamma$ where
     $\gamma$ is a constant and $0 \leqslant \gamma \leqslant \alpha$. Then $\forall x \in \mathbb{Z}_+^L$ there exists
-    a $L$-dimensional cube which is of edge length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$, tangent at
-    $x$ and inside the sub-level set $\mathbb{L}_x^\downarrow (f)$
+    a $L$-dimensional cube (a ball with norm $\|\cdot\|_\infty$) which is of edge length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$, tangent at
+    $x$ ($x$ is inside its boundry) and inside the sub-level set $\mathbb{L}_x^\downarrow (f)$
     \label{lem:cube}
+
+    \begin{proof}
+        Applying the definition of $(\beta_1, \beta_2)$-smooth and \lemref{lem:lemma-raro} we have that
+        $$f\left( x - \frac{1}{\beta_2} \Delta f(x) + \frac{1}{2}\textbf{1} + s \right) \leqslant f(x) + \left\langle
+        \Delta f(x) - \frac{\beta_2}{2} \textbf{1}, s + \frac{1}{2}\textbf{1} - \frac{1}{\beta_2} \Delta f(x)
+    \right\rangle + \frac{\beta_2}{2}\left\| s + \frac{1}{2} \textbf{1} - \frac{1}{\beta_2} \Delta f(x) \right\|^2$$
+    $$ = f(x) + \frac{\beta_2}{2} \left( \| s \|^2 - \| \frac{1}{2}\textbf{1} - \frac{1}{\beta_2} \Delta f(x) \|^2 \right) \quad \forall s \in \mathbb{Z}_+^L$$
+    The inequality implies that for any $y \in \mathbb{Z}^L_+$ inside the euclidean ball
+    \begin{equation}
+    B\left(x - \frac{1}{\beta_2} \Delta f(x) + \frac{1}{2}\textbf{1}, \| \frac{1}{2}\textbf{1} - \frac{1}{\beta_2} \Delta f(x) \| \right)
+    \label{eq:ball}
+    \end{equation}
+    Yields that $f(y) \leqslant f(x)$ and therefore $y \in \mathbb{L}_x^\downarrow (f)$ We can also clearly see that the point $x$
+    is in the tangent of the ball \ref{eq:ball} i.e it is inside its boundry. On the other hand, the radius of the ball is lower bounded by:
+    \begin{align*}
+        \frac{1}{\beta_2} \left\| \frac{\beta_2}{2}\textbf{1} - \Delta f(x) \right\| &= \frac{1}{\beta_2} \left| \frac{\beta_2}{2} \textbf{1} - \Delta f(x^*) + \Delta f(x^*) - \Delta f(x)  \right \| \\
+                                                                                     &\geqslant \frac{1}{\beta_2} \left( \| \Delta f(x) - \Delta f(x^*) \| - \| \frac{\beta}{2} \textbf{1} - \Delta f(x^*) \| \right) \\
+                                                                                     &\geqslant \frac{(\alpha - \gamma)}{\beta_2} \| x - x^* \|
+    \end{align*}
+    The last inequality follows from the assumption that $\|\frac{\beta_2}{2} \textbf{1} - \Delta f(x^*) \| \geqslant \gamma$ and from
+    2. from \lemref{lem:strong-convex}.
+
+    Now we show that the ball \ref{eq:ball} contains a cube of length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$.
+    We form a cube from a vertex $x$ and we extend the edges of the cube until they touch the surface of the ball (See \figref{fig:ballhd}).
+    The length of the edges of the cube is $2R \cos{\theta}$ where $R$ is the radius of the ball and $\theta$ is the angle denoted
+    on the figure. One can see geometrically from the figure that $\theta = \arccos {(1 / \sqrt{L})}$. By the last inequality,
+    we get that the cube has edges of length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$
+\end{proof}
 \end{lemma}
-The proof of this lemma can be found at lemma B.8 from the appendix of \cite{liAlternatingLocalEnumeration2023}
+
+\begin{figure}
+\tdplotsetmaincoords{60}{110}
+
+\centering
+\iffalse
+\begin{tikzpicture}[scale=1.5]
+
+
+    \def\R{sqrt(3)}
+    \coordinate (O) at (0,0,0);
+    \fill[ball color=blue!10, opacity=1.0] (O) circle (\R); % 3D lighting effect
+
+    \begin{scope}[tdplot_main_coords, shift={(0,0)}, rotate=0]
+      \draw[-latex, opacity=0.3] (O)--(3.5,0,0) node[anchor=east] {};
+      \draw[-latex, opacity=0.3] (O)-- (0,2.8,0) node[anchor=south] {};
+      \draw[-latex, opacity=0.3] (O)--(0,0,2.5) node[anchor=south] {};
+      
+      % \draw[-latex] (O)--(0,0,2.5) node[anchor=south] {$Z$};
+
+
+
+      \draw[]  (0, 0, 0) coordinate (O) circle (1pt) node[anchor=south east] {$O$};
+      \draw (O) -- (-1, 1, 1);
+      \draw (O) -- (-1, 0, 1);
+      \draw (-1, -0.15 ,0.10) node[anchor=west] {$\theta$};
+      % \draw (-1, 0, -0.5) arc (0:180:0.05);
+
+      \draw[opacity=0.8]
+      (1,-1,1)   coordinate (A) --
+      (-1,-1,1)  coordinate (B) --
+      (-1,1,1)   coordinate (C) node[anchor=west] {$x$} --
+      (1,1,1)    coordinate (D) -- cycle
+      (1,1,-1)   coordinate (E) --
+      (-1,1,-1)  coordinate (F) --
+      (-1,-1,-1) coordinate (G) --
+      (1,-1,-1)  coordinate (H) -- cycle
+      (A)--(H) (B)--(G) (D)--(E) (C)--(F);
+
+      \foreach \l in {A,B,C,D,E,F,G,H}
+      \draw[fill=black] (\l) circle (1pt);
+    \end{scope}
+  \end{tikzpicture}
+\fi
+\includegraphics[width=0.8\linewidth]{media/balls.png}
+  \caption{The inner cube of edge length $\frac{2(\alpha - \gamma)}{\beta_2 \sqrt{L}} \|x - x^*\|$ obtained by extending its edges from the point $x$ until they touch the ball \ref{eq:ball} }
+  \label{fig:ballhd}
+\end{figure}
+
+% The proof of this lemma can be found at lemma B.8 from the appendix of \cite{liAlternatingLocalEnumeration2023}
+
 \begin{lemma}[Convex combination in the discrete domain]
     Suppose that $q = \theta x + (1 - \theta) y$ for all $x, y \in \mathbb{Z}_+^L$ and $\theta \in [0,1]$ and that
     there is a $\hat q \in \mathbb{Z}^L_+$ such that if $\Lambda = q - \hat q$ and we suppose that $f$ is $\alpha$-strongly convex then
@@ -3320,7 +3425,9 @@ fixed some $G \in \mathbb{G}$ and $R \in \mathbb{F}_G$.
 % \item Fixar la mathematical subject classification
 % \end{itemize}
 
-\chapter{Applying TN low-rank approximations on FCNN}
+\chapter{Aplications TN low-rank approximations}
+
+\section{Image compression}
 
 \section{Neural networks}
 
@@ -3429,10 +3536,10 @@ $\TNS(G; R)$. Since obtaining the representation consists of evaluating the core
 mapping $\mathcal{C}(\mathcal{G}_1, \dots, \mathcal{G}_n)$, we can apply the chain rule and compute the partial derivative of the
 loss function respect to each parameter of each core. In this way we can find the cores of the tensor network while training the neural network.
 
-
-
-Another approach on compressing the neural network is to compress the weight matrices $W^{(l)}$ once the neural network is already trained using the
-TN-ALS algorithm. On (TODO: Citar resultado apendice) we see the results of these two different methods.
+On \secref{sec:nn-compression} we made an experiment over compressing the weights of a classifier that is trained over the MNIST dataset \cite{dengMNISTDatabaseHandwritten2012}.
+We applied also the TnALE algorithm for finding optimal structures by evaluating them as "what structures backpropagate better to the
+weight layers of an already pretrained network". As we can see this method is not the best for finding the optimal structures
+but it gives decent candidates.
 
 
 
@@ -3445,14 +3552,31 @@ Then, we have given some algorithms for computing the cores of the tensor networ
 algorithms that search over the space of possible tensor networks for a optimal structure. Finally, we have
 applied these algorithms for compressing images and neural networks.
 
-Further research on this topic would include implementing other algorithms that improve
+We have seen that tensor networks can compress data with an outstanding compress ratio with the compromise
+of having some small relative error. We have also found that when compressing the weights of neural networks using a low rank approximation from
+tensor network states, the accuracy of the neural network is not compromised if the structure is chosen well. 
+We expect further advances in this field.
+
+\section*{Further work}
+
+\textbf{Improve TN-SS} Further research on this topic could include implementing other algorithms that improve
 the tensor network structure search, such as finding the tensor structures using program synthesis which
-Zhang et. al. in \cite{guoTensorNetworkStructure2025} claim that is superior to \gls{TnALE}. Finding how the structure
+Zhang et. al. in \cite{guoTensorNetworkStructure2025} claims that it is superior to \gls{TnALE}. Finding how the structure
 found by this algorithm improves compression on neural networks would be a good experiment.
 
-Another interesting topic that could be also researched is about representing big tensors by splitting its parameters
+\textbf{Splitting TNs} Another interesting topic that could be also researched is about representing big tensors by splitting its parameters
 into multiple low-dimension tensors and then applying the tensor network low-rank approximation with these, since
-we have found that computing the core tensors for big tensors is very computationally expensive.
+we have found that computing the core tensors for big tensors is very computationally expensive. Qing et al.
+does this in \cite{qingCompressingNeuralNetworks2025} by splitting the weight matrices onto smaller tensor network blocks
+and it shows very promising results.
+We think that further research can be made over finding the best splitting structures of
+tensor network structures.
+
+\textbf{Finding proper evaluation for NN compression} On the other hand, we found that for compressing neural networks, the TnALE algorithm does not find the most optimal
+structure. We theorize that it is mainly because of two factors: the highly compressed parameters that the algorithm does
+over the layers with less parameters, making the neural network lose expressivity and also because of the 
+lack of a proper evaluation function for the found candidate TN structures for compressing the layers, since
+what we have done is which one of them can backpropagate better to a layer to an already trained network.
 
 Finally, I would like to add some words about how hard it has been 
 as a total non initiated to write this thesis since all of it is based
@@ -3846,13 +3970,17 @@ $(G^{(5)}, R^{(5)})$ & Original         & 3.92   & 0.07800    & 6s     &        
 % TODO: Treure conclusions d'això, però posar-ho al chapter 5
 
 \section{Neural Network compression}
+\label{sec:nn-compression}
 
-For this experiment we trained a classifier over the MNIST dataset. Using fully connected neural networks.
+For this experiment we trained an small classifier using three layers of
+fully connected neural networks over the MNIST dataset. 
 The MNIST dataset consists in total of two sets of images: one of 60,000 training images and another set of 10,000 testing images.
-Each image has  
+Each image has a $32 \times 32$ resultion and each pixel only contains the luminosity of the image. The images of the MNIST dataset
+consists of handwritten digits with a label that contains
+the digit that is written \cite{dengMNISTDatabaseHandwritten2012}. The goal of the classifier is: given an input image, guess which digit is drawn on the image.
 
 
-The architecture of the overall model can be seen in \ref{fig:neural-architecture}. Then, we compress each weight
+The architecture of the overall model can be seen in \ref{fig:ap-neural-architecture}. Then, we compress each weight
 layer using a defined tensor network structure. The input layer contains 784 neurons, the first hidden layer
 contains 180 neurons, the second hidden layer 100 neurons and the output layer contains 10 neurons, which their output
 determine the guess of the network.
@@ -3889,20 +4017,53 @@ we tested them over a validation set after the training is complete. The results
 \begin{tabular}{llllll}
 \hline
             & CR & N. Params & Loss & Training Acc. & Validation Acc. \\ \hline
-    LeNeT       & 1 & 160400 & 0.0187 & 0.9959 & 0.9775  \\
-    LeNetTN     & 22.61 & 7510 & 0.1028 & 0.9606 & 0.9610 \\ \hline
-    LeNetTN+ALE $\lambda = 0.1$ & 107.39 & 1771 & 1.5858 & 0.4078 & 0.4067 \\
-    LeNetTN+ALE $\lambda = 0.25$ & 27.07 & 6193 &  0.7311 & 0.7850 & 0.7860 \\
-    LeNetTN+ALE $\lambda = 0.5$ & 11.06 & 14753 & 0.6031 & 0.8502 & 0.8558 \\
-    LeNetTN+ALE $\lambda = 0.75$ & 7.23 & 22416 & 0.0805 & 0.9742 & 0.9687 \\
-    LeNetTN+ALE $\lambda = 1$ & 3.82 & 42247 & 0.0493 & 0.9840 & 0.9748 \\
-    LeNetTN+ALE $\lambda = 2$ & 1.78 & 89761 & 0.0415 & 0.9856 & 0.9718 \\
+    MNIST     & 1 & 160400 & 0.0187 & 0.9959 & 0.9775  \\
+    MNIST-TN     & 22.61 & 7510 & 0.1028 & 0.9606 & 0.9610 \\ \hline
+    MNIST-TN+ALE $\lambda = 0.1$ & 107.39 & 1771 & 1.5858 & 0.4078 & 0.4067 \\
+    MNIST-TN+ALE $\lambda = 0.25$ & 27.07 & 6193 &  0.7311 & 0.7850 & 0.7860 \\
+    MNIST-TN+ALE $\lambda = 0.5$ & 11.06 & 14753 & 0.6031 & 0.8502 & 0.8558 \\
+    MNIST-TN+ALE $\lambda = 0.75$ & 7.23 & 22416 & 0.0805 & 0.9742 & 0.9687 \\
+    MNIST-TN+ALE $\lambda = 1$ & 3.82 & 42247 & 0.0493 & 0.9840 & 0.9748 \\
+    MNIST-TN+ALE $\lambda = 2$ & 1.78 & 89761 & 0.0415 & 0.9856 & 0.9718 \\
 \end{tabular}
 
 \caption{Relative error obtained by running the TN-ALS algorithm and the backpropagation algorithm for approximating
     the tensors $T_F, T_G$ and $T_H$ fot the same fixed amount of time. The CR column denotes the compression ratio of each structure.
 In each test the result with less relative error is marked in bold test. Source: own elaboration}
 \label{fig:ap-table-backprop}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+  layer/.style={rectangle, draw=black, thick, minimum width=3.5cm, minimum height=1cm, align=center},
+  llayer/.style={rectangle, draw=black, thick, minimum width=6.5cm, minimum height=1.5cm, align=center},
+  relu/.style={rectangle, draw=blue!60, thick, minimum width=2.5cm, minimum height=1cm, align=center, fill=blue!10},
+  arrow/.style={->, thick},
+  node distance=1.5cm
+  ]
+
+  % Nodes
+  \node at (0, 2) {MNIST-TN+ALE classifier structure}
+  \node[layer] (input) at (0,0) {Input\\$28 \times 28$ image};
+  \node[llayer] (dense1) at (0, -2) {Layer 1: TnALE Weight + Bias\\$\mathcal{W}_1 \in \mathbb{R}^{7 \times 7 \times 4 \times 4 \times 4 \times 9 \times 5}$};
+  \node[relu] (relu1) at (0, -4) {ReLU};
+  \node[llayer] (dense2) at (0, -6) {Layer 2: TnALE Weight + Bias\\$\mathcal{W}_2 \in \mathbb{R}^{4 \times 9 \times 5 \times 10 \times 10}$};
+  \node[relu] (relu2) at (0, -8) {ReLU};
+  \node[llayer] (dense3) at (0, -10) {Layer 3: TN Weight + Bias\\$\mathcal{W}_3 \in \mathbb{R}^{10 \times 10 \times 2 \times 5 }$};
+  \node[layer] (output) at (0, -12) {Output Layer\\10 Outputs (1 value)};
+
+  % Arrows
+  \draw[arrow] (input) -- (dense1);
+  \draw[arrow] (dense1) -- (relu1);
+  \draw[arrow] (relu1) -- (dense2);
+  \draw[arrow] (dense2) -- (relu2);
+  \draw[arrow] (relu2) -- (dense3);
+  \draw[arrow] (dense3) -- (output);
+
+\end{tikzpicture}
+\caption{Structure of the classifier with its weights compressed using \gls{TN} structures and \gls{TnALE}. Source: Own elaboration}
+    \label{fig:ap-neural-architecture}
 \end{figure}
 
 %\section{Tensor contractions}
